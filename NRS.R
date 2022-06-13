@@ -390,7 +390,7 @@ ql4<-function (x,interval=9,fast=TRUE,batch=1000,d=1.511272749 ,sorted=FALSE){
   (((1/4)*resultdp)/((l21[1])))
 }
 #robust scaled L4 moments
-rl4<-function (x,interval=9,fast=TRUE,batch=1000,d=0.009055351 ,sorted=FALSE){
+rl4<-function (x,interval=9,fast=TRUE,batch=1000,d=0.009055351,sorted=FALSE){
   if (length(x)>108){
     print("Warning: The computational complexity is n^4, data slicing is recommended")
   }
@@ -475,42 +475,99 @@ dataslicing<-function (x,slicesize=108,FUN=rskew){
   }else{
   apply(Groupall,MARGIN=1,FUN=mean)}
 }
-
+#reducing time complexity to nlogn with dataslicing
+dataslicing2<-function (x,slicesize=108,FUN=rskew,interval=9,fast=TRUE,batch=1000,d=NULL,sorted=FALSE){
+  if (is.null(d)){
+    return("please provide d")
+  }
+  lengthx<-length(x)
+  slices<-lengthx/slicesize
+  IntKslices<-floor(slices)
+  x_ordered<-sort(x,decreasing = FALSE,method ="radix")
+  group<-rep(rep(c(1:IntKslices), each=1), times=slicesize)
+  suppressWarnings(Group1<-split(x_ordered, group))
+  Groupall0<-c()
+  for (i in (1:IntKslices)){
+    Groupall<-FUN(unlist(Group1[i]),interval=interval,fast=fast,batch=batch,d=d,sorted=sorted)
+    Groupall0<-rbind(Groupall0,Groupall)
+  }
+  if (is.null(dim(Groupall0))){
+    all1<-mean(Groupall0)
+  }else{
+    all1<-apply(Groupall0,MARGIN=2,FUN=mean)}
+  (all1)
+}
 #test
 x<-rexp(900,1)
+#the population mean is 1
 mean(x)
-rm(x)
-qm(x)
-rsd(x)
-qsd(x)
-rl2(x)
-ql2(x)
-x<-rexp(180,1)
-rskew(x)
-qskew(x)
-rl3(x)
-ql3(x)
+rm(x,interval=9,fast=TRUE,fsbc=FALSE)
+#finite sample bias correction
+rm(x,interval=9,fast=TRUE,fsbc=TRUE)
+
+qm(x,interval=9,fast=TRUE,fsbc=FALSE)
+qm(x,interval=9,fast=TRUE,fsbc=TRUE)
+#the population standard deviation is 1
+rsd(x,interval=9,fast=TRUE,fsbc=FALSE)
+rsd(x,interval=9,fast=TRUE,fsbc=TRUE)
+
+qsd(x,interval=9,fast=TRUE,fsbc=FALSE)
+qsd(x,interval=9,fast=TRUE,fsbc=TRUE)
+
+#the population l2-moment is 1/2
+rl2(x,interval=9,fast=TRUE,fsbc=FALSE)
+rl2(x,interval=9,fast=TRUE,fsbc=TRUE)
+ql2(x,interval=9,fast=TRUE,fsbc=FALSE)
+ql2(x,interval=9,fast=TRUE,fsbc=TRUE)
+
+x<-rexp(1800000,1)
+#a trick to reduce convergence time 
+x<-data_augmentation(x,targetsize=180)
+
+#the population skewness is 2
+rskew(x,interval=9,fast=TRUE)
+qskew(x,interval=9,fast=TRUE)
+#the population L-skewness is 1/3
+rl3(x,interval=9,fast=TRUE)
+ql3(x,interval=9,fast=TRUE)
+
+#the population kurtosis is 9
 dataslicing(x,slicesize=90,FUN=rkurt)
 dataslicing(x,slicesize=90,FUN=qkurt)
+#the population L-skewness is 1/6
 dataslicing(x,slicesize=90,FUN=rl4)
 dataslicing(x,slicesize=90,FUN=rl4)
+#test paramater defined dataslicing
+dataslicing2(x,slicesize=90,FUN=rkurt,interval=9,fast=TRUE,batch=1000,d=2.478171,sorted=FALSE)
+
 
 x<-rgamma(900,4,1)
+#the population mean is 4
 mean(x)
-
 rm(x)
 qm(x)
+#the population standard deviation is 2
 rsd(x)
 qsd(x)
+#the population l2-moment is 1.09375
 rl2(x)
 ql2(x)
-x<-rgamma(180,4,1)
-rskew(x)
-qskew(x)
-rl3(x)
-ql3(x)
-dataslicing(x,slicesize=90,FUN=rkurt)
-dataslicing(x,slicesize=90,FUN=qkurt)
-dataslicing(x,slicesize=90,FUN=rl4)
-dataslicing(x,slicesize=90,FUN=rl4)
 
+
+x<-rpois(900,8)
+#the population mean is 8
+mean(x)
+rm(x)
+#quantile mean returns 7 or 9
+qm(x)
+#the population standard deviation is sqrt(8)
+rsd(x)
+qsd(x)
+#the population l2-moment is 1.583
+rl2(x)
+#quantile l2 returns 2
+ql2(x)
+
+#quantile estimator is not suitable for discrete unimodal distributions
+
+#for more tests, use the codes in consistency.R

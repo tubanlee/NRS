@@ -521,7 +521,7 @@ ql2(x,interval=9,fast=TRUE,fsbc=FALSE)
 ql2(x,interval=9,fast=TRUE,fsbc=TRUE)
 
 x<-rexp(1800000,1)
-#a trick to reduce convergence time 
+#a trick to reduce convergence time, but is biased.
 x<-data_augmentation(x,targetsize=180)
 
 #the population skewness is 2

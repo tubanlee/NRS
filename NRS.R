@@ -684,7 +684,6 @@ qm(x,interval=9,fast=TRUE,fsbc=FALSE)
 qm(x,interval=9,fast=TRUE,fsbc=TRUE)
 #the population standard deviation is 1
 rsd(x,interval=9,fast=FALSE,fsbc=TRUE)
-#the d of dataslicing haven't been calibrated yet
 rsd(x,interval=9,fast=FALSE,batch=540000,d=0.779270,dataslicing=TRUE)
 rsd(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 qsd(x,interval=9,fast=FALSE,fsbc=TRUE)

@@ -1,5 +1,7 @@
 
 
+
+
 least_common_multiple<-function(a,b){
   g<-greatest_common_divisor(a, b)
   (a/g * b)
@@ -86,21 +88,28 @@ etm<-function (x,interval=9,fast=TRUE,batch=1000){
     (Groupmean)}
 }
 
-finddtm<-function (x,interval=9,fast=TRUE,batch=1000,sorted=TRUE){
+finddtm<-function (x,interval=9,fast=TRUE,batch=540000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
     sortedx<-sort(x,decreasing = FALSE,method ="radix")
   }
-  subtract<-t(combn(sortedx, 3))
+  
   getm<-function(vector){ 
     ((1/6)*(2*vector[1]-vector[2]-vector[3])*(-1*vector[1]+2*vector[2]-vector[3])*(-vector[1]-vector[2]+2*vector[3]))
   }
+  if (fast){
+    subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
+  }else{
+    subtract<-t(combn(sortedx, 3))
+  }
   dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+  
   getlm<-function(vector){ 
     (vector[3]-2*vector[2]+vector[1])
   }
   dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+  
   dps<-sort(dp2lm,decreasing = FALSE,method ="radix")
   dp2s<-sort(dp2m,decreasing = FALSE,method ="radix")
   etm1dps<-etm(dps,interval=interval,fast=fast,batch=batch)
@@ -131,13 +140,13 @@ finddtm<-function (x,interval=9,fast=TRUE,batch=1000,sorted=TRUE){
   all<-c(dqtm,drtm,dql3,drl3)
   return(all)
 }
-finddfm<-function (x,interval=9,fast=TRUE,batch=1000,sorted=TRUE){
+
+finddfm<-function (x,interval=9,fast=TRUE,batch=540000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
     sortedx<-sort(x,decreasing = FALSE,method ="radix")
   }
-  subtract<-t(combn(sortedx, 4))
   getm<-function(vector){ 
     resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
                   4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
@@ -147,11 +156,18 @@ finddfm<-function (x,interval=9,fast=TRUE,batch=1000,sorted=TRUE){
                                6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
     (resd)
   }
+  if (fast){
+    subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
+  }else{
+    subtract<-t(combn(sortedx, 4))
+  }
   dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+  
   getlm<-function(vector){ 
     (vector[4]-3*vector[3]+3*vector[2]-vector[1])
   }
   dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+  
   dps<-sort(dp2lm,decreasing = FALSE,method ="radix")
   dp2s<-sort(dp2m,decreasing = FALSE,method ="radix")
   etm1dps<-etm(dps,interval=interval,fast=fast,batch=batch)
@@ -167,7 +183,6 @@ finddfm<-function (x,interval=9,fast=TRUE,batch=1000,sorted=TRUE){
   mx1dp2s<-(min(which(dp2s>(etm1dp2s[2])))-1)/length(dp2s)
   mx2dp2s<-1/2
   
-  mx1dp2s
   if (mx1dp2s>0.5){
     dqfm<-log(((quatileexpectdp2s-mx1dp2s)/(abs(1-mx1dp2s)*((mx1dp2s-mx2dp2s)*2))),base=((abs(mx1dp2s-mx2dp2s)*2)))
   }else{
@@ -200,18 +215,17 @@ dataslicing<-function (x,slicesize=90,FUN=finddtm){
     apply(Groupall,MARGIN=1,FUN=mean)}
 }
 
-#notice that quantile l3 moments for exponential distribution is not valid since the true mean is within etm and median
-
 simulatedbatch<-c()
 for(i in (1:10)){
   x<-c(rexp(5400,1))
   x<-sort(x,decreasing = FALSE,method ="radix")
-  dtm1<-dataslicing(x,slicesize=216,FUN=finddtm)
-  dfm1<-dataslicing(x,slicesize=90,FUN=finddfm)
+  dtm1<-finddtm(x,interval=9,fast=TRUE,batch=540000,sorted=TRUE)
+  dfm1<-finddfm(x,interval=9,fast=TRUE,batch=540000,sorted=TRUE)
   all<-c(dqtm=dtm1[1],drtm=dtm1[2],dql3=dtm1[3],drl3=dtm1[4],dqfm=dfm1[1],drfm=dfm1[2],dql4=dfm1[3],drl4=dfm1[4])
   simulatedbatch<-rbind(simulatedbatch,all)
 }
+
+
 simulatedbatch[is.infinite(simulatedbatch)] <-NA
 
 write.csv(simulatedbatch,paste("simulatedd",batchnumber,".csv", sep = ","), row.names = TRUE)
-

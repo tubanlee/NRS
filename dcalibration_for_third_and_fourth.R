@@ -87,61 +87,82 @@ etm<-function (x,interval=9,fast=TRUE,batch=1000){
     Groupmean<-c(Groupsumweight[1]/length(which(group == 0)),Groupsumweight[2]/etmlength,Groupsumweight[3]/ctmlength)
     (Groupmean)}
 }
-
-finddtm<-function (x,interval=9,fast=TRUE,batch=540000,sorted=TRUE){
+finddmmm<-function(expect,x,interval=9,fast=TRUE,batch=10000,sorted=FALSE){
   if(sorted){
     sortedx<-x
   }else{
     sortedx<-sort(x,decreasing = FALSE,method ="radix")
   }
+  quatileexpect<-(min(which(sortedx>(expect)))-1)/length(x)
+  etm1<-etm(x,interval=interval,fast=fast,batch=batch)
+  mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+  mx2<-1/2
+  if (mx1>0.5){
+    qm1<-log(((quatileexpect-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
+  }else{
+    qm1<-log(((quatileexpect-mx1)/(abs(0-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
+  }
+  rm1<-(expect-etm1[2])/(etm1[2]-etm1[3])
+  listd<-c(qm1,rm1)
+  return(listd)
+}
+
+finddtm<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,sorted=TRUE){
+  if(sorted){
+    sortedx<-x
+  }else{
+    sortedx<-sort(x,decreasing = FALSE,method ="radix")
+  }
+  if (fast){
+    subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
+  }else if(dataslicing){
+    subtract<-sortedx
+  }else{
+    subtract<-t(combn(sortedx, 3))
+  }
+  
+  getlm<-function(vector){ 
+    (1/3)*(vector[3]-2*vector[2]+vector[1])
+  }
+  alllm<-function(sortedx){ 
+    subtract<-t(combn(sortedx, 3))
+    apply(subtract,MARGIN=1,FUN=getlm)
+  }
+  
+  if (dataslicing){
+    dp2lm<-dataslicingm(x=subtract,slicesize=18,FUN=alllm)
+  }else{
+    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+  }
   
   getm<-function(vector){ 
     ((1/6)*(2*vector[1]-vector[2]-vector[3])*(-1*vector[1]+2*vector[2]-vector[3])*(-vector[1]-vector[2]+2*vector[3]))
   }
-  if (fast){
-    subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
-  }else{
+  allm<-function(sortedx){ 
     subtract<-t(combn(sortedx, 3))
+    apply(subtract,MARGIN=1,FUN=getm)
   }
-  dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-  
-  getlm<-function(vector){ 
-    (vector[3]-2*vector[2]+vector[1])
-  }
-  dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-  
-  dps<-sort(dp2lm,decreasing = FALSE,method ="radix")
-  dp2s<-sort(dp2m,decreasing = FALSE,method ="radix")
-  etm1dps<-etm(dps,interval=interval,fast=fast,batch=batch)
-  etm1dp2s<-etm(dp2s,interval=interval,fast=fast,batch=batch)
-  expectdps<-mean(dps)
-  expectdp2s<-mean(dp2s)
-  
-  quatileexpectdps<-(min(which(dps>(expectdps)))-1)/length(dps)
-  mx1dps<-(min(which(dps>(etm1dps[2])))-1)/length(dps)
-  mx2dps<-1/2
-  
-  quatileexpectdp2s<-(min(which(dp2s>(expectdp2s)))-1)/length(dp2s)
-  mx1dp2s<-(min(which(dp2s>(etm1dp2s[2])))-1)/length(dp2s)
-  mx2dp2s<-1/2
-  
-  if (mx1dp2s>0.5){
-    dqtm<-log(((quatileexpectdp2s-mx1dp2s)/(abs(1-mx1dp2s)*((mx1dp2s-mx2dp2s)*2))),base=((abs(mx1dp2s-mx2dp2s)*2)))
+  if (dataslicing){
+    dp2m<-dataslicingm(x=subtract,slicesize=18,FUN=allm)
   }else{
-    dqtm<-log(((quatileexpectdp2s-mx1dp2s)/(abs(0-mx1dp2s)*((mx1dp2s-mx2dp2s)*2))),base=((abs(mx1dp2s-mx2dp2s)*2)))
+    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
   }
-  drtm<-(expectdp2s-etm1dp2s[2])/(etm1dp2s[2]-etm1dp2s[3])
-  if (mx1dps>0.5){
-    dql3<-log(((quatileexpectdps-mx1dps)/(abs(1-mx1dps)*((mx1dps-mx2dps)*2))),base=((abs(mx1dps-mx2dps)*2)))
-  }else{
-    dql3<-log(((quatileexpectdps-mx1dps)/(abs(0-mx1dps)*((mx1dps-mx2dps)*2))),base=((abs(mx1dps-mx2dps)*2)))
-  }
-  drl3<-(expectdps-etm1dps[2])/(etm1dps[2]-etm1dps[3])
+
+  lengthn<-length(sortedx)
+  lm1<-Lmoments(sortedx)
+  expectdps<-lm1[3]
+  expectdp2s<-((sum((sortedx - mean(sortedx))^3)/lengthn)*(lengthn^2/((lengthn-1)*(lengthn-2))))
+  
+  dlmo<-finddmmm(expect=expectdps,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dmo<-finddmmm(expect=expectdp2s,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dqtm<-dmo[1]
+  drtm<-dmo[2]
+  dql3<-dlmo[1]
+  drl3<-dlmo[2]
   all<-c(dqtm,drtm,dql3,drl3)
   return(all)
 }
-
-finddfm<-function (x,interval=9,fast=TRUE,batch=540000,sorted=TRUE){
+finddfm<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=1000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
@@ -156,63 +177,59 @@ finddfm<-function (x,interval=9,fast=TRUE,batch=540000,sorted=TRUE){
                                6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
     (resd)
   }
+  
+  allm<-function(sortedx){ 
+    subtract<-t(combn(sortedx, 4))
+    apply(subtract,MARGIN=1,FUN=getm)
+  }
   if (fast){
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
+  }else if(dataslicing){
+    subtract<-sortedx
   }else{
     subtract<-t(combn(sortedx, 4))
   }
-  dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-  
+  if (dataslicing){
+    dp2m<-dataslicingm(x=subtract,slicesize=18,FUN=allm)
+  }else{
+    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+  }
   getlm<-function(vector){ 
-    (vector[4]-3*vector[3]+3*vector[2]-vector[1])
+    (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
   }
-  dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-  
-  dps<-sort(dp2lm,decreasing = FALSE,method ="radix")
-  dp2s<-sort(dp2m,decreasing = FALSE,method ="radix")
-  etm1dps<-etm(dps,interval=interval,fast=fast,batch=batch)
-  etm1dp2s<-etm(dp2s,interval=interval,fast=fast,batch=batch)
-  expectdps<-mean(dps)
-  expectdp2s<-mean(dp2s)
-  
-  quatileexpectdps<-(min(which(dps>(expectdps)))-1)/length(dps)
-  mx1dps<-(min(which(dps>(etm1dps[2])))-1)/length(dps)
-  mx2dps<-1/2
-  
-  quatileexpectdp2s<-(min(which(dp2s>(expectdp2s)))-1)/length(dp2s)
-  mx1dp2s<-(min(which(dp2s>(etm1dp2s[2])))-1)/length(dp2s)
-  mx2dp2s<-1/2
-  
-  if (mx1dp2s>0.5){
-    dqfm<-log(((quatileexpectdp2s-mx1dp2s)/(abs(1-mx1dp2s)*((mx1dp2s-mx2dp2s)*2))),base=((abs(mx1dp2s-mx2dp2s)*2)))
+  alllm<-function(sortedx){ 
+    subtract<-t(combn(sortedx, 4))
+    apply(subtract,MARGIN=1,FUN=getlm)
+  }
+  if (dataslicing){
+    dp2lm<-dataslicingm(x=subtract,slicesize=18,FUN=alllm)
   }else{
-    dqfm<-log(((quatileexpectdp2s-mx1dp2s)/(abs(0-mx1dp2s)*((mx1dp2s-mx2dp2s)*2))),base=((abs(mx1dp2s-mx2dp2s)*2)))
+    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
   }
-  drfm<-(expectdp2s-etm1dp2s[2])/(etm1dp2s[2]-etm1dp2s[3])
-  if (mx1dps>0.5){
-    dql4<-log(((quatileexpectdps-mx1dps)/(abs(1-mx1dps)*((mx1dps-mx2dps)*2))),base=((abs(mx1dps-mx2dps)*2)))
-  }else{
-    dql4<-log(((quatileexpectdps-mx1dps)/(abs(0-mx1dps)*((mx1dps-mx2dps)*2))),base=((abs(mx1dps-mx2dps)*2)))
-  }
-  drl4<-(expectdps-etm1dps[2])/(etm1dps[2]-etm1dps[3])
+
+  lengthn<-length(sortedx)
+  lm1<-Lmoments(sortedx)
+  expectdps<-lm1[4]
+  expectdp2s<-(sum((sortedx - mean(sortedx))^4)/lengthn)
+  
+  dlmo<-finddmmm(expect=expectdps,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dmo<-finddmmm(expect=expectdp2s,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dqfm<-dmo[1]
+  drfm<-dmo[2]
+  dql4<-dlmo[1]
+  drl4<-dlmo[2]
   all<-c(dqfm,drfm,dql4,drl4)
   return(all)
 }
-dataslicing<-function (x,slicesize=90,FUN=finddtm){
+dataslicingm<-function (x,slicesize=108,FUN=rskew){
   lengthx<-length(x)
   slices<-lengthx/slicesize
   IntKslices<-floor(slices)
-  if (IntKslices==1){
-    return("sample size too small, no need for data slicing")
-  }
   x_ordered<-sort(x,decreasing = FALSE,method ="radix")
   group<-rep(rep(c(1:IntKslices), each=1), times=slicesize)
   suppressWarnings(Group1<-split(x_ordered, group))
   Groupall<-((sapply(Group1,FUN)))
-  if (is.null(dim(Groupall))){
-    mean(Groupall)
-  }else{
-    apply(Groupall,MARGIN=1,FUN=mean)}
+  Groupall
 }
 
 simulatedbatch<-c()
@@ -225,7 +242,22 @@ for(i in (1:10)){
   simulatedbatch<-rbind(simulatedbatch,all)
 }
 
-
 simulatedbatch[is.infinite(simulatedbatch)] <-NA
 
 write.csv(simulatedbatch,paste("simulatedd",batchnumber,".csv", sep = ","), row.names = TRUE)
+
+
+simulatedbatchdataslicing<-c()
+for(i in (1:10)){
+  x<-c(rexp(5400,1))
+  x<-sort(x,decreasing = FALSE,method ="radix")
+  dtm1<-finddtm(x,interval=9,fast=FALSE,batch=540000,sorted=TRUE,dataslicing=TRUE)
+  dfm1<-finddfm(x,interval=9,fast=FALSE,batch=540000,sorted=TRUE,dataslicing=TRUE)
+  all<-c(dqtm=dtm1[1],drtm=dtm1[2],dql3=dtm1[3],drl3=dtm1[4],dqfm=dfm1[1],drfm=dfm1[2],dql4=dfm1[3],drl4=dfm1[4])
+  simulatedbatchdataslicing<-rbind(simulatedbatchdataslicing,all)
+}
+
+simulatedbatchdataslicing[is.infinite(simulatedbatchdataslicing)] <-NA
+
+write.csv(simulatedbatchdataslicing,paste("simulatedddataslicing",batchnumber,".csv", sep = ","), row.names = TRUE)
+

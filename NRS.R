@@ -186,7 +186,11 @@ qm<-function(x,interval=9,fast=TRUE,batch=1000,d=0.821497,sorted=FALSE,fsbc=FALS
   if (fsbc){
     d<-finited(n=samplesize,fd=fd,type="qm")
   }
-  quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^d)+mx1
+  if (mx1>0.5){
+    quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^d)+mx1
+  }else{
+    quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^d)+mx1
+  }
   if (quatiletarget>8/9){
     print("Warning: the percentile exceeds 8/9, the robustness shrinks")
   }else if(quatiletarget<1/9){
@@ -204,6 +208,9 @@ rm<-function(x,interval=9,fast=TRUE,batch=10000,d=0.366919,fsbc=FALSE){
   etm1<-etm(x,interval=interval,fast=fast,batch=batch)
   -d*etm1[3]+etm1[2]+d*etm1[2] 
 }
+
+
+
 #quantile standard deviation
 qsd<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.78609163,sorted=FALSE,fsbc=FALSE){
   if (length(x)>5000& fast==FALSE&dataslicing==FALSE){
@@ -360,7 +367,7 @@ rl2<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.366885
 }
 
 #quantile skewness
-qskew<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.58778,sorted=FALSE){
+qskew<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.767522,sorted=FALSE){
   if (length(x)>300& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^3, data slicing or bootstrap is recommended")
   }
@@ -380,7 +387,7 @@ qskew<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.5877
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=36,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 3))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -390,7 +397,7 @@ qskew<-function (x,interval=9,fast=FALSE,dataslicing=FALSE,batch=540000,d=0.5877
   (resultdp)/((sd1)^3)
 }
 #robust skewness
-rskew<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.71172,sorted=FALSE){
+rskew<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.32122,sorted=FALSE){
   if (length(x)>300& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^3, data slicing or bootstrap is recommended")
   }
@@ -410,7 +417,7 @@ rskew<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.71172
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=36,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 3))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -420,7 +427,7 @@ rskew<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.71172
   (resultdp)/((sd1[1])^3)
 }
 #quantile scaled L3-moment
-ql3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.18983,sorted=FALSE){
+ql3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=10000,sorted=FALSE){
   if (length(x)>300& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^3, data slicing or bootstrap is recommended")
   }
@@ -440,7 +447,7 @@ ql3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.18983,s
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=36,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 3))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -450,7 +457,7 @@ ql3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.18983,s
   (((1/3)*resultdp)/((l21[1])))
 }
 #robust scaled L3-moment
-rl3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.176434,sorted=FALSE){
+rl3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=-0.282833,sorted=FALSE){
   if (length(x)>300& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^3, data slicing or bootstrap is recommended")
   }
@@ -470,7 +477,7 @@ rl3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.176434,
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 3))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=36,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 3))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -480,7 +487,7 @@ rl3<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.176434,
   (((1/3)*resultdp)/((l21[1])))
 }
 #quantile scaled L4-moment
-ql4<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.511272749 ,sorted=FALSE){
+ql4<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=100 ,sorted=FALSE){
   if (length(x)>108& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^4, data slicing or bootstrap is recommended")
   }
@@ -500,7 +507,7 @@ ql4<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.5112727
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=54,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 4))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -510,7 +517,7 @@ ql4<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=1.5112727
   (((1/4)*resultdp)/((l21[1])))
 }
 #robust scaled L4-moment
-rl4<-function(x,interval=9,fast=TRUE,dataslicing =FALSE,batch=540000,d=0.009055351,sorted=FALSE){
+rl4<-function(x,interval=9,fast=TRUE,dataslicing =FALSE,batch=540000,d=-1.910177,sorted=FALSE){
   if (length(x)>108& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^4, data slicing or bootstrap is recommended")
   }
@@ -530,7 +537,7 @@ rl4<-function(x,interval=9,fast=TRUE,dataslicing =FALSE,batch=540000,d=0.0090553
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=54,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 4))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -540,7 +547,7 @@ rl4<-function(x,interval=9,fast=TRUE,dataslicing =FALSE,batch=540000,d=0.0090553
   (((1/4)*resultdp)/((l21[1])))
 }
 #quantile kurtosis
-qkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.1364722 ,sorted=FALSE){
+qkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.283620,sorted=FALSE){
   if (length(x)>108& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^4, data slicing or bootstrap is recommended")
   }
@@ -566,7 +573,7 @@ qkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.13647
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=54,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 4))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -577,7 +584,7 @@ qkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=0.13647
 }
 #robust kurtosis
 
-rkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=3.378723,sorted=FALSE){
+rkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=2.63026,sorted=FALSE){
   if (length(x)>108& fast==FALSE&dataslicing==FALSE){
     print("Warning: The computational complexity is n^4, data slicing or bootstrap is recommended")
   }
@@ -603,7 +610,7 @@ rkurt<-function (x,interval=9,fast=TRUE,dataslicing=FALSE,batch=540000,d=3.37872
     subtract<-t(replicate(batch, sort(sample(sortedx, size = 4))))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
   }else if(dataslicing){
-    dp2<-dataslicingm(x=sortedx,slicesize=54,FUN=all)
+    dp2<-dataslicingm(x=sortedx,slicesize=18,FUN=all)
   }else{
     subtract<-t(combn(sortedx, 4))
     dp2<-apply(subtract,MARGIN=1,FUN=get)
@@ -666,6 +673,7 @@ dataslicing2<-function (x,slicesize=108,FUN=rskew,interval=9,fast=TRUE,batch=100
 
 #test
 x<-rexp(5400,1)
+
 #the population mean is 1
 mean(x)
 rm(x,interval=9,fast=TRUE,fsbc=FALSE)
@@ -677,43 +685,44 @@ qm(x,interval=9,fast=TRUE,fsbc=TRUE)
 #the population standard deviation is 1
 rsd(x,interval=9,fast=FALSE,fsbc=TRUE)
 #the d of dataslicing haven't been calibrated yet
-rsd(x,interval=9,fast=FALSE,fsbc=TRUE,dataslicing=TRUE)
+rsd(x,interval=9,fast=FALSE,batch=540000,d=0.779270,dataslicing=TRUE)
 rsd(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 qsd(x,interval=9,fast=FALSE,fsbc=TRUE)
-qsd(x,interval=9,fast=FALSE,fsbc=TRUE,dataslicing=TRUE)
-#bootstrap 540000 for around three decimal accuracy, the batch should be the factor of interval
+qsd(x,interval=9,fast=FALSE,batch=540000,d=0.872255,dataslicing=TRUE)
+#bootstrap 540000 for around three decimal accuracy, the batch should be the factor of the interval 9
 qsd(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 
 #the population L2-moment is 1/2
 rl2(x,interval=9,fast=FALSE,fsbc=TRUE)
-rl2(x,interval=9,fast=FALSE,fsbc=TRUE,dataslicing=TRUE)
+rl2(x,interval=9,fast=FALSE,batch=540000,d=0.3512476,dataslicing=TRUE)
 rl2(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 ql2(x,interval=9,fast=FALSE,fsbc=TRUE)
-ql2(x,interval=9,fast=FALSE,fsbc=TRUE,dataslicing=TRUE)
+ql2(x,interval=9,fast=FALSE,batch=540000,d=0.9611119,dataslicing=TRUE)
 ql2(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 
 #the population skewness is 2
-rskew(x,interval=9,fast=TRUE,batch=540000)
-rskew(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
-qskew(x,interval=9,fast=TRUE,batch=540000)
-qskew(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
+rskew(x,interval=9,fast=TRUE,batch=540000,d=1.743779)
+rskew(x,interval=9,fast=FALSE,batch=540000,d=1.321220,dataslicing=TRUE)
+qskew(x,interval=9,fast=TRUE,batch=540000,d=0.5867597)
+qskew(x,interval=9,fast=FALSE,batch=540000,d=0.767522,dataslicing=TRUE)
 #the population L-skewness is 1/3
-rl3(x,interval=9,fast=TRUE,batch=540000)
-rl3(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
-ql3(x,interval=9,fast=TRUE,batch=540000)
-ql3(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
+rl3(x,interval=9,fast=TRUE,batch=540000,d=0.1770)
+rl3(x,interval=9,fast=FALSE,batch=540000,d=-0.282833,dataslicing=TRUE)
+ql3(x,interval=9,fast=TRUE,batch=540000,d=1.210968)
+#no d for ql3 for data slicing, due to the true mean does not lie on the extension of etm and median
+ql3(x,interval=9,fast=FALSE,batch=540000,d=1000,dataslicing=TRUE)
 #the population kurtosis is 9
-rkurt(x,interval=9,fast=TRUE,batch=540000)
-rkurt(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
-qkurt(x,interval=9,fast=TRUE,batch=540000)
-qkurt(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
+rkurt(x,interval=9,fast=TRUE,batch=540000,d=3.47432)
+rkurt(x,interval=9,fast=FALSE,batch=540000,d=2.63026,dataslicing=TRUE)
+qkurt(x,interval=9,fast=TRUE,batch=540000,d=0.12225)
+qkurt(x,interval=9,fast=FALSE,batch=540000,d=0.28362,dataslicing=TRUE)
 #the population L-kurtosis is 1/6
-rl4(x,interval=9,fast=TRUE,batch=540000)
-rl4(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
-ql4(x,interval=9,fast=TRUE,batch=540000)
-ql4(x,interval=9,fast=FALSE,batch=540000,dataslicing=TRUE)
-#test paramater defined dataslicing
-dataslicing2(x,slicesize=90,FUN=rskew,interval=9,fast=TRUE,batch=1000,d=1.71172,sorted=FALSE)
+rl4(x,interval=9,fast=TRUE,batch=540000,d=-0.146569924)
+rl4(x,interval=9,fast=FALSE,batch=540000,d=-1.91018,dataslicing=TRUE)
+#no d for ql4, both for data slicing and bootstrap, due to the true mean does not lie on the extension of etm and median
+ql4(x,interval=9,fast=TRUE,batch=540000,d=1000)
+ql4(x,interval=9,fast=FALSE,batch=540000,d=1000,dataslicing=TRUE)
+
 
 x<-rgamma(5400,4,1)
 #the population mean is 4
@@ -721,24 +730,33 @@ mean(x)
 rm(x)
 qm(x)
 #the population standard deviation is 2
-rsd(x)
-qsd(x)
+rsd(x,interval=9,fast=FALSE,batch=540000,d=0.779270,dataslicing=TRUE)
+rsd(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
+qsd(x,interval=9,fast=FALSE,batch=540000,d=0.872255,dataslicing=TRUE)
+qsd(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 #the population L2-moment is 1.09375
-rl2(x)
-ql2(x)
+rl2(x,interval=9,fast=FALSE,batch=540000,d=0.3512476,dataslicing=TRUE)
+rl2(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
+ql2(x,interval=9,fast=FALSE,batch=540000,d=0.9611119,dataslicing=TRUE)
+ql2(x,interval=9,fast=TRUE,fsbc=TRUE,batch=540000)
 #the population skewness is 1
-rskew(x,interval=9,fast=TRUE,batch=540000)
-qskew(x,interval=9,fast=TRUE,batch=540000)
+rskew(x,interval=9,fast=TRUE,batch=540000,d=1.743779)
+rskew(x,interval=9,fast=FALSE,batch=540000,d=1.321220,dataslicing=TRUE)
+qskew(x,interval=9,fast=TRUE,batch=540000,d=0.5867597)
+qskew(x,interval=9,fast=FALSE,batch=540000,d=0.767522,dataslicing=TRUE)
 #the population L-skewness is 0.1646599 
-rl3(x,interval=9,fast=TRUE,batch=540000)
-ql3(x,interval=9,fast=TRUE,batch=540000)
+rl3(x,interval=9,fast=TRUE,batch=540000,d=0.1770)
+rl3(x,interval=9,fast=FALSE,batch=540000,d=-0.282833,dataslicing=TRUE)
+ql3(x,interval=9,fast=TRUE,batch=540000,d=1.210968)
 
 #the population kurtosis is 4.5
-rkurt(x,interval=9,fast=TRUE,batch=540000)
-qkurt(x,interval=9,fast=TRUE,batch=540000)
+rkurt(x,interval=9,fast=TRUE,batch=540000,d=3.47432)
+rkurt(x,interval=9,fast=FALSE,batch=540000,d=2.63026,dataslicing=TRUE)
+qkurt(x,interval=9,fast=TRUE,batch=540000,d=0.12225)
+qkurt(x,interval=9,fast=FALSE,batch=540000,d=0.28362,dataslicing=TRUE)
 #the population L-kurtosis is 0.1312521 
-rl4(x,interval=9,fast=TRUE,batch=540000)
-ql4(x,interval=9,fast=TRUE,batch=540000)
+rl4(x,interval=9,fast=TRUE,batch=540000,d=-0.146569924)
+rl4(x,interval=9,fast=FALSE,batch=540000,d=-1.91018,dataslicing=TRUE)
 
 x<-rpois(5400,8)
 #the population mean is 8

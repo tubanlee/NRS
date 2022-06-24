@@ -532,7 +532,7 @@ for (a in (1:300)) {
 
 write.csv(listgamma,paste("Congamma",batchnumber,".csv", sep = ","), row.names = TRUE)
 
-#better for heavy-tailed distributions, because the kurtosis much larger than 4
+#better for heavy-tailed distributions, because the kurtosis much larger than 4, but the finite sample bias is huge
 listlnorm<-data.frame()
 for (a in (1:300)) {
   allforlnorm<-c()
@@ -570,7 +570,7 @@ for (a in (1:300)) {
 }
 
 write.csv(listlnorm,paste("Conlnorm",batchnumber,".csv", sep = ","), row.names = TRUE)
-
+#notice that third moment only defined for shape>3, fourth moment only defined for shape>4
 listpareto<-data.frame()
 for (a in (1:300)) {
   allforpareto<-c()

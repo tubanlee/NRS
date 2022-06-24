@@ -309,7 +309,7 @@ write.csv(allforlaplace,paste("Conlaplace,",batchnumber,".csv", sep = ","), row.
 
 #the biases of robust/quantile fourth moments for normal are huge, because the kurtosis is 3, too differ from that of exponential distribution (9)
 
-#but robust 4th moment still remain high consistent, because the distributions of U-statistics of L-moments are more symmetric.
+#but robust 4th L-moment still remain high consistent, because the distributions of U-statistics of L-moments are more symmetric.
 
 allfornorm<-c()
 for(i in (1:1)){

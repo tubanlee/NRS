@@ -132,7 +132,7 @@ fm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted
 
 
 allfornorm<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   x<-c(rnorm(5400))
   x<-sort(x,decreasing = FALSE,method ="radix")
   scale1boot<-scale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
@@ -154,7 +154,7 @@ allfornorm[is.infinite(allfornorm)] <-NA
 write.csv(allfornorm,paste("Bootstrapnorm,",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 allforlaplace<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   library(VGAM)
   x<-c(rlaplace(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -176,7 +176,7 @@ write.csv(allforlaplace,paste("Bootstraplaplace,",batchnumber,".csv", sep = ",")
 
 
 allforlogis<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   x<-c(rlogis(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   scale1boot<-scale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
@@ -198,7 +198,7 @@ write.csv(allforlogis,paste("Bootstraplogis,",batchnumber,".csv", sep = ","), ro
 
 
 allforRayleigh<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   library(VGAM)
   x<-c(rrayleigh(5400, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -220,7 +220,7 @@ allforRayleigh[is.infinite(allforRayleigh)] <-NA
 write.csv(allforRayleigh,paste("BootstrapRayleigh,",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 allforexp<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   x<-c(rexp(5400,1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   scale1boot<-scale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
@@ -243,7 +243,7 @@ library(lmom)
 listWeibull<-data.frame()
 for (a in (1:300)) {
   allforweibull<-c()
-  for(i in (1:1)){
+  for(i in (1:10)){
     x<-c(rweibull(5400, shape=a/100, scale = 1))
     targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -269,7 +269,7 @@ library(lmom)
 listgamma<-data.frame()
 for (a in (1:300)) {
   allforgamma<-c()
-  for(i in (1:1)){
+  for(i in (1:10)){
     x<-c(rgamma(5400, shape=a/100, rate = 1))
     targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -295,7 +295,7 @@ write.csv(listgamma,paste("Bootstrapgamma",batchnumber,".csv", sep = ","), row.n
 listlnorm<-data.frame()
 for (a in (1:300)) {
   allforlnorm<-c()
-  for(i in (1:1)){
+  for(i in (1:10)){
     x<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
     targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -320,7 +320,7 @@ write.csv(listlnorm,paste("Bootstraplnorm",batchnumber,".csv", sep = ","), row.n
 listpareto<-data.frame()
 for (a in (1:300)) {
   allforpareto<-c()
-  for(i in (1:1)){
+  for(i in (1:10)){
     library(VGAM)
     x<-c(VGAM::rpareto(5400, scale  = 1, shape=2+a/100))
     targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)

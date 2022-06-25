@@ -275,7 +275,7 @@ library(Lmoments)
 
 #the biases of NRSs for laplace are very small, because the kurtosis is 6, not much differ from that of exponential distribution (9)
 allforlaplace<-c()
-for(i in (1:2)){
+for(i in (1:10)){
   library(VGAM)
   x<-c(rlaplace(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -313,7 +313,7 @@ write.csv(allforlaplace,paste("Conlaplace,",batchnumber,".csv", sep = ","), row.
 #but robust 4th moment still remain high consistent, because the distributions of U-statistics of L-moments are more symmetric.
 
 allfornorm<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   x<-c(rnorm(5400))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)
@@ -347,7 +347,7 @@ write.csv(allfornorm,paste("Connorm,",batchnumber,".csv", sep = ","), row.names 
 #the biases of robust/quantile fourth moments for logis are not very large ~0.2 and ~0.06, because the kurtosis is 4.2, better than normal
 
 allforlogis<-c()
-for(i in (1:2)){
+for(i in (1:10)){
   x<-c(rlogis(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)
@@ -381,7 +381,7 @@ write.csv(allforlogis,paste("Conlogis,",batchnumber,".csv", sep = ","), row.name
 #the biases of robust/quantile fourth moments for Rayleigh are very large ~0.3 and ~0.11, because the kurtosis is 3.245, very close to normal
 
 allforRayleigh<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   library(VGAM)
   x<-c(rrayleigh(5400, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -415,7 +415,7 @@ write.csv(allforRayleigh,paste("ConRayleigh,",batchnumber,".csv", sep = ","), ro
 
 
 allforexp<-c()
-for(i in (1:1)){
+for(i in (1:10)){
   x<-c(rexp(5400,1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)

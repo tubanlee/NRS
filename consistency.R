@@ -102,6 +102,7 @@ mmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FAL
     quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
   }
   qm1<-quantile(sortedx,quatiletarget)
+  names(qm1)<-NULL
   rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
   listd<-c(expecttrue,expectboot,rm1,qm1)
   return(listd)
@@ -121,6 +122,7 @@ mmme<-function(x,interval=9,fast=TRUE,batch=1000,sorted=FALSE,drm=0.366439,dqm=0
     quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
   }
   qm1<-quantile(sortedx,quatiletarget)
+  names(qm1)<-NULL
   rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
   listd<-c(etm1[2],rm1,qm1)
   return(listd)
@@ -273,7 +275,7 @@ library(Lmoments)
 
 #the biases of NRSs for laplace are very small, because the kurtosis is 6, not much differ from that of exponential distribution (9)
 allforlaplace<-c()
-for(i in (1:10)){
+for(i in (1:2)){
   library(VGAM)
   x<-c(rlaplace(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -282,8 +284,8 @@ for(i in (1:10)){
   wm1<-mean(winsor(x,fraction=1/9))
   sd1<-sd(x) 
   rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-  rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
   rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   targetm<-0
@@ -296,7 +298,6 @@ for(i in (1:10)){
   all<-c(
     meanBias=((mean1-targetm)/(sd1)),
     tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-    rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
     rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
     rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
     rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -309,10 +310,10 @@ write.csv(allforlaplace,paste("Conlaplace,",batchnumber,".csv", sep = ","), row.
 
 #the biases of robust/quantile fourth moments for normal are huge, because the kurtosis is 3, too differ from that of exponential distribution (9)
 
-#but robust 4th L-moment still remain high consistent, because the distributions of U-statistics of L-moments are more symmetric.
+#but robust 4th moment still remain high consistent, because the distributions of U-statistics of L-moments are more symmetric.
 
 allfornorm<-c()
-for(i in (1:10)){
+for(i in (1:1)){
   x<-c(rnorm(5400))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)
@@ -320,8 +321,8 @@ for(i in (1:10)){
   wm1<-mean(winsor(x,fraction=1/9))
   sd1<-sd(x) 
   rqmmm1<-mmme(x,interval=9,fast=TRUE,batch=1000,sorted=FALSE,drm=0.366439,dqm=0.8241268)
-  rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
   rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   targetm<-0
@@ -334,7 +335,6 @@ for(i in (1:10)){
   all<-c(
     meanBias=((mean1-targetm)/(sd1)),
     tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-    rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
     rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
     rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
     rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -347,7 +347,7 @@ write.csv(allfornorm,paste("Connorm,",batchnumber,".csv", sep = ","), row.names 
 #the biases of robust/quantile fourth moments for logis are not very large ~0.2 and ~0.06, because the kurtosis is 4.2, better than normal
 
 allforlogis<-c()
-for(i in (1:10)){
+for(i in (1:2)){
   x<-c(rlogis(5400, location = 0, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)
@@ -355,8 +355,8 @@ for(i in (1:10)){
   wm1<-mean(winsor(x,fraction=1/9))
   sd1<-sd(x) 
   rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-  rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
   rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   targetm<-0
@@ -369,7 +369,6 @@ for(i in (1:10)){
   all<-c(
     meanBias=((mean1-targetm)/(sd1)),
     tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-    rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
     rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
     rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
     rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -382,7 +381,7 @@ write.csv(allforlogis,paste("Conlogis,",batchnumber,".csv", sep = ","), row.name
 #the biases of robust/quantile fourth moments for Rayleigh are very large ~0.3 and ~0.11, because the kurtosis is 3.245, very close to normal
 
 allforRayleigh<-c()
-for(i in (1:10)){
+for(i in (1:1)){
   library(VGAM)
   x<-c(rrayleigh(5400, scale = 1))
   x<-sort(x,decreasing = FALSE,method ="radix")
@@ -391,8 +390,8 @@ for(i in (1:10)){
   wm1<-mean(winsor(x,fraction=1/9))
   sd1<-sd(x) 
   rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-  rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
   rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   targetm<-sqrt(pi/2)
@@ -405,11 +404,9 @@ for(i in (1:10)){
   all<-c(
     meanBias=((mean1-targetm)/(sd1)),
     tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-    rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
     rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
     rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
     rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
-  
   allforRayleigh<-rbind(allforRayleigh,all)
 }
 allforRayleigh[is.infinite(allforRayleigh)] <-NA
@@ -418,7 +415,7 @@ write.csv(allforRayleigh,paste("ConRayleigh,",batchnumber,".csv", sep = ","), ro
 
 
 allforexp<-c()
-for(i in (1:10)){
+for(i in (1:1)){
   x<-c(rexp(5400,1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   mean1<-mean(x)
@@ -426,8 +423,8 @@ for(i in (1:10)){
   wm1<-mean(winsor(x,fraction=1/9))
   sd1<-sd(x) 
   rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-  rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+  rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
   rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   targetm<-1
@@ -440,7 +437,6 @@ for(i in (1:10)){
   all<-c(
     meanBias=((mean1-targetm)/(sd1)),
     tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-    rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
     rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
     rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
     rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -452,11 +448,14 @@ write.csv(allforexp,paste("Conexp,",batchnumber,".csv", sep = ","), row.names = 
 
 
 #same issue, when kurtosis lower than 4, the performances of robust/quantile fourth moments are very poor.
+
+
+#the 0.01-0.1 shape parameter range were removed, as the variance too high, often introducing bugs.
 library(lmom)
 listWeibull<-data.frame()
-for (a in (1:300)) {
+for (a in (10:300)) {
   allforweibull<-c()
-  for(i in (1:10)){
+  for(i in (1:1)){
     x<-c(rweibull(5400, shape=a/100, scale = 1))
     targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -465,8 +464,8 @@ for (a in (1:300)) {
     wm1<-mean(winsor(x,fraction=1/9))
     sd1<-sd(x) 
     rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-    rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+    #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
     rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     targetm<-gamma(1+1/(a/100))
@@ -479,7 +478,6 @@ for (a in (1:300)) {
     all<-c(
       meanBias=((mean1-targetm)/(sd1)),
       tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-      rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
       rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
       rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
       rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -497,7 +495,7 @@ library(lmom)
 listgamma<-data.frame()
 for (a in (1:300)) {
   allforgamma<-c()
-  for(i in (1:10)){
+  for(i in (1:1)){
     x<-c(rgamma(5400, shape=a/100, rate = 1))
     targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -506,8 +504,8 @@ for (a in (1:300)) {
     wm1<-mean(winsor(x,fraction=1/9))
     sd1<-sd(x) 
     rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-    rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+    #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
     rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     targetm<-targetgam[1]
@@ -520,7 +518,6 @@ for (a in (1:300)) {
     all<-c(
       meanBias=((mean1-targetm)/(sd1)),
       tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-      rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
       rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
       rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
       rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -532,11 +529,11 @@ for (a in (1:300)) {
 
 write.csv(listgamma,paste("Congamma",batchnumber,".csv", sep = ","), row.names = TRUE)
 
-#better for heavy-tailed distributions, because the kurtosis much larger than 4, but the finite sample bias is huge
+#better for heavy-tailed distributions, because the kurtosis much larger than 4
 listlnorm<-data.frame()
 for (a in (1:300)) {
   allforlnorm<-c()
-  for(i in (1:10)){
+  for(i in (1:1)){
     x<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
     targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
     x<-sort(x,decreasing = FALSE,method ="radix")
@@ -545,8 +542,8 @@ for (a in (1:300)) {
     wm1<-mean(winsor(x,fraction=1/9))
     sd1<-sd(x) 
     rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-    rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+    #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
     rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     targetm<-targetlnorm[1]
@@ -559,7 +556,6 @@ for (a in (1:300)) {
     all<-c(
       meanBias=((mean1-targetm)/(sd1)),
       tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-      rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
       rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
       rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
       rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))
@@ -570,11 +566,11 @@ for (a in (1:300)) {
 }
 
 write.csv(listlnorm,paste("Conlnorm",batchnumber,".csv", sep = ","), row.names = TRUE)
-#notice that third moment only defined for shape>3, fourth moment only defined for shape>4
+
 listpareto<-data.frame()
 for (a in (1:300)) {
   allforpareto<-c()
-  for(i in (1:10)){
+  for(i in (1:1)){
     library(VGAM)
     x<-c(VGAM::rpareto(5400, scale  = 1, shape=2+a/100))
     targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)
@@ -584,8 +580,8 @@ for (a in (1:300)) {
     wm1<-mean(winsor(x,fraction=1/9))
     sd1<-sd(x) 
     rqmmm1<-mmm(expectboot=mean1,expecttrue=mean1,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE)
-    rqscale1boot<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
+    rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+    #rqscale1<-rqscale(x,interval=9,fast=TRUE,batch=1000,boot=FALSE,subsample=54000,sorted=TRUE)
     rqtm1<-rqtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     rqfm1<-rqfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
     targetm<-targetlpareto[1]
@@ -598,7 +594,6 @@ for (a in (1:300)) {
     all<-c(
       meanBias=((mean1-targetm)/(sd1)),
       tmBias=((tm1-targetm)/(sd1)),wmBias=((wm1-targetm)/(sd1)), etmBias=((rqmmm1[3]-targetm)/(sd1)),rmBias=((rqmmm1[2]-targetm)/(sd1)),qmBias=((rqmmm1[3]-targetm)/(sd1)),
-      rvarBiasboot=((rqscale1boot[4]-targetvar)/(rqscale1boot[6])), qvarBiasboot=((rqscale1boot[5]-targetvar)/(rqscale1boot[6])),rl2Biasboot=((rqscale1boot[1]-targetl2)/(rqscale1boot[3])),ql2Biasboot=((rqscale1boot[2]-targetl2)/(rqscale1boot[3])),
       rvarBias=((rqscale1[4]-targetvar)/(rqscale1[6])),qvarBias=((rqscale1[5]-targetvar)/(rqscale1[6])),rl2Bias=((rqscale1[1]-targetl2)/(rqscale1[3])),ql2Bias=((rqscale1[2]-targetl2)/(rqscale1[3])),
       rtmBias=((rqtm1[4]-targettm)/(rqtm1[6])),qtmBias=((rqtm1[5]-targettm)/(rqtm1[6])),rl3Bias=((rqtm1[1]-targetl3)/(rqtm1[3])),ql3Bias=((rqtm1[2]-targetl3)/(rqtm1[3])),
       rfmBias=(rqfm1[4]-targetfm)/(rqfm1[6]),qfmBias=(rqfm1[5]-targetfm)/(rqfm1[6]),rl4Bias=((rqfm1[1]-targetl4)/(rqfm1[3])),ql4Bias=((rqfm1[2]-targetl4)/(rqfm1[3])))

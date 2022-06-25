@@ -1,4 +1,4 @@
-
+library(Lmoments)
 
 least_common_multiple<-function(a,b){
   g<-greatest_common_divisor(a, b)

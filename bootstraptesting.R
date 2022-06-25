@@ -1,4 +1,5 @@
 
+library(Lmoments)
 
 
 
@@ -129,7 +130,6 @@ fm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted
 #bootstrap works very good and the performance for the fourth moment is slighly better than sample kurtosis ~0.004, 
 #because sample kurtosis is biased (finite sample bias), and uncorrectable without specific distribution assumption, 
 #while U-statistics is much less biased.
-library(Lmoments)
 
 allfornorm<-c()
 for(i in (1:10)){

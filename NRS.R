@@ -801,13 +801,6 @@ x<-c(VGAM::rpareto(5400, scale  = 1, shape=2+a/100))
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=TRUE,SD=FALSE)
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="rayleigh",SE=TRUE,SD=FALSE)
 
-a=500
-library(VGAM)
-x<-c(VGAM::rpareto(5400, scale  = 1, shape=2+a/100))
-
-NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=TRUE,SD=FALSE)
-NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="rayleigh",SE=TRUE,SD=FALSE)
-
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 

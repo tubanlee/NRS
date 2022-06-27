@@ -1,5 +1,6 @@
 
 
+
 #because I combined all estimators into one function, there might be errors when running several functions in a time and these are not bugs,
 #but because R is prone to produce errors for such a large function (I haven't found anything wrong), 
 #Run one function one time. If there is an error, try to restart and then it will be fixed.
@@ -411,7 +412,7 @@ rrayleigh<-function (n, scale = 1) {
   sample1
 }
 
-NRSs<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution=c("exponential","rayleigh"),SE=TRUE,SD=FALSE){
+NRSssimple<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution=c("exponential","rayleigh"),SE=TRUE,SD=FALSE){
   if(sorted){
     sortedx<-x
   }else{
@@ -516,43 +517,12 @@ NRSs<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sort
   
   return(all)
 }
-
-rqfmci<-function(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,dlrm=-0.3542,drm=3.4560,dlqm=NaN,dqm=0.1246,alpha=0.05,nboot=1000){
-  data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
-  pairs1 <- data.frame()
-  pairs2 <- data.frame()
-  pairs3 <- data.frame()
-  pairs4 <- data.frame()
-  pairs5 <- data.frame()
-  pairs6 <- data.frame()
-  for (i in 1:nboot) {
-    robustlocation1<-rqfm(data[i,],interval=interval,fast=fast,batch=batch,boot=boot,subsample=subsample,sorted=sorted,dlrm=dlrm,drm=drm,dlqm=dlqm,dqm=dqm)
-    pairs1 <- rbind(pairs1,robustlocation1[1])
-    pairs2 <- rbind(pairs2,robustlocation1[2])
-    pairs3 <- rbind(pairs3,robustlocation1[3])
-    pairs4 <- rbind(pairs4,robustlocation1[5])
-    pairs5 <- rbind(pairs5,robustlocation1[6])
-    pairs6 <- rbind(pairs6,robustlocation1[7])
-  }
-  bootlist1<-sort(as.matrix(pairs1))
-  bootlist2<-sort(as.matrix(pairs2))
-  bootlist3<-sort(as.matrix(pairs3))
-  bootlist4<-sort(as.matrix(pairs4))
-  bootlist5<-sort(as.matrix(pairs5))
-  bootlist6<-sort(as.matrix(pairs6))
-  low<-round((alpha/2)*nboot)
-  up<-nboot-low
-  low<-low+1
-  estimate=rqfm(x,interval=interval,fast=fast,batch=batch,boot=boot,subsample=subsample,sorted=sorted,dlrm=dlrm,drm=drm,dlqm=dlqm,dqm=dqm)
-  result <- list(cil2=c(bootlist1[low],bootlist1[up]), cirl2=c(bootlist2[low],bootlist2[up]),ciql2=c(bootlist3[low],bootlist3[up]),
-                 civar=c(bootlist4[low],bootlist4[up]),cirvar=c(bootlist5[low],bootlist5[up]),ciqvar=c(bootlist6[low],bootlist6[up]),
-                 sel2=sd(bootlist1),serl2=sd(bootlist2),seql2=sd(bootlist3),sevar=sd(bootlist4),servar=sd(bootlist5),seqvar=sd(bootlist6),
-                 estimate=estimate
-  )
-  return(result)
-}
-
-
+NRSs<-function(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution=c("exponential","rayleigh"),SE=TRUE,SD=FALSE,cise = FALSE,alpha = 0.05,nboot = 100){
+  if(cise){
+    return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,subsample=subsample,sorted=sorted,standarddistribution=standarddistribution,alpha=alpha,nboot=nboot))
+  } else {return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,subsample=subsample,sorted=sorted,standarddistribution=standarddistribution,SE=SE,SD = SD))
+    
+}}
 NRSsci<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution=c("exponential","rayleigh"),alpha=0.05,nboot=100){
   if(sorted){
     sortedx<-x
@@ -751,23 +721,22 @@ x<-rexp(5400,1)
 #no d for ql4, because the distribution of U-statistic of L4-moment does not follow mean-ETM-median inequality
 #if want to see the standard deviation of the distribution of U-statistic,  set SD to TRUE.
 #this standard deviation is calculated based on the law of propogatio of uncertainty.
-NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=FALSE,SD=TRUE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",SE=FALSE,SD=TRUE,cise = FALSE,alpha = 0.05,nboot = 100)
+
 #sample mean, standard deviation, skewness, kurtosis are provided to compared,
 #the standard deviations of the underlying distribution can be used to estimate the standard error
 #, for example, sdrkurt is ~90, a rough estimation of SE is 90/sqrt(5400)=1.224745 
 #but this is just rough estimation, since the influence functions haven't been derived yet. 
 
-NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=TRUE,SD=FALSE)
-
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",SE=TRUE,SD=FALSE,cise = FALSE,alpha = 0.05,nboot = 100)
 #the standard error and confidential interval of robust/quantile mean can also be estimated based on bootstrap
 
 rqmean(x, interval=9,fast=TRUE,batch=1000,sorted=FALSE,drm=0.3665,dqm=0.82224,cise = TRUE,alpha = 0.05,nboot = 1000)
 #similar approach can be applied to all NRSs, but the challenge is the computational time (just 100 nboot takes ~10 mins)
 
-NRSsci(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",alpha=0.05,nboot=100)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 #comparing the above results implies that the rough estimation is generally well (the average deviation is ~30%)
-
 
 
 x<-rgamma(5400,4,1)

@@ -1,6 +1,7 @@
 
 
 
+
 #because I combined all estimators into one function, there might be errors when running several functions in a time and these are not bugs,
 #but because R is prone to produce errors for such a large function (I haven't found anything wrong), 
 #Run one function one time. If there is an error, try to restart and then it will be fixed.
@@ -755,6 +756,7 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,st
 #while accurately estimating population kurtosis is hard, find a rough range and choose the right standard should be easy in practice, 
 #also, if the quantile kurtosis is less than 5, highly indicating the need to change to rayleigh
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="rayleigh",SE=TRUE,SD=FALSE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
 
 x<-rrayleigh(n=5400, scale = 1) 
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=TRUE,SD=FALSE)
@@ -806,6 +808,8 @@ x<-c(VGAM::rpareto(5400, scale  = 1, shape=2+a/100))
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="exponential",SE=TRUE,SD=FALSE)
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=FALSE,standarddistribution="rayleigh",SE=TRUE,SD=FALSE)
 
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE,standarddistribution="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 
 #for more tests, use the codes in consistency.R
+

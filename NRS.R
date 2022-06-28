@@ -1216,7 +1216,7 @@ x<-c(rweibull(5400, shape=a/100, scale = 1))
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #the standard errors are lower, especially for robust moments and L-moments
-NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
 
 a=150
 x<-c(rgamma(5400, shape=a/100, rate = 1))

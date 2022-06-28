@@ -672,7 +672,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,st
         l4=c(bootlist17[low],bootlist17[up]),rl4=c(bootlist18[low],bootlist18[up]),ql4=c(bootlist19[low],bootlist19[up])
         ,
         
-        kurt=c(bootlist20[low],bootlist20[up]),rkurt=c(bootlist21[low],bootlist21[up]),qkurt=c(bootlist22[low],bootlist2[up]))
+        kurt=c(bootlist20[low],bootlist20[up]),rkurt=c(bootlist21[low],bootlist21[up]),qkurt=c(bootlist22[low],bootlist22[up]))
   
   se<-c(mean=sd(bootlist1),etm=sd(bootlist2),rm=sd(bootlist3),qm=sd(bootlist4),
         l2=sd(bootlist5),rl2=sd(bootlist6),ql2=sd(bootlist7),
@@ -1059,7 +1059,7 @@ NRSscimulticore<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample
         l4=c(bootlist17[low],bootlist17[up]),rl4=c(bootlist18[low],bootlist18[up]),ql4=c(bootlist19[low],bootlist19[up])
         ,
         
-        kurt=c(bootlist20[low],bootlist20[up]),rkurt=c(bootlist21[low],bootlist21[up]),qkurt=c(bootlist22[low],bootlist2[up]))
+        kurt=c(bootlist20[low],bootlist20[up]),rkurt=c(bootlist21[low],bootlist21[up]),qkurt=c(bootlist22[low],bootlist22[up]))
   
   se<-c(mean=sd(bootlist1),etm=sd(bootlist2),rm=sd(bootlist3),qm=sd(bootlist4),
         l2=sd(bootlist5),rl2=sd(bootlist6),ql2=sd(bootlist7),

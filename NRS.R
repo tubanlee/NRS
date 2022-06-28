@@ -1109,7 +1109,7 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 #comparing the above results implies that the rough estimation is generally well (the average deviation is ~30%)
 
 
-#a solution is parallel computing (takes 1 min with 12 cores, but unavailable in some types of computers)
+#a solution is parallel computing (takes 1 min with 12 cores (a typical PC), but unavailable for some types of computers)
 library(foreach)
 library(doParallel)
 numCores <- detectCores()
@@ -1136,8 +1136,6 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
-
-NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
 
 
 x<-rrayleigh(n=5400, scale = 1) 
@@ -1199,7 +1197,7 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #the standard errors are lower, especially for robust moments and L-moments
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
-
+#this is non-parallel, can be deleted
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 a=100

@@ -2,6 +2,7 @@
 
 
 
+
 #because I combined all estimators into one function, there might be errors when running several functions in a time and these are not bugs,
 #but because R is prone to produce errors for such a large function (I haven't found anything wrong), 
 #Run one function one time. If there is an error, try to restart and then it will be fixed.
@@ -1177,6 +1178,16 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
 
+
+library(VGAM)
+x<-c(rlaplace(5400, location = 0, scale = 1))
+
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
+
+
+
 #NRSs have excellent performance even for heavy tailed distributions. 
 #Even the kurtosis is extreme or infinite, while the consistency is poor, it is still better than all current robust statistics.
 
@@ -1191,5 +1202,28 @@ NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,stan
 
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
+a=100
+x<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
+
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
+#the standard errors are lower, especially for robust moments and L-moments
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
+
+a=150
+x<-c(rweibull(5400, shape=a/100, scale = 1))
+
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
+#the standard errors are lower, especially for robust moments and L-moments
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
+
+a=150
+x<-c(rgamma(5400, shape=a/100, rate = 1))
+
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
+#the standard errors are lower, especially for robust moments and L-moments
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
 
 #for more tests, use the codes in consistency.R

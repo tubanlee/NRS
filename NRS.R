@@ -1,8 +1,5 @@
 
 
-
-
-
 #because I combined all estimators into one function, there might be errors when running several functions in a time and these are not bugs,
 #but because R is prone to produce errors for such a large function (I haven't found anything wrong), 
 #Run one function one time. If there is an error, try to restart and then it will be fixed.
@@ -389,13 +386,19 @@ rqfmci<-function(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,dlr
   )
   return(result)
 }
-
-rrayleigh<-function (n, scale = 1) {
+rlaplace<-function (n, location,scale) {
+  location <- rep_len(location, n)
+  scale <- rep_len(scale, n)
+  sample1 <- runif(n)
+  location - sign(sample1 - 0.5) * scale * (log(2) + ifelse(sample1 < 0.5, log(sample1), log1p(-sample1)))
+  
+}
+rrayleigh<-function (n, scale) {
   sample1 <- scale * sqrt(-2 * log(runif(n)))
   sample1[scale <= 0] <- NaN
   sample1
 }
-rpareto<-function (n, scale = 1, shape) {
+rpareto<-function (n, scale, shape) {
   sample1 <- scale/runif(n)^(1/shape)
   sample1[scale <= 0] <- NaN
   sample1[shape <= 0] <- NaN
@@ -1109,7 +1112,7 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 #comparing the above results implies that the rough estimation is generally well (the average deviation is ~30%)
 
 
-#a solution is parallel computing (takes 1 min with 12 cores (a typical PC), but unavailable for some types of computers)
+#a solution is parallel computing (takes 1 min with 12 cores, but unavailable in some types of computers)
 library(foreach)
 library(doParallel)
 numCores <- detectCores()
@@ -1136,6 +1139,8 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
+
+NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
 
 
 x<-rrayleigh(n=5400, scale = 1) 
@@ -1177,13 +1182,10 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayle
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
 
 
-library(VGAM)
-x<-c(rlaplace(5400, location = 0, scale = 1))
-
+x<-c(rlaplace(n=5400, location = 0, scale = 1))
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
-
 
 
 #NRSs have excellent performance even for heavy tailed distributions. 
@@ -1197,7 +1199,7 @@ NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="expon
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #the standard errors are lower, especially for robust moments and L-moments
 NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
-#this is non-parallel, can be deleted
+
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 a=100
@@ -1214,7 +1216,7 @@ x<-c(rweibull(5400, shape=a/100, scale = 1))
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",SE=TRUE,SD=FALSE)
 NRSs(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",SE=TRUE,SD=FALSE)
 #the standard errors are lower, especially for robust moments and L-moments
-NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="rayleigh",alpha = 0.05,nboot = 100)
+NRSscimulticore(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,standist="exponential",alpha = 0.05,nboot = 100)
 
 a=150
 x<-c(rgamma(5400, shape=a/100, rate = 1))

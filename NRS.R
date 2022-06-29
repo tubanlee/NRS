@@ -1687,7 +1687,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 xexp<-rexp(5400,1.1)
 yexp<-rexp(5400,1)
 
-#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
+#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000. if 54000, takes around 3 mins.
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xexp<-c(rexp(5380,1),rnorm(20,10))

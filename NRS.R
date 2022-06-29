@@ -1696,6 +1696,13 @@ yexp<-rexp(5400,1)
 #test of outliers
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
+xexp<-c(rexp(5400,1))
+yexp<-rexp(5400,1)
+
+#test of null hypothesis
+pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
 library(lmom)
 
 

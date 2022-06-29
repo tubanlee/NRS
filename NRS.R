@@ -2287,7 +2287,7 @@ rqmean(x=xexp,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = TR
 
 #the null values are the corresponding population parameters
 
-
+#the P value is two-side
 
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
 
@@ -2298,7 +2298,6 @@ yexp<-rexp(5400,1)
 
 #to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
 
-#the results of empirial bootstrap and percentile bootstrap are very different (the latter is very controversial)
 ebh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)

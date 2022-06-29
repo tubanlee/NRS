@@ -2302,7 +2302,7 @@ ebh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54
 #percentile bootstrap hypothesis test (very controversial, but the results are similar.)
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
-xexp<-c(rexp(5300,1),rnorm(100,10))
+xexp<-c(rexp(5350,1),rnorm(50,30))
 yexp<-rexp(5400,1)
 
 #test of outliers 

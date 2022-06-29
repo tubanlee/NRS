@@ -2297,9 +2297,9 @@ xexp<-rexp(5400,1.1)
 yexp<-rexp(5400,1)
 
 #to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
-
+#empirical bootstrap hypothesis test
 ebh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
+#percentile bootstrap hypothesis test (very controversial, but the results are similar.)
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xexp<-c(rexp(5380,1),rnorm(20,10))

@@ -2302,10 +2302,10 @@ ebh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54
 #percentile bootstrap hypothesis test (very controversial, but the results are similar.)
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
-xexp<-c(rexp(5380,1),rnorm(20,10))
+xexp<-c(rexp(5250,1),rnorm(150,10))
 yexp<-rexp(5400,1)
 
-#test of outliers
+#test of outliers (maximum robustness of kurtosis is 1/36
 ebh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)

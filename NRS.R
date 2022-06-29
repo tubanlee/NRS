@@ -1703,6 +1703,9 @@ yexp<-rexp(5400,1)
 pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 
+#It should be noticed that, the percentile bootstrap method is appealing. John Rice, Mathematical Statistics and Data Analysis, 2nd edition, p. 272
+#so this method should be further testing....
+
 library(lmom)
 
 

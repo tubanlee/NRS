@@ -1705,7 +1705,6 @@ pbh2parallel(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54
 
 #It should be noticed that, the percentile bootstrap method is appealing. John Rice, Mathematical Statistics and Data Analysis, 2nd edition, p. 272
 #so this method should be further testing and not included in the main manuscript....
-#I am wondering the statistical power comparing to other robust methods, because NRSs are designed for consistency, not high-statistical power (I took standard error into considerations, but not the focus).
 
 
 library(lmom)

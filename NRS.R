@@ -1,6 +1,5 @@
 
 
-
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -1118,19 +1117,16 @@ rqmean(x=xexp,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = TR
 
 #the null values are the corresponding population parameters
 
-#Surprisingly, the results show that NRSs "often" have better power than sample statistics
+#Surprisingly, the results show that NRSs "often" have better power than sample moments.
 
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,multicore=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
 
+library(lmom)
 
-xgamma<-rgamma(5400,5,1)
-#the population mean is 5
-#the population variance is 5
-#the population L2-moment is 1.230469 
-#the population skewness is 0.8944272
-#the population L-skewness is 0.1808755
-#the population kurtosis is 4.2
-#the population L-kurtosis is 0.1592059
+
+a=500
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
 #A rule of thumb for desired consistency performance (all four moments > 90%) is that 
 #the kurtosis of the underlying distribution should be within [1/2,2] times that of the standard distribution used to calibrate the d values. 
@@ -1140,9 +1136,17 @@ NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 #Also, if the quantile kurtosis is less than 4.7, it highly indicates the need to change to Rayleigh.
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 #multicore is default for confidential interval.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,multicore=TRUE,alpha = 0.05,nboot=100,null_mean=5,null_sd=sqrt(5),null_skew=0.8944272,null_kurt=4.2,null_l2=1.230469,null_l3=0.1808755,null_l4=0.1592059)
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,multicore=TRUE,alpha = 0.05,nboot=100,null_mean=5,null_sd=sqrt(5),null_skew=0.8944272,null_kurt=4.2,null_l2=1.230469,null_l3=0.1808755,null_l4=0.1592059)
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+
+a=150
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+#even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
 
 
@@ -1178,61 +1182,58 @@ NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="
 NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,multicore=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
 
 
-x<-c(rnorm(5400))
+xnorm<-c(rnorm(5400))
 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 
-#notice, the following null value is that of exponential distributions, and haven't been replaced, I am doing that.
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
+xlogis<-c(rlogis(5400, location = 0, scale = 1))
 
-x<-c(rlogis(5400, location = 0, scale = 1))
-
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
 
 
-x<-c(rlaplace(n=5400, location = 0, scale = 1))
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100)
+xlaplace<-c(rlaplace(n=5400, location = 0, scale = 1))
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
 
 
 #NRSs have excellent performance even for heavy tailed distributions.
 
 #two performance criteria, consistency (or sensitive) and standard error
-
+library(lmom)
 a=500
-x<-c(rpareto(5400, scale  = 1, shape=2+a/100))
+xpareto<-c(rpareto(5400, scale  = 1, shape=2+a/100))
+targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)
 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 #the standard errors are lower, especially for robust moments and L-moments
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
 
 a=100
-x<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
+xlnorm<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
+targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 #the standard errors are lower, especially for robust moments and L-moments
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
 
 a=150
-x<-c(rweibull(5400, shape=a/100, scale = 1))
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+library(lmom)
+targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
-a=150
-x<-c(rgamma(5400, shape=a/100, rate = 1))
-
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-#even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
-NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100)
 
 #for more tests, use the codes in consistency.R
+
+

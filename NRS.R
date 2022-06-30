@@ -2409,7 +2409,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 xexp<-c(rexp(5400,2))
 yexp<-rexp(5400,1)
 effectsizeNRSs(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
-#but this effectsize is just the unstandardized moments
+#but this effectsize is just the unstandardized moments, the standarized version is deriving.
 
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.

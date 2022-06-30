@@ -2312,16 +2312,16 @@ effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times ,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times ,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm)
   
-  firsteffectsize<-c(mean=(mmmx[1]-mmmy[1])/(((sqrt((rqscalex[5]))+sqrt((rqscaley[5])))^0.5)*0.5),etm=(mmmx[2]-mmmy[2])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5),rm=(mmmx[3]-mmmy[3])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5),qm=(mmmx[4]-mmmy[4])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5))
+  firsteffectsize<-c(mean=(mmmx[1]-mmmy[1])/(((((rqscalex[5]))^2+((rqscaley[5]))^2)^0.5)*0.5),etm=(mmmx[2]-mmmy[2])/(((((rqscalex[5])^2)+((rqscaley[5])^2))^0.5)*0.5),rm=(mmmx[3]-mmmy[3])/(((((rqscaley[5])^2)+((rqscaley[5])^2))^0.5)*0.5),qm=(mmmx[4]-mmmy[4])/(((((rqscaley[5])^2)+((rqscaley[5])^2))^0.5)*0.5))
   
-  secondeffectsize<-c(l2=(rqscalex[1]-rqscaley[1])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),rl2=(rqscalex[2]-rqscaley[2])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),ql2=(rqscalex[3]-rqscaley[3])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),
-                      var=(rqscalex[5]-rqscaley[5])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),rvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),qvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5)
+  secondeffectsize<-c(l2=(rqscalex[1]-rqscaley[1])/(((((rqscalex[4]))^2+((rqscaley[4]))^2)^0.5)*0.5),rl2=(rqscalex[2]-rqscaley[2])/(((((rqscalex[4])^2)+((rqscaley[4])^2))^0.5)*0.5),ql2=(rqscalex[3]-rqscaley[3])/(((((rqscalex[4])^2)+((rqscaley[4])^2))^0.5)*0.5),
+                      var=(rqscalex[5]-rqscaley[5])/(((((rqscalex[8]))+((rqscaley[8]))^2)^0.5)*0.5),rvar=(rqscalex[6]-rqscaley[6])/(((((rqscalex[8])^2)+((rqscaley[8])^2))^0.5)*0.5),qvar=(rqscalex[6]-rqscaley[6])/(((((rqscalex[8])^2)+((rqscaley[8])^2))^0.5)*0.5)
                       )
-  thirdeffectsize<-c(l3=(rqtmx[1]-rqtmy[1])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),rl3=(rqtmx[2]-rqtmy[2])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),ql3=(rqtmx[3]-rqtmy[3])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),
-                      tm=(rqtmx[5]-rqtmy[5])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),rtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),qtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5)
+  thirdeffectsize<-c(l3=(rqtmx[1]-rqtmy[1])/(((((rqtmx[4]))^2+((rqtmy[4])^2))^0.5)*0.5),rl3=(rqtmx[2]-rqtmy[2])/(((((rqtmx[4])^2)+((rqtmy[4])^2))^0.5)*0.5),ql3=(rqtmx[3]-rqtmy[3])/(((((rqtmx[4])^2)+((rqtmy[4])^2))^0.5)*0.5),
+                      tm=(rqtmx[5]-rqtmy[5])/(((((rqtmx[8]))^2+((rqtmy[8])^2))^0.5)*0.5),rtm=(rqtmx[6]-rqtmy[6])/(((((rqtmx[8])^2)+((rqtmy[8])^2))^0.5)*0.5),qtm=(rqtmx[6]-rqtmy[6])/(((((rqtmx[8])^2)+((rqtmy[8])^2))^0.5)*0.5)
   )
-  fourtheffectsize<-c(l4=(rqfmx[1]-rqfmy[1])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),rl4=(rqfmx[2]-rqfmy[2])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),ql4=(rqfmx[3]-rqfmy[3])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),
-                     fm=(rqfmx[5]-rqfmy[5])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5),rfm=(rqfmx[6]-rqfmy[6])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5),qfm=(rqfmx[6]-rqfmy[6])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5)
+  fourtheffectsize<-c(l4=(rqfmx[1]-rqfmy[1])/(((((rqfmx[4]))^2+((rqfmy[4])^2))^0.5)*0.5),rl4=(rqfmx[2]-rqfmy[2])/(((((rqfmx[4])^2)+((rqfmy[4])^2))^0.5)*0.5),ql4=(rqfmx[3]-rqfmy[3])/(((((rqfmx[4])^2)+((rqfmy[4])^2))^0.5)*0.5),
+                     fm=(rqfmx[5]-rqfmy[5])/(((((rqfmx[8]))^2+((rqfmy[8])^2))^0.5)*0.5),rfm=(rqfmx[6]-rqfmy[6])/(((((rqfmx[8])^2)+((rqfmy[8])^2))^0.5)*0.5),qfm=(rqfmx[6]-rqfmy[6])/(((((rqfmx[8])^2)+((rqfmy[8])^2))^0.5)*0.5)
   )
   
   firstx<-c(mean=mmmx[1],etm=mmmx[2],rm=mmmx[3],qm=mmmx[4])
@@ -2409,7 +2409,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 xexp<-c(rexp(5400,2))
 yexp<-rexp(5400,1)
 effectsizeNRSs(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
-#but this effectsize is just the unstandardized moments, the standarized version is deriving.
+#but this effectsize is just the unstandardized moments
 
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.

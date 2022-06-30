@@ -2317,7 +2317,7 @@ effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =
   secondeffectsize<-c(l2=(rqscalex[1]-rqscaley[1])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),rl2=(rqscalex[2]-rqscaley[2])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),ql2=(rqscalex[3]-rqscaley[3])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),
                       var=(rqscalex[5]-rqscaley[5])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),rvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),qvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5)
                       )
-  thirdeffectsize<-c(l3=(rqtmx[1]-rqtmy[1])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),rl3=(rqtmy[2]-rqtmy[2])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),ql3=(rqtmx[3]-rqtmy[3])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),
+  thirdeffectsize<-c(l3=(rqtmx[1]-rqtmy[1])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),rl3=(rqtmx[2]-rqtmy[2])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),ql3=(rqtmx[3]-rqtmy[3])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),
                       tm=(rqtmx[5]-rqtmy[5])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),rtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),qtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5)
   )
   fourtheffectsize<-c(l4=(rqfmx[1]-rqfmy[1])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),rl4=(rqfmx[2]-rqfmy[2])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),ql4=(rqfmx[3]-rqfmy[3])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),
@@ -2409,6 +2409,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 xexp<-c(rexp(5400,2))
 yexp<-rexp(5400,1)
 effectsizeNRSs(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
+#but this effectsize is just the unstandardized moments
 
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.
@@ -2576,6 +2577,7 @@ targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
+
 
 
 #for more tests, use the codes in consistency.R

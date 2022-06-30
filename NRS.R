@@ -1,4 +1,5 @@
 
+
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -2311,6 +2312,18 @@ effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times ,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times ,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm)
   
+  firsteffectsize<-c(mean=(mmmx[1]-mmmy[1])/(((sqrt((rqscalex[5]))+sqrt((rqscaley[5])))^0.5)*0.5),etm=(mmmx[2]-mmmy[2])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5),rm=(mmmx[3]-mmmy[3])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5),qm=(mmmx[4]-mmmy[4])/(((sqrt((rqscaley[5]))+sqrt((rqscaley[5])))^0.5)*0.5))
+  
+  secondeffectsize<-c(l2=(rqscalex[1]-rqscaley[1])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),rl2=(rqscalex[2]-rqscaley[2])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),ql2=(rqscalex[3]-rqscaley[3])/(((sqrt((rqscalex[4]))+sqrt((rqscaley[4])))^0.5)*0.5),
+                      var=(rqscalex[5]-rqscaley[5])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),rvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5),qvar=(rqscalex[6]-rqscaley[6])/(((sqrt((rqscalex[8]))+sqrt((rqscaley[8])))^0.5)*0.5)
+                      )
+  thirdeffectsize<-c(l3=(rqtmx[1]-rqtmy[1])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),rl3=(rqtmy[2]-rqtmy[2])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),ql3=(rqtmx[3]-rqtmy[3])/(((sqrt((rqtmx[4]))+sqrt((rqtmy[4])))^0.5)*0.5),
+                      tm=(rqtmx[5]-rqtmy[5])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),rtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5),qtm=(rqtmx[6]-rqtmy[6])/(((sqrt((rqtmx[8]))+sqrt((rqtmy[8])))^0.5)*0.5)
+  )
+  fourtheffectsize<-c(l4=(rqfmx[1]-rqfmy[1])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),rl4=(rqfmx[2]-rqfmy[2])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),ql4=(rqfmx[3]-rqfmy[3])/(((sqrt((rqfmx[4]))+sqrt((rqfmy[4])))^0.5)*0.5),
+                     fm=(rqfmx[5]-rqfmy[5])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5),rfm=(rqfmx[6]-rqfmy[6])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5),qfm=(rqfmx[6]-rqfmy[6])/(((sqrt((rqfmx[8]))+sqrt((rqfmy[8])))^0.5)*0.5)
+  )
+  
   firstx<-c(mean=mmmx[1],etm=mmmx[2],rm=mmmx[3],qm=mmmx[4])
   secondx<-c(l2=rqscalex[1],rl2=rqscalex[2],ql2=rqscalex[3],sdrql2=rqscalex[4],sd=sqrt(rqscalex[5]),
             rsd=sqrt(rqscalex[6]),qsd=sqrt(rqscalex[7]),sdrsd=sqrt(rqscalex[6])*(1/2)*(rqscalex[8]/rqscalex[6]),sdqsd=sqrt(rqscalex[7])*(1/2)*(rqscalex[8]/rqscalex[7])
@@ -2341,14 +2354,8 @@ effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =
              sdqkurt=((rqfmy[7])/((rqscaley[7])^(2)))*((rqfmy[8]/rqfmy[7])^2+((1/2)*(rqscaley[8]/rqscaley[7]))^2+((1/2)*(rqscaley[8]/rqscaley[7]))^2+((1/2)*(rqscaley[8]/rqscaley[6]))^2+((1/2)*(rqscaley[8]/rqscaley[7]))^2)^(1/2))
   
   
-  firsteffectsize<-c(mean=(firstx[1]-firsty[1])/(((sqrt((secondx[5]))+sqrt((secondy[5])))^0.5)*0.5),etm=(firstx[2]-firsty[2])/(((sqrt((secondx[5]))+sqrt((secondy[5])))^0.5)*0.5),rm=(firstx[3]-firsty[3])/(((sqrt((secondx[5]))+sqrt((secondy[5])))^0.5)*0.5),qm=(firstx[4]-firsty[4])/(((sqrt((secondx[5]))+sqrt((secondy[5])))^0.5)*0.5))
-  secondeffectsize<-c(l2=(secondx[1]-secondy[1])/(((sqrt((secondx[4]))+sqrt((secondy[4])))^0.5)*0.5),rl2=(secondx[2]-secondy[2])/(((sqrt((secondx[4]))+sqrt((secondy[4])))^0.5)*0.5),ql2=(secondx[3]-secondy[3])/(((sqrt((secondx[4]))+sqrt((secondy[4])))^0.5)*0.5),
-                      sd=(sqrt(secondx[5])-sqrt(secondy[5]))/(((sqrt(sqrt(rqscalex[5])*(1/2)*(rqscalex[8]/rqscalex[5]))+sqrt(sqrt(rqscaley[5])*(1/2)*(rqscaley[8]/rqscaley[5])))^0.5)*0.5),
-             rsd=(sqrt(secondx[6])-sqrt(secondy[6]))/(((sqrt(sqrt(rqscalex[6])*(1/2)*(rqscalex[8]/rqscalex[6]))+sqrt(sqrt(rqscaley[6])*(1/2)*(rqscaley[8]/rqscaley[6])))^0.5)*0.5)
-             ,qsd=(sqrt(secondx[7])-sqrt(secondy[7]))/(((sqrt(sqrt(rqscalex[7])*(1/2)*(rqscalex[8]/rqscalex[7]))+sqrt(sqrt(rqscaley[7])*(1/2)*(rqscaley[8]/rqscaley[7])))^0.5)*0.5)
-  )
   
-  all<-list(firsteffectsize=firsteffectsize,secondeffectsize=secondeffectsize,firstx=firstx,secondx=secondx,thirdx=thirdx,fourthx=fourthx,firsty=firsty,secondy=secondy,thirdy=thirdy,fourthy=fourthy)
+  all<-list(firsteffectsize=firsteffectsize,secondeffectsize=secondeffectsize,thirdeffectsize=thirdeffectsize,fourtheffectsize=fourtheffectsize,firstx=firstx,secondx=secondx,thirdx=thirdx,fourthx=fourthx,firsty=firsty,secondy=secondy,thirdy=thirdy,fourthy=fourthy)
   
   if((rqfm1[7])/((rqscale1[7])^(2))<4.7 & standist=="exponential"){
     print("The quantile kurtosis is lower than 4.7, it might be better to use the Rayleigh distribution as the standard distribution.")
@@ -2569,7 +2576,6 @@ targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
-
 
 
 #for more tests, use the codes in consistency.R

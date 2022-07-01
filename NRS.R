@@ -2880,8 +2880,7 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
 
 #robust regression test
 library(lmtest)
-
-
+#Gaussian outliers
 n<-5400
 y<-as.numeric(n)
 x<-as.numeric(n)
@@ -2901,6 +2900,48 @@ m1=lm(y~x)
 summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 
+#exponential outliers
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rexp(1,1)-1
+  x2 <- runif(1,200,201)
+  u <- runif(1)
+  k <- as.integer(u > 0.99) 
+  error[i] <- (1-k)* x1 +  k* x2 
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+
+m1=lm(y~x)
+summary(m1)
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+
+
+#Rayleigh outliers
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rRayleigh(1,1)-sqrt(pi/2)
+  x2 <- runif(1,200,201)
+  u <- runif(1)
+  k <- as.integer(u > 0.99) 
+  error[i] <- (1-k)* x1 +  k* x2 
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+
+m1=lm(y~x)
+summary(m1)
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+
+#the performance of rm and qm is not as good as etm
 
 
 #test

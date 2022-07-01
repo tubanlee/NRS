@@ -2951,7 +2951,7 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
   rownames(coef) <- c("mean", "etm", "rm", "qm")  
   coef
 }
-
+library(lmtest)
 #robust regression test
 #Gaussian outliers
 n<-5400
@@ -2968,7 +2968,8 @@ for (i in 1:n){
   y[i]<-10+2*x[i]+error[i]
 }
 hist(error)
-
+m1=lm(y~x)
+summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 twreg(x=x, y=y,iter = 200)
 
@@ -2988,7 +2989,8 @@ for (i in 1:n){
   y[i]<-10+2*x[i]+error[i]
 }
 hist(error)
-
+m1=lm(y~x)
+summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 twreg(x=x, y=y,iter = 200)
 
@@ -3007,7 +3009,8 @@ for (i in 1:n){
   y[i]<-10+2*x[i]+error[i]
 }
 hist(error)
-
+m1=lm(y~x)
+summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm

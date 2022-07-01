@@ -79,6 +79,33 @@ etm<-function (x,interval=9,fast=TRUE,batch="auto"){
     Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
     return(Groupmean)}
 }
+mmme<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,type=1){
+  sortedx<-sort(x,decreasing = FALSE,method ="radix")
+  etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
+  if(etm1[2]==Inf){
+    return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
+  }
+  mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+  mx2<-1/2
+  if (mx1>0.5){
+    quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+  }else{
+    quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+  }
+  upper1<-(1-1/interval)
+  lower1<-1/interval
+  if (!is.na(quatiletarget) & quatiletarget>(upper1)){
+    print(paste("Warning: the percentile exceeds ",as.character(upper1*interval),"/",as.character(interval),", the robustness shrinks."))
+  }else if(!is.na(quatiletarget) & quatiletarget<(lower1)){
+    print(paste("Warning: the percentile exceeds ",as.character(lower1*interval),"/",as.character(interval),", the robustness shrinks."))
+  }
+  qm1<-quantile(sortedx,quatiletarget)
+  rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
+  names(rm1)<-NULL
+  output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
+  return(output1[type])
+}
+
 mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
@@ -2186,7 +2213,7 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
   }
@@ -2194,7 +2221,7 @@ NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standi
     return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
   } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
   }
-  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist))
+  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,sd=sd))
 }}
 
 htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
@@ -2764,10 +2791,6 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
                skew=sd(bootlist17a),etskew=sd(bootlist18a),
                rskew=sd(bootlist19a),qskew=sd(bootlist20a)),
              c(l4=sd(bootlist21a),etl4=sd(bootlist22a),rl4=sd(bootlist23a),ql4=sd(bootlist24a),kurt=sd(bootlist25a),etkurt=sd(bootlist26a),rkurt=sd(bootlist27a),qkurt=sd(bootlist28a)))
-  
-  
-  
-  
   all<-list(ci_diff=ci_diff,se=se,estimate=estimate)
   
   return(all)
@@ -2779,6 +2802,104 @@ effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE
   } 
   else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist))
 }}
+rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
+  matrix1 <- cbind(x, y)
+  matrix1 <- na.omit(matrix1)
+  x <- matrix1[, 1]
+  y <- matrix1[, 2]
+  productxy<-x*y
+  productx2<-x*x
+  producty2<-y*y
+  if(standist=="exponential"|| standist=="exp"){
+    drm=0.3665
+    dqm=0.82224
+
+  }else if (standist=="Rayleigh"|| standist=="Ray"){
+    drm=0.4025526
+    dqm=0.4452798
+  }
+  meanx <- rqmean(x,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+  meany <- rqmean(y,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+  meanxy <- rqmean(productxy,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+  meanx2 <- rqmean(productx2,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+  meany2 <- rqmean(producty2,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+  mean1<-(meanxy[1]-meanx[1]*meany[1])
+  etm1<-(meanxy[2]-meanx[2]*meany[2])
+  rm1<-(meanxy[3]-meanx[3]*meany[3])
+  qm1<-(meanxy[4]-meanx[4]*meany[4])
+  rqcov <- c(mean1=mean1,etm1=etm1,rm1=rm1,qm1=qm1)
+  return(rqcov)
+}
+rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
+  if(standist=="exponential"|| standist=="exp"){
+    drm=0.3665
+    dqm=0.82224
+    
+  }else if (standist=="Rayleigh"|| standist=="Ray"){
+    drm=0.4025526
+    dqm=0.4452798
+  }
+  x <- as.matrix(x)
+  xy <- cbind(x, y)
+  xy <- na.omit(xy)
+  ncolx<-ncol(x)
+  ncolx1<-ncol(x)+1
+  x <- xy[, 1:ncolx]
+  y <- xy[, ncolx1]
+  x = as.matrix(x)
+  ma <- matrix(0, ncol(x), 1)
+  m <- matrix(0, ncol(x), ncol(x))
+  coef<-c()
+  for (type in (1:4)){
+    mval1 <- apply(x, 2, mmme,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type)
+    for (i in 1:ncol(x)) {
+      ma[i, 1] <- rqcov(x=x[, i],y=y,interval=interval,fast=fast,batch=batch,standist=standist)[type]
+      for (j in 1:ncol(x)) m[i, j] <-rqcov(x=x[, i],y=x[, j],interval=interval,fast=fast,batch=batch,standist=standist)[type]
+    }
+    slope <- solve(m, ma)
+    inter <- mmme(x=y,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type) - sum(slope %*% mval1)
+    for (it in 1:iter) {
+      res <- y - x %*% slope - inter
+      for (i in 1:ncol(x)) ma[i, 1] <- rqcov(x=x[, i],y=res,interval=interval,fast=fast,batch=batch,standist=standist)[type]
+      sadd <- solve(m, ma)
+      inadd <- mmme(x=res,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type) - sum(sadd %*% mval1)
+      if (max(abs(sadd), abs(inadd)) < 1e-04) 
+        break
+      slope <- slope + sadd
+      inter <- inter + inadd
+    }
+    if (max(abs(sadd), abs(inadd)) >= 1e-04) {
+      namestype<-c("mean", "etm", "rm", "qm")  
+      print(paste(namestype[type],"failed to converge within", iter, "iterations"))}
+    all1<-(c(Intercept=inter, slope=slope))
+    coef<-rbind(coef,all1)
+  }
+  rownames(coef) <- c("mean", "etm", "rm", "qm")  
+  coef
+}
+
+#robust regression test
+library(lmtest)
+
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rnorm(1,0,1)
+  x2 <- runif(1,200,201)
+  u <- runif(1)
+  k <- as.integer(u > 0.99) #vector of 0?s and 1?s
+  error[i] <- (1-k)* x1 +  k* x2 #the mixture
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+
+m1=lm(y~x)
+summary(m1)
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+
 
 #test
 xexp<-rexp(5400,1)
@@ -2797,12 +2918,12 @@ xexp<-rexp(5400,1)
 #Bickel, P. J., & Doksum, K. A. (2015). Mathematical statistics: basic ideas and selected topics, volumes I-II package. Chapman and Hall/CRC.
 #Rice, J. A. (2006). Mathematical statistics and data analysis. Cengage Learning.
 
-#the asymptotic validity of bootstrap of U-statistics, although haven't been proven yet, is verified by Monta Carlo study and suggested by 
+#the asymptotic validity of bootstrap of U-statistics, although haven't been proven yet, is verified by Monta Carlo study and highly suggested by 
 #Bickel, P. J., & Freedman, D. A. (1981). Some asymptotic theory for the bootstrap. The annals of statistics, 9(6), 1196-1217.
 #Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 #Arguments
 #x:a numeric vector
 #interval: The b value in equinterval trimmed mean and complement trimmed mean, notifying that the breakdown points for higher order moments/L-moments are b*k, not b.
@@ -2817,9 +2938,9 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 #nboot: the number of bootstrap samples for confidence interval computation.
 
 #To make comparisons easier, sample standardized moments and scaled L-moments are provided (this moments are estimated same based on U-statistics, not the formula approach
-#because if direct compared sample moments with NRSs, the variance from bootstrap also need to take into consideration.
+#because if direct compare sample moments with NRSs, the variance from bootstrap also need to take into consideration.
 
-#also, ETM-based moments and L-moments are provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
+#ETM-based moments and L-moments are also provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
 
 #The standard deviations of the distributions of U-statistic can be used to estimate the consistency percentage.
 

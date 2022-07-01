@@ -2881,6 +2881,7 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
 #robust regression test
 library(lmtest)
 
+
 n<-5400
 y<-as.numeric(n)
 x<-as.numeric(n)
@@ -2889,8 +2890,8 @@ for (i in 1:n){
   x1 <- rnorm(1,0,1)
   x2 <- runif(1,200,201)
   u <- runif(1)
-  k <- as.integer(u > 0.99) #vector of 0?s and 1?s
-  error[i] <- (1-k)* x1 +  k* x2 #the mixture
+  k <- as.integer(u > 0.99) 
+  error[i] <- (1-k)* x1 +  k* x2 
   x[i]<-runif(1,0,10)
   y[i]<-10+2*x[i]+error[i]
 }
@@ -2899,6 +2900,7 @@ hist(error)
 m1=lm(y~x)
 summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+
 
 
 #test

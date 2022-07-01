@@ -7,10 +7,6 @@
 #Run one function each time. If there is an error, try to restart, and then it will be fixed. 
 #It will be completely fixed in the future by rewriting the code in C++.
 
-#require library "Lmoments" to compare the consistencies and standard errors of NRSs.
-if (!require("Lmoments")) install.packages("Lmoments")
-library(Lmoments)
-
 #require foreach and doparallel for parallel processing of bootstrap (not available for some types of computers)
 if (!require("foreach")) install.packages("foreach")
 library(foreach)
@@ -381,7 +377,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
                rkurtsd=fourth[7]*((rqfm1[15]/rqfm1[7])^2+(((((rqscale1[7])^(2))*(2)*(rqscale1[15]/rqscale1[7]))/((rqscale1[7])^(2))))^2)^(1/2),
                qkurtsd=fourth[8]*((rqfm1[16]/rqfm1[8])^2+(((((rqscale1[8])^(2))*(2)*(rqscale1[16]/rqscale1[8]))/((rqscale1[8])^(2))))^2)^(1/2))
                
-    allsd<-list(firstsd=firstsd,secondsd=secondsd,thirdsd=thirdsd,fourth=fourthsd)
+    allsd<-list(firstsd=firstsd,secondsd=secondsd,thirdsd=thirdsd,fourthsd=fourthsd)
     
     all<-c(allmo,allsd)
   }else{
@@ -1003,9 +999,6 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-
-
-
 pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
@@ -1470,7 +1463,6 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootlist54<-sort(bootlist54)
   bootlist55<-sort(bootlist55)
   bootlist56<-sort(bootlist56)
-  
 
   low<-round((alpha/2)*nboot)
   up<-nboot-low
@@ -1992,7 +1984,6 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootlist27a<-sort(bootlist27-bootlist55)
   bootlist28a<-sort(bootlist28-bootlist56)
   
-  
   bootlist1<-sort(bootlist1)
   bootlist2<-sort(bootlist2)
   bootlist3<-sort(bootlist3)
@@ -2195,7 +2186,6 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-
 NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
@@ -2213,24 +2203,23 @@ htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,bat
   } 
   else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
 }}
-
-effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
+effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
   estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
   estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
-  firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))^0.5)*0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))^0.5)*0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))^0.5)*0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))^0.5)*0.5))
+  firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))*0.5)^0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))*0.5)^0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))*0.5)^0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))*0.5)^0.5))
   
-  secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))^0.5)*0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))^0.5)*0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))^0.5)*0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))^0.5)*0.5),
-                      sd=(estimatex$second[5]-estimatey$second[5])/(((((estimatex$second[5])^2)+((estimatey$second[5])^2))^0.5)*0.5),etsd=(estimatex$second[6]-estimatey$second[6])/(((((estimatex$second[6])^2)+((estimatey$second[6])^2))^0.5)*0.5),rsd=(estimatex$second[7]-estimatey$second[7])/(((((estimatex$second[7])^2)+((estimatey$second[7])^2))^0.5)*0.5),qsd=(estimatex$second[8]-estimatey$second[8])/(((((estimatex$second[8])^2)+((estimatey$second[8])^2))^0.5)*0.5)
-                      )
-  thirdeffectsize<-c(l3=(estimatex$third[1]-estimatey$third[1])/(((((estimatex$third[1])^2)+((estimatey$third[1])^2))^0.5)*0.5),etl3=(estimatex$third[2]-estimatey$third[2])/(((((estimatex$third[2])^2)+((estimatey$third[2])^2))^0.5)*0.5),rl3=(estimatex$third[3]-estimatey$third[3])/(((((estimatex$third[3])^2)+((estimatey$third[3])^2))^0.5)*0.5),ql3=(estimatex$third[4]-estimatey$third[4])/(((((estimatex$third[4])^2)+((estimatey$third[4])^2))^0.5)*0.5),
-                     skew=(estimatex$third[5]-estimatey$third[5])/(((((estimatex$third[5])^2)+((estimatey$third[5])^2))^0.5)*0.5),etskew=(estimatex$third[6]-estimatey$third[6])/(((((estimatex$third[6])^2)+((estimatey$third[6])^2))^0.5)*0.5),rskew=(estimatex$third[7]-estimatey$third[7])/(((((estimatex$third[7])^2)+((estimatey$third[7])^2))^0.5)*0.5),qskew=(estimatex$third[8]-estimatey$third[8])/(((((estimatex$third[8])^2)+((estimatey$third[8])^2))^0.5)*0.5)
+  secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))*0.5)^0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))*0.5)^0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))*0.5)^0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))*0.5)^0.5),
+                      sd=(estimatex$second[5]-estimatey$second[5])/(((((estimatex$second[5])^2)+((estimatey$second[5])^2))*0.5)^0.5),etsd=(estimatex$second[6]-estimatey$second[6])/(((((estimatex$second[6])^2)+((estimatey$second[6])^2))*0.5)^0.5),rsd=(estimatex$second[7]-estimatey$second[7])/(((((estimatex$second[7])^2)+((estimatey$second[7])^2))*0.5)^0.5),qsd=(estimatex$second[8]-estimatey$second[8])/(((((estimatex$second[8])^2)+((estimatey$second[8])^2))*0.5)^0.5)
   )
-  fourtheffectsize<-c(l4=(estimatex$fourth[1]-estimatey$fourth[1])/(((((estimatex$fourth[1])^2)+((estimatey$fourth[1])^2))^0.5)*0.5),etl4=(estimatex$fourth[2]-estimatey$fourth[2])/(((((estimatex$fourth[2])^2)+((estimatey$fourth[2])^2))^0.5)*0.5),rl4=(estimatex$fourth[3]-estimatey$fourth[3])/(((((estimatex$fourth[3])^2)+((estimatey$fourth[3])^2))^0.5)*0.5),ql4=(estimatex$fourth[4]-estimatey$fourth[4])/(((((estimatex$fourth[4])^2)+((estimatey$fourth[4])^2))^0.5)*0.5),
-                      kurt=(estimatex$fourth[5]-estimatey$fourth[5])/(((((estimatex$fourth[5])^2)+((estimatey$fourth[5])^2))^0.5)*0.5),etkurt=(estimatex$fourth[6]-estimatey$fourth[6])/(((((estimatex$fourth[6])^2)+((estimatey$fourth[6])^2))^0.5)*0.5),rkurt=(estimatex$fourth[7]-estimatey$fourth[7])/(((((estimatex$fourth[7])^2)+((estimatey$fourth[7])^2))^0.5)*0.5),qkurt=(estimatex$fourth[8]-estimatey$fourth[8])/(((((estimatex$fourth[8])^2)+((estimatey$fourth[8])^2))^0.5)*0.5)
+  thirdeffectsize<-c(l3=(estimatex$third[1]-estimatey$third[1])/(((((estimatex$third[1])^2)+((estimatey$third[1])^2))*0.5)^0.5),etl3=(estimatex$third[2]-estimatey$third[2])/(((((estimatex$third[2])^2)+((estimatey$third[2])^2))*0.5)^0.5),rl3=(estimatex$third[3]-estimatey$third[3])/(((((estimatex$third[3])^2)+((estimatey$third[3])^2))*0.5)^0.5),ql3=(estimatex$third[4]-estimatey$third[4])/(((((estimatex$third[4])^2)+((estimatey$third[4])^2))*0.5)^0.5),
+                     skew=(estimatex$third[5]-estimatey$third[5])/(((((estimatex$third[5])^2)+((estimatey$third[5])^2))*0.5)^0.5),etskew=(estimatex$third[6]-estimatey$third[6])/(((((estimatex$third[6])^2)+((estimatey$third[6])^2))*0.5)^0.5),rskew=(estimatex$third[7]-estimatey$third[7])/(((((estimatex$third[7])^2)+((estimatey$third[7])^2))*0.5)^0.5),qskew=(estimatex$third[8]-estimatey$third[8])/(((((estimatex$third[8])^2)+((estimatey$third[8])^2))*0.5)^0.5)
+  )
+  fourtheffectsize<-c(l4=(estimatex$fourth[1]-estimatey$fourth[1])/(((((estimatex$fourth[1])^2)+((estimatey$fourth[1])^2))*0.5)^0.5),etl4=(estimatex$fourth[2]-estimatey$fourth[2])/(((((estimatex$fourth[2])^2)+((estimatey$fourth[2])^2))*0.5)^0.5),rl4=(estimatex$fourth[3]-estimatey$fourth[3])/(((((estimatex$fourth[3])^2)+((estimatey$fourth[3])^2))*0.5)^0.5),ql4=(estimatex$fourth[4]-estimatey$fourth[4])/(((((estimatex$fourth[4])^2)+((estimatey$fourth[4])^2))*0.5)^0.5),
+                      kurt=(estimatex$fourth[5]-estimatey$fourth[5])/(((((estimatex$fourth[5])^2)+((estimatey$fourth[5])^2))*0.5)^0.5),etkurt=(estimatex$fourth[6]-estimatey$fourth[6])/(((((estimatex$fourth[6])^2)+((estimatey$fourth[6])^2))*0.5)^0.5),rkurt=(estimatex$fourth[7]-estimatey$fourth[7])/(((((estimatex$fourth[7])^2)+((estimatey$fourth[7])^2))*0.5)^0.5),qkurt=(estimatex$fourth[8]-estimatey$fourth[8])/(((((estimatex$fourth[8])^2)+((estimatey$fourth[8])^2))*0.5)^0.5)
   )
   
   all<-list(firsteffectsize=firsteffectsize,secondeffectsize=secondeffectsize,thirdeffectsize=thirdeffectsize,fourtheffectsize=fourtheffectsize,estimatex=estimatex,estimatey=estimatey)
@@ -2241,6 +2230,555 @@ effectsizeNRSs<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =
   return(all)
 }
 
+esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+  sortedx<-sort(x,decreasing = FALSE,method ="radix")
+  lengthx<-length(sortedx)
+  sortedy<-sort(y,decreasing = FALSE,method ="radix")
+  lengthy<-length(sortedy)
+  if(standist=="exponential" || standist=="exp"){
+    drm=0.3665
+    dqm=0.82224
+    
+    dlrmscale=0.3659
+    drmscale=0.7930
+    dlqmscale=0.8218
+    dqmscale=0.7825
+    
+    dlrmtm=0.1808
+    drmtm=1.7492
+    dlqmtm=1.1753
+    dqmtm=0.5715
+    
+    dlrmfm=-0.3542
+    drmfm=3.4560
+    dlqmfm=NaN
+    dqmfm=0.1246
+    
+  }else if (standist=="Rayleigh"|| standist=="Ray"){
+    drm=0.4025526
+    dqm=0.4452798
+    
+    dlrmscale=0.3095063
+    drmscale=0.3862421
+    dlqmscale=0.7055909
+    dqmscale=1.097661
+    
+    dlrmtm=0.1561753
+    drmtm=0.7855876
+    dlqmtm=0.8038741
+    dqmtm=0.9621217
+    
+    dlrmfm=0.2290345
+    drmfm=0.8758908
+    dlqmfm=0.6571804
+    dqmfm=0.7304692
+  }
+  datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
+  datay<-matrix(sample(y,size=length(y)*nboot,replace=TRUE),nrow=nboot)
+  
+  estimate0<-foreach (i=1:nboot, .combine=rbind) %dopar% {
+    greatest_common_divisor<- function(a, b) {
+      if (b == 0) a else Recall(b, a %% b)
+    }
+    least_common_multiple<-function(a,b){
+      g<-greatest_common_divisor(a, b)
+      return(a/g * b)
+    }
+    data_augmentation<-function (x,targetsize){
+      lengthx<-length(x)
+      meanx<-mean(x)
+      disn<-least_common_multiple(lengthx,targetsize)
+      orderedx<-sort(x,decreasing = FALSE,method ="radix")
+      disori<-rep(orderedx, each = disn/lengthx)
+      group<-rep(1:targetsize, each =disn/targetsize)
+      data_augmentationresult<-sapply(split(disori, group), mean)
+      return(data_augmentationresult)
+    }
+    #equinveral trimmed mean and complementary trimmed mean
+    etm<-function (x,interval=9,fast=TRUE,batch="auto"){
+      lengthx<-length(x)
+      if (batch=="auto" ){
+        batch<-ceiling(500000/lengthx)+1
+      }
+      Ksamples<-lengthx/interval
+      IntKsamples<-ceiling(Ksamples)
+      target1<-IntKsamples*interval
+      etmass<-function(x1,IntKsamples,target1,sorted=FALSE){
+        if(sorted){
+          x_ordered<-x1
+        }else{
+          x_ordered<-sort(x1,decreasing = FALSE,method ="radix")
+        }
+        group<-rep(rep(c(1,2,3), each=IntKsamples), times=target1/(IntKsamples*3))
+        group<-replace(group,(target1-IntKsamples+1):target1, 0)
+        group<-replace(group,1:(IntKsamples), 0)
+        group[group == 1] <- 3
+        Group1<-split(x_ordered, group)
+        Groupsum<-(sapply(Group1, sum))
+        partiallist<-(c(x_ordered[(IntKsamples+1):(2*(IntKsamples))],x_ordered[(target1-2*IntKsamples+1):(target1-IntKsamples)]))
+        Groupsumweight<-c(Groupsum[1],(sum(c(Groupsum[2],sum(partiallist)))),Groupsum[3])
+        etmlength<-length(which(group == 2))+length(partiallist)
+        ctmlength<-length(which(group == 3))
+        Groupmean<-c(Groupsumweight[1]/length(which(group == 0)),Groupsumweight[2]/etmlength,Groupsumweight[3]/ctmlength)
+        return(Groupmean)
+      }
+      if (Ksamples%%1!=0 ){
+        if (fast==TRUE & lengthx<10000){
+          x_ordered<-data_augmentation(x,target1)
+          Groupmean<-etmass(x_ordered,IntKsamples,target1,sorted=TRUE)
+          return(Groupmean)
+        }
+        else{
+          addedx<-matrix(sample(x,size=(target1-lengthx)*batch,replace=TRUE),nrow=batch)
+          xt<-t(as.data.frame(x))
+          xmatrix<-as.data.frame(lapply(xt, rep, batch))
+          allmatrix<-cbind(addedx,xmatrix)
+          batchresults<-apply(allmatrix,1,etmass,IntKsamples=IntKsamples,target1=target1,sorted=FALSE)
+          return(colMeans(t(batchresults)))}
+      }
+      else{
+        Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
+        return(Groupmean)}
+    }
+    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
+      if(etm1[2]==Inf){
+        return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
+      }
+      mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+      mx2<-1/2
+      if (mx1>0.5){
+        quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+      }else{
+        quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+      }
+      upper1<-(1-1/interval)
+      lower1<-1/interval
+      if (!is.na(quatiletarget) & quatiletarget>(upper1)){
+        print(paste("Warning: the percentile exceeds ",as.character(upper1*interval),"/",as.character(interval),", the robustness shrinks."))
+      }else if(!is.na(quatiletarget) & quatiletarget<(lower1)){
+        print(paste("Warning: the percentile exceeds ",as.character(lower1*interval),"/",as.character(interval),", the robustness shrinks."))
+      }
+      qm1<-quantile(sortedx,quatiletarget)
+      rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
+      names(rm1)<-NULL
+      output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
+      return(output1)
+    }
+
+    rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.3659,drm=0.7930,dlqm=0.8218,dqm=0.7825,sd=FALSE){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthn<-length(sortedx)
+      if (boot){
+        subtract<-t(replicate(times , sort(sample(sortedx, size = 2))))
+        getlm<-function(vector){ 
+          (vector[2]-vector[1])/2
+        }
+        dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+        getm<-function(vector){ 
+          ((vector[1]-vector[2])^2)/2
+        }
+        dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+      }else{
+        if (lengthn>5000){
+          print("Warning: The computational complexity is (e*n/2)^2, bootstrap is recommended")
+        }
+        subtract<-sapply(sortedx, "-", sortedx)
+        subtract[lower.tri(subtract)] <- NA
+        diag(subtract)=NA
+        subtract<-na.omit(as.vector(subtract))
+        dp<-subtract[subtract>0]
+        dp2lm<-dp/2
+        dp2m<-(dp^2)/2
+      }
+      lmo<-mmm(x=dp2lm,interval=interval,fast=fast,batch=batch,drm=dlrm,dqm=dlqm)
+      mo<-mmm(x=dp2m,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+      if(sd){
+        lmsd<-rqsd(x=dp2lm,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drm,dqm=drm)
+        msd<-rqsd(x=dp2m,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drm,dqm=drm)
+        allmo<-c(l2=lmo[1],etl2=lmo[2],rl2=lmo[3],ql2=lmo[4],
+                 var=mo[1],etvar=mo[2],rvar=mo[3],qvar=mo[4])
+        allsd<-c(l2sd=lmsd[1],etl2sd=lmsd[2],rl2sd=lmsd[3],ql2sd=lmsd[4],
+                 varsd=msd[1],etvarsd=msd[2],rvarsd=msd[3],qvarsd=msd[4])
+        all<-c(allmo,allsd)
+      }else{
+        all<-c(l2=lmo[1],etl2=lmo[2],rl2=lmo[3],ql2=lmo[4],
+               var=mo[1],etvar=mo[2],rvar=mo[3],qvar=mo[4])
+      }
+      return(all)
+    }
+    
+    rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0.7930,dqm=0.7825){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthn<-length(sortedx)
+      if (boot){
+        subtract<-t(replicate(times , sort(sample(sortedx, size = 2))))
+        getm<-function(vector){ 
+          ((vector[1]-vector[2])^2)/2
+        }
+        dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+      }else{
+        if (lengthn>5000){
+          print("Warning: The computational complexity is (e*n/2)^2, bootstrap is recommended")
+        }
+        subtract<-sapply(sortedx, "-", sortedx)
+        subtract[lower.tri(subtract)] <- NA
+        diag(subtract)=NA
+        subtract<-na.omit(as.vector(subtract))
+        dp<-subtract[subtract>0]
+        dp2m<-(dp^2)/2
+      }
+      mo<-mmm(x=dp2m,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+      all<-c(sd=sqrt(mo[1]),etsd=sqrt(mo[2]),rsd=sqrt(mo[3]),qsd=sqrt(mo[4]))
+      return(all)
+    }
+    
+    rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.1808,drm=1.7492,dlqm=1.1753,dqm=0.5715,sd=FALSE,drsd=0.7930,dqsd=0.7825){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthn<-length(sortedx)
+      if (boot){
+        subtract<-t(replicate(times , sort(sample(sortedx, size = 3))))
+      }else{
+        if (lengthn>300){
+          print("Warning: The computational complexity is n^3, bootstrap is recommended.")
+        }
+        subtract<-t(combn(sortedx, 3))
+      }
+      getlm<-function(vector){ 
+        (1/3)*(vector[3]-2*vector[2]+vector[1])
+      }
+      dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+      
+      getm<-function(vector){ 
+        ((1/6)*(2*vector[1]-vector[2]-vector[3])*(-1*vector[1]+2*vector[2]-vector[3])*(-vector[1]-vector[2]+2*vector[3]))
+      }
+      dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+      lmo<-mmm(x=dp2lm,interval=interval,fast=fast,batch=batch,drm=dlrm,dqm=dlqm)
+      mo<-mmm(x=dp2m,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+      if(sd){
+        lmsd<-rqsd(x=dp2lm,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drsd,dqm=dqsd)
+        msd<-rqsd(x=dp2m,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drsd,dqm=dqsd)
+        allmo<-c(l3=lmo[1],etl3=lmo[2],rl3=lmo[3],ql3=lmo[4],
+                 tm=mo[1],ettm=mo[2],rtm=mo[3],qtm=mo[4])
+        allsd<-c(l3sd=lmsd[1],etl3sd=lmsd[2],rl3sd=lmsd[3],ql3sd=lmsd[4],
+                 tmsd=msd[1],ettmsd=msd[2],rtmsd=msd[3],qtmsd=msd[4])
+        all<-c(allmo,allsd)
+      }else{
+        all<-c(l3=lmo[1],etl3=lmo[2],rl3=lmo[3],ql3=lmo[4],
+               tm=mo[1],ettm=mo[2],rtm=mo[3],qtm=mo[4])
+      }
+      return(all)
+    }
+    
+    rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=-0.3542,drm=3.4560,dlqm=NaN,dqm=0.1246,sd=FALSE,drsd=0.7930,dqsd=0.7825){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthn<-length(sortedx)
+      
+      getm<-function(vector){ 
+        resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
+                      4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
+                      vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
+                      6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
+                      vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
+                                   6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
+        return(resd)
+      }
+      if (boot){
+        subtract<-t(replicate(times , sort(sample(sortedx, size = 4))))
+      }else{
+        if (lengthn>100){
+          print("Warning: The computational complexity is n^4, bootstrap is recommended.")
+        }
+        subtract<-t(combn(sortedx, 4))
+      }
+      
+      dp2m<-apply(subtract,MARGIN=1,FUN=getm)
+      
+      getlm<-function(vector){ 
+        (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
+      }
+      
+      dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
+      
+      lmo<-mmm(x=dp2lm,interval=interval,fast=fast,batch=batch,drm=dlrm,dqm=dlqm)
+      mo<-mmm(x=dp2m,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+      if(sd){
+        lmsd<-rqsd(x=dp2lm,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drsd,dqm=dqsd)
+        msd<-rqsd(x=dp2m,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drsd,dqm=dqsd)
+        allmo<-c(l4=lmo[1],etl4=lmo[2],rl4=lmo[3],ql4=lmo[4],
+                 fm=mo[1],etfm=mo[2],rfm=mo[3],qfm=mo[4])
+        allsd<-c(l4sd=lmsd[1],etl4sd=lmsd[2],rl4sd=lmsd[3],ql4sd=lmsd[4],
+                 fmsd=msd[1],etfmsd=msd[2],rfmsd=msd[3],qfmsd=msd[4])
+        all<-c(allmo,allsd)
+      }else{
+        all<-c(l4=lmo[1],etl4=lmo[2],rl4=lmo[3],ql4=lmo[4],
+               fm=mo[1],etfm=mo[2],rfm=mo[3],qfm=mo[4])
+      }
+      return(all)
+    }
+    
+    NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthx<-length(sortedx)
+      if(standist=="exponential"|| standist=="exp"){
+        drm=0.3665
+        dqm=0.82224
+        
+        dlrmscale=0.3659
+        drmscale=0.7930
+        dlqmscale=0.8218
+        dqmscale=0.7825
+        
+        dlrmtm=0.1808
+        drmtm=1.7492
+        dlqmtm=1.1753
+        dqmtm=0.5715
+        
+        dlrmfm=-0.3542
+        drmfm=3.4560
+        dlqmfm=NaN
+        dqmfm=0.1246
+        
+      }else if (standist=="Rayleigh"|| standist=="Ray"){
+        drm=0.4025526
+        dqm=0.4452798
+        
+        dlrmscale=0.3095063
+        drmscale=0.3862421
+        dlqmscale=0.7055909
+        dqmscale=1.097661
+        
+        dlrmtm=0.1561753
+        drmtm=0.7855876
+        dlqmtm=0.8038741
+        dqmtm=0.9621217
+        
+        dlrmfm=0.2290345
+        drmfm=0.8758908
+        dlqmfm=0.6571804
+        dqmfm=0.7304692
+      }
+      
+      mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
+      rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=sd)
+      rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=sd,drsd=drmscale,dqsd=dqmscale)
+      rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=sd,drsd=drmscale,dqsd=dqmscale)
+      
+      if(sd){
+        first<-c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4])
+        second<-c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
+                  rsd=sqrt(rqscale1[7]),qsd=sqrt(rqscale1[8]))
+        third<-c(l3=rqtm1[1]/rqscale1[1],etl3=rqtm1[2]/rqscale1[2],rl3=rqtm1[3]/rqscale1[3],ql3=rqtm1[4]/rqscale1[4],
+                 skew=(rqtm1[5])/((rqscale1[5])^(3/2)),etskew=(rqtm1[6])/((rqscale1[6])^(3/2)),
+                 rskew=(rqtm1[7])/((rqscale1[7])^(3/2)),qskew=(rqtm1[8])/((rqscale1[8])^(3/2)))
+        fourth<-c(l4=rqfm1[1]/rqscale1[1],etl4=rqfm1[2]/rqscale1[2],rl4=rqfm1[3]/rqscale1[3],ql4=rqfm1[4]/rqscale1[4],kurt=(rqfm1[5])/((rqscale1[5])^(2)),etkurt=(rqfm1[6])/((rqscale1[6])^(2)),rkurt=(rqfm1[7])/((rqscale1[7])^(2)),qkurt=(rqfm1[8])/((rqscale1[8])^(2)))
+        
+        allmo<-list(first=first,second=second,third=third,fourth=fourth)
+        
+        
+        firstsd<-c(sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),rsd=sqrt(rqscale1[7]),qsd=sqrt(rqscale1[8]))
+        secondsd<-c(l2sd=rqscale1[9],etl2sd=rqscale1[10],rl2sd=rqscale1[11],ql2sd=rqscale1[12],
+                    sdsd=second[5]*(1/2)*(rqscale1[13]/rqscale1[5]),
+                    etsdsd=second[6]*(1/2)*(rqscale1[14]/rqscale1[6]),rsdsd=second[7]*(1/2)*(rqscale1[15]/rqscale1[7]),qsdsd=second[8]*(1/2)*(rqscale1[16]/rqscale1[8]))
+        
+        thirdsd<-c(l3sd=(rqtm1[1]/rqscale1[1])*((rqtm1[9]/rqtm1[1])^2+(rqscale1[9]/rqscale1[1])^2)^(1/2),
+                   etl3sd=(rqtm1[2]/rqscale1[2])*((rqtm1[10]/rqtm1[2])^2+(rqscale1[10]/rqscale1[2])^2)^(1/2),
+                   rl3sd=(rqtm1[3]/rqscale1[3])*((rqtm1[11]/rqtm1[3])^2+(rqscale1[11]/rqscale1[3])^2)^(1/2),
+                   ql3sd=(rqtm1[4]/rqscale1[4])*((rqtm1[12]/rqtm1[4])^2+(rqscale1[12]/rqscale1[4])^2)^(1/2),
+                   skewsd=third[5]*((rqtm1[13]/rqtm1[5])^2+(((((rqscale1[5])^(3/2))*(3/2)*(rqscale1[13]/rqscale1[5]))/((rqscale1[5])^(3/2))))^2)^(1/2),
+                   etskewsd=third[6]*((rqtm1[14]/rqtm1[6])^2+(((((rqscale1[6])^(3/2))*(3/2)*(rqscale1[14]/rqscale1[6]))/((rqscale1[6])^(3/2))))^2)^(1/2),
+                   rskewsd=third[7]*((rqtm1[15]/rqtm1[7])^2+(((((rqscale1[7])^(3/2))*(3/2)*(rqscale1[15]/rqscale1[7]))/((rqscale1[7])^(3/2))))^2)^(1/2),
+                   qskewsd=third[8]*((rqtm1[16]/rqtm1[8])^2+(((((rqscale1[8])^(3/2))*(3/2)*(rqscale1[16]/rqscale1[8]))/((rqscale1[8])^(3/2))))^2)^(1/2))
+        
+        fourthsd<-c(l4sd=(rqfm1[1]/rqscale1[1])*((rqfm1[9]/rqfm1[1])^2+(rqscale1[9]/rqscale1[1])^2)^(1/2),
+                    etl4sd=(rqfm1[2]/rqscale1[2])*((rqfm1[10]/rqfm1[2])^2+(rqscale1[10]/rqscale1[2])^2)^(1/2),
+                    rl4sd=(rqfm1[3]/rqscale1[3])*((rqfm1[11]/rqfm1[3])^2+(rqscale1[11]/rqscale1[3])^2)^(1/2),
+                    ql4sd=(rqfm1[4]/rqscale1[4])*((rqfm1[12]/rqfm1[4])^2+(rqscale1[12]/rqscale1[4])^2)^(1/2),
+                    kurtsd=fourth[5]*((rqfm1[13]/rqfm1[5])^2+(((((rqscale1[5])^(2))*(2)*(rqscale1[13]/rqscale1[5]))/((rqscale1[5])^(2))))^2)^(1/2),
+                    etkurtsd=fourth[6]*((rqfm1[14]/rqfm1[6])^2+(((((rqscale1[6])^(2))*(2)*(rqscale1[14]/rqscale1[6]))/((rqscale1[6])^(2))))^2)^(1/2),
+                    rkurtsd=fourth[7]*((rqfm1[15]/rqfm1[7])^2+(((((rqscale1[7])^(2))*(2)*(rqscale1[15]/rqscale1[7]))/((rqscale1[7])^(2))))^2)^(1/2),
+                    qkurtsd=fourth[8]*((rqfm1[16]/rqfm1[8])^2+(((((rqscale1[8])^(2))*(2)*(rqscale1[16]/rqscale1[8]))/((rqscale1[8])^(2))))^2)^(1/2))
+        
+        allsd<-list(firstsd=firstsd,secondsd=secondsd,thirdsd=thirdsd,fourthsd=fourthsd)
+        
+        all<-c(allmo,allsd)
+      }else{
+        first<-c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4])
+        second<-c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
+                  rsd=sqrt(rqscale1[7]),qsd=sqrt(rqscale1[8]))
+        third<-c(l3=rqtm1[1]/rqscale1[1],etl3=rqtm1[2]/rqscale1[2],rl3=rqtm1[3]/rqscale1[3],ql3=rqtm1[4]/rqscale1[4],
+                 skew=(rqtm1[5])/((rqscale1[5])^(3/2)),etskew=(rqtm1[6])/((rqscale1[6])^(3/2)),
+                 rskew=(rqtm1[7])/((rqscale1[7])^(3/2)),qskew=(rqtm1[8])/((rqscale1[8])^(3/2)))
+        fourth<-c(l4=rqfm1[1]/rqscale1[1],etl4=rqfm1[2]/rqscale1[2],rl4=rqfm1[3]/rqscale1[3],ql4=rqfm1[4]/rqscale1[4],kurt=(rqfm1[5])/((rqscale1[5])^(2)),etkurt=(rqfm1[6])/((rqscale1[6])^(2)),rkurt=(rqfm1[7])/((rqscale1[7])^(2)),qkurt=(rqfm1[8])/((rqscale1[8])^(2)))
+        all<-list(first=first,second=second,third=third,fourth=fourth)
+      }
+      
+      if((rqfm1[8])/((rqscale1[8])^(2))<4.7 & standist=="exponential"){
+        print("The quantile kurtosis is lower than 4.7, it might be better to use the Rayleigh distribution as the standard distribution.")
+      }
+      return(all)
+    }
+    effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
+      sortedx<-sort(x,decreasing = FALSE,method ="radix")
+      lengthx<-length(sortedx)
+      sortedy<-sort(y,decreasing = FALSE,method ="radix")
+      lengthy<-length(sortedy)
+      estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
+      estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
+      firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))*0.5)^0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))*0.5)^0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))*0.5)^0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))*0.5)^0.5))
+      
+      secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))*0.5)^0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))*0.5)^0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))*0.5)^0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))*0.5)^0.5),
+                          sd=(estimatex$second[5]-estimatey$second[5])/(((((estimatex$second[5])^2)+((estimatey$second[5])^2))*0.5)^0.5),etsd=(estimatex$second[6]-estimatey$second[6])/(((((estimatex$second[6])^2)+((estimatey$second[6])^2))*0.5)^0.5),rsd=(estimatex$second[7]-estimatey$second[7])/(((((estimatex$second[7])^2)+((estimatey$second[7])^2))*0.5)^0.5),qsd=(estimatex$second[8]-estimatey$second[8])/(((((estimatex$second[8])^2)+((estimatey$second[8])^2))*0.5)^0.5)
+      )
+      thirdeffectsize<-c(l3=(estimatex$third[1]-estimatey$third[1])/(((((estimatex$third[1])^2)+((estimatey$third[1])^2))*0.5)^0.5),etl3=(estimatex$third[2]-estimatey$third[2])/(((((estimatex$third[2])^2)+((estimatey$third[2])^2))*0.5)^0.5),rl3=(estimatex$third[3]-estimatey$third[3])/(((((estimatex$third[3])^2)+((estimatey$third[3])^2))*0.5)^0.5),ql3=(estimatex$third[4]-estimatey$third[4])/(((((estimatex$third[4])^2)+((estimatey$third[4])^2))*0.5)^0.5),
+                         skew=(estimatex$third[5]-estimatey$third[5])/(((((estimatex$third[5])^2)+((estimatey$third[5])^2))*0.5)^0.5),etskew=(estimatex$third[6]-estimatey$third[6])/(((((estimatex$third[6])^2)+((estimatey$third[6])^2))*0.5)^0.5),rskew=(estimatex$third[7]-estimatey$third[7])/(((((estimatex$third[7])^2)+((estimatey$third[7])^2))*0.5)^0.5),qskew=(estimatex$third[8]-estimatey$third[8])/(((((estimatex$third[8])^2)+((estimatey$third[8])^2))*0.5)^0.5)
+      )
+      fourtheffectsize<-c(l4=(estimatex$fourth[1]-estimatey$fourth[1])/(((((estimatex$fourth[1])^2)+((estimatey$fourth[1])^2))*0.5)^0.5),etl4=(estimatex$fourth[2]-estimatey$fourth[2])/(((((estimatex$fourth[2])^2)+((estimatey$fourth[2])^2))*0.5)^0.5),rl4=(estimatex$fourth[3]-estimatey$fourth[3])/(((((estimatex$fourth[3])^2)+((estimatey$fourth[3])^2))*0.5)^0.5),ql4=(estimatex$fourth[4]-estimatey$fourth[4])/(((((estimatex$fourth[4])^2)+((estimatey$fourth[4])^2))*0.5)^0.5),
+                          kurt=(estimatex$fourth[5]-estimatey$fourth[5])/(((((estimatex$fourth[5])^2)+((estimatey$fourth[5])^2))*0.5)^0.5),etkurt=(estimatex$fourth[6]-estimatey$fourth[6])/(((((estimatex$fourth[6])^2)+((estimatey$fourth[6])^2))*0.5)^0.5),rkurt=(estimatex$fourth[7]-estimatey$fourth[7])/(((((estimatex$fourth[7])^2)+((estimatey$fourth[7])^2))*0.5)^0.5),qkurt=(estimatex$fourth[8]-estimatey$fourth[8])/(((((estimatex$fourth[8])^2)+((estimatey$fourth[8])^2))*0.5)^0.5)
+      )
+      
+      all<-list(firsteffectsize=firsteffectsize,secondeffectsize=secondeffectsize,thirdeffectsize=thirdeffectsize,fourtheffectsize=fourtheffectsize,estimatex=estimatex,estimatey=estimatey)
+      if(estimatex$fourth[5]<4.7 & standist=="exponential"){
+        print("The quantile kurtosis is lower than 4.7, it might be better to use the Rayleigh distribution as the standard distribution.")
+      }
+      
+      return(all)
+    }
+    
+    effectsizeNRSs1<-effectsizeNRSssimple(x=datax[i,],y=datay[i,],interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist)
+    estimate1<-c(effectsizeNRSs1$firsteffectsize,effectsizeNRSs1$secondeffectsize,effectsizeNRSs1$thirdeffectsize,effectsizeNRSs1$fourtheffectsize)
+  }
+  
+  bootlist1<-(as.matrix(estimate0[,1]))
+  bootlist2<-(as.matrix(estimate0[,2]))
+  bootlist3<-(as.matrix(estimate0[,3]))
+  bootlist4<-(as.matrix(estimate0[,4]))
+  bootlist5<-(as.matrix(estimate0[,5]))
+  bootlist6<-(as.matrix(estimate0[,6]))
+  bootlist7<-(as.matrix(estimate0[,7]))
+  bootlist8<-(as.matrix(estimate0[,8]))
+  bootlist9<-(as.matrix(estimate0[,9]))
+  bootlist10<-(as.matrix(estimate0[,10]))
+  bootlist11<-(as.matrix(estimate0[,11]))
+  bootlist12<-(as.matrix(estimate0[,12]))
+  bootlist13<-(as.matrix(estimate0[,13]))
+  bootlist14<-(as.matrix(estimate0[,14]))
+  bootlist15<-(as.matrix(estimate0[,15]))
+  bootlist16<-(as.matrix(estimate0[,16]))
+  bootlist17<-(as.matrix(estimate0[,17]))
+  bootlist18<-(as.matrix(estimate0[,18]))
+  bootlist19<-(as.matrix(estimate0[,19]))
+  bootlist20<-(as.matrix(estimate0[,20]))
+  bootlist21<-(as.matrix(estimate0[,21]))
+  bootlist22<-(as.matrix(estimate0[,22]))
+  bootlist23<-(as.matrix(estimate0[,23]))
+  bootlist24<-(as.matrix(estimate0[,24]))
+  bootlist25<-(as.matrix(estimate0[,25]))
+  bootlist26<-(as.matrix(estimate0[,26]))
+  bootlist27<-(as.matrix(estimate0[,27]))
+  bootlist28<-(as.matrix(estimate0[,28]))
+  
+  bootlist1a<-sort(bootlist1)
+  bootlist2a<-sort(bootlist2)
+  bootlist3a<-sort(bootlist3)
+  bootlist4a<-sort(bootlist4)
+  bootlist5a<-sort(bootlist5)
+  bootlist6a<-sort(bootlist6)
+  bootlist7a<-sort(bootlist7)
+  bootlist8a<-sort(bootlist8)
+  bootlist9a<-sort(bootlist9)
+  bootlist10a<-sort(bootlist10)
+  bootlist11a<-sort(bootlist11)
+  bootlist12a<-sort(bootlist12)
+  bootlist13a<-sort(bootlist13)
+  bootlist14a<-sort(bootlist14)
+  bootlist15a<-sort(bootlist15)
+  bootlist16a<-sort(bootlist16)
+  bootlist17a<-sort(bootlist17)
+  bootlist18a<-sort(bootlist18)
+  bootlist19a<-sort(bootlist19)
+  bootlist20a<-sort(bootlist20)
+  bootlist21a<-sort(bootlist21)
+  bootlist22a<-sort(bootlist22)
+  
+  bootlist23a<-sort(bootlist23)
+  bootlist24a<-sort(bootlist24)
+  bootlist25a<-sort(bootlist25)
+  bootlist26a<-sort(bootlist26)
+  bootlist27a<-sort(bootlist27)
+  bootlist28a<-sort(bootlist28)
+
+  low<-round((alpha/2)*nboot)
+  up<-nboot-low
+  low<-low+1
+  effectsizeNRSs2<-effectsizeNRSssimple(x=sortedx,y=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist)
+  estimate<-c(effectsizeNRSs2$firsteffectsize,effectsizeNRSs2$secondeffectsize,effectsizeNRSs2$thirdeffectsize,effectsizeNRSs2$fourtheffectsize)
+  
+  bootlist1a<-bootlist1a-(estimate[1])
+  bootlist2a<-bootlist2a-(estimate[2])
+  bootlist3a<-bootlist3a-(estimate[3])
+  bootlist4a<-bootlist4a-(estimate[4])
+  bootlist5a<-bootlist5a-(estimate[5])
+  bootlist6a<-bootlist6a-(estimate[6])
+  bootlist7a<-bootlist7a-(estimate[7])
+  bootlist8a<-bootlist8a-(estimate[8])
+  bootlist9a<-bootlist9a-(estimate[9])
+  bootlist10a<-bootlist10a-(estimate[10])
+  bootlist11a<-bootlist11a-(estimate[11])
+  bootlist12a<-bootlist12a-(estimate[12])
+  bootlist13a<-bootlist13a-(estimate[13])
+  bootlist14a<-bootlist14a-(estimate[14])
+  bootlist15a<-bootlist15a-(estimate[15])
+  bootlist16a<-bootlist16a-(estimate[16])
+  bootlist17a<-bootlist17a-(estimate[17])
+  bootlist18a<-bootlist18a-(estimate[18])
+  bootlist19a<-bootlist19a-(estimate[19])
+  bootlist20a<-bootlist20a-(estimate[20])
+  bootlist21a<-bootlist21a-(estimate[21])
+  bootlist22a<-bootlist22a-(estimate[22])
+  bootlist23a<-bootlist23a-(estimate[23])
+  bootlist24a<-bootlist24a-(estimate[24])
+  bootlist25a<-bootlist25a-(estimate[25])
+  bootlist26a<-bootlist26a-(estimate[26])
+  bootlist27a<-bootlist27a-(estimate[27])
+  bootlist28a<-bootlist28a-(estimate[28])
+  
+  cidiff<-function(bootlist,low,up,estimate,n){
+    (estimate[n])+c(bootlist[low],bootlist[up])
+  }
+  
+  ci_diff<-c(c(mean=cidiff(bootlist1a,low=low,up=up,estimate=estimate,n=1),etm=cidiff(bootlist2a,low=low,up=up,estimate=estimate,n=2),rm=cidiff(bootlist3a,low=low,up=up,estimate=estimate,n=3),qm=cidiff(bootlist4a,low=low,up=up,estimate=estimate,n=4)),
+             c(l2=cidiff(bootlist5a,low=low,up=up,estimate=estimate,n=5),etl2=cidiff(bootlist6a,low=low,up=up,estimate=estimate,n=6),rl2=cidiff(bootlist7a,low=low,up=up,estimate=estimate,n=7),ql2=cidiff(bootlist8a,low=low,up=up,estimate=estimate,n=8),sd=cidiff(bootlist9a,low=low,up=up,estimate=estimate,n=9),etsd=cidiff(bootlist10a,low=low,up=up,estimate=estimate,n=10),
+               rsd=cidiff(bootlist11a,low=low,up=up,estimate=estimate,n=11),qsd=cidiff(bootlist12a,low=low,up=up,estimate=estimate,n=12)),
+             c(l3=cidiff(bootlist13a,low=low,up=up,estimate=estimate,n=13),etl3=cidiff(bootlist14a,low=low,up=up,estimate=estimate,n=14),rl3=cidiff(bootlist15a,low=low,up=up,estimate=estimate,n=15),ql3=cidiff(bootlist16a,low=low,up=up,estimate=estimate,n=16),
+               skew=cidiff(bootlist17a,low=low,up=up,estimate=estimate,n=17),etskew=cidiff(bootlist18a,low=low,up=up,estimate=estimate,n=18),
+               rskew=cidiff(bootlist19a,low=low,up=up,estimate=estimate,n=19),qskew=cidiff(bootlist20a,low=low,up=up,estimate=estimate,n=20)),
+             c(l4=cidiff(bootlist21a,low=low,up=up,estimate=estimate,n=21),etl4=cidiff(bootlist22a,low=low,up=up,estimate=estimate,n=22),rl4=cidiff(bootlist23a,low=low,up=up,estimate=estimate,n=23),ql4=cidiff(bootlist24a,low=low,up=up,estimate=estimate,n=24),kurt=cidiff(bootlist25a,low=low,up=up,estimate=estimate,n=25),etkurt=cidiff(bootlist26a,low=low,up=up,estimate=estimate,n=26),rkurt=cidiff(bootlist27a,low=low,up=up,estimate=estimate,n=27),qkurt=cidiff(bootlist28a,low=low,up=up,estimate=estimate,n=28)))
+  
+  
+  se<-c(c(mean=sd(bootlist1a),etm=sd(bootlist2a),rm=sd(bootlist3a),qm=sd(bootlist4a)),
+             c(l2=sd(bootlist5a),etl2=sd(bootlist6a),rl2=sd(bootlist7a),ql2=sd(bootlist8a),sd=sd(bootlist9a),etsd=sd(bootlist10a),
+               rsd=sd(bootlist11a),qsd=sd(bootlist12a)),
+             c(l3=sd(bootlist13a),etl3=sd(bootlist14a),rl3=sd(bootlist15a),ql3=sd(bootlist16a),
+               skew=sd(bootlist17a),etskew=sd(bootlist18a),
+               rskew=sd(bootlist19a),qskew=sd(bootlist20a)),
+             c(l4=sd(bootlist21a),etl4=sd(bootlist22a),rl4=sd(bootlist23a),ql4=sd(bootlist24a),kurt=sd(bootlist25a),etkurt=sd(bootlist26a),rkurt=sd(bootlist27a),qkurt=sd(bootlist28a)))
+  
+  
+  
+  
+  all<-list(ci_diff=ci_diff,se=se,estimate=estimate)
+  
+  return(all)
+}
+
+effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+  if (ci){
+    return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
+  } 
+  else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist))
+}}
 
 
 #test
@@ -2279,17 +2817,23 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 #alpha: the alpha level for confidence interval computation.
 #nboot: the number of bootstrap samples for confidence interval computation.
 
-#To make comparisons easier, sample standardized moments and scaled L-moments are provided. 
-#The standard deviations of the distributions of U-statistic can be used to estimate the consistency percentage.
+#To make comparisons easier, sample standardized moments and scaled L-moments are provided (this moments are estimated same based on U-statistics, not the formula approach
+#because if direct compared sample moments with NRSs, the variance from bootstrap also need to take into consideration.
+
 #also, ETM-based moments and L-moments are provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
+
+#The standard deviations of the distributions of U-statistic can be used to estimate the consistency percentage.
 
 #another very interesting and probably novel approach is effect size based on the standard deviation of the U-statistics (I said novel is because I haven't found effect size of higher moments, e.g., standard deviation, skewness, kurtosis)
 xexp<-c(rexp(5400,2))
 yexp<-rexp(5400,1)
 
-#beca
-effectsizeNRSs(x=xexp,y=yexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
+effectsizeNRSs(x=xexp,y=yexp,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
 #the standard deviation is estimated by the corresponding estimators, e.g., for rskew, the standard deviation of the distribution of U-statistics is estimated by rsd.
+
+#the confidence interval of effect size can be estimated by bootstrap. With the help of parallel computing, the running time is around 1 mins
+#because for every estimators, the standard deviation of the corresponding U statistics needs to be estimated by etsd, rsd, qsd.
+effectsizeNRSs(x=xexp,y=yexp,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.
@@ -2341,9 +2885,6 @@ htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=T
 htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 
-
-
-
 library(lmom)
 
 
@@ -2372,8 +2913,6 @@ NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
 
-
-
 xRayleigh<-rRayleigh(n=5400, scale = 1) 
 
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
@@ -2384,8 +2923,6 @@ NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standi
 xRayleigh<-rRayleigh(n=5400, scale = 1.08) 
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
 pbh2parallel(x=xRayleigh,y=yRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-
 
 
 xpois<-rpois(5400,8)
@@ -2460,3 +2997,4 @@ NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standis
 
 
 #for more tests, use the codes in consistency.R
+

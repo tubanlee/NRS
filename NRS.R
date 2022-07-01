@@ -2281,6 +2281,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="e
 
 #To make comparisons easier, sample standardized moments and scaled L-moments are provided. 
 #The standard deviations of the distributions of U-statistic can be used to estimate the consistency percentage.
+#also, ETM-based moments and L-moments are provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
 
 #another very interesting and probably novel approach is effect size based on the standard deviation of the U-statistics (I said novel is because I haven't found effect size of higher moments, e.g., standard deviation, skewness, kurtosis)
 xexp<-c(rexp(5400,2))

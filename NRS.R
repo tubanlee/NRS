@@ -2901,15 +2901,15 @@ NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 #Also, if the quantile kurtosis is less than 4.7, it highly indicates the need to change to Rayleigh.
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 #parallel is default for confidential interval.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
 
 #test of effect size
-effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
@@ -2935,7 +2935,7 @@ xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
 
 #test of effect size
-effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
@@ -2961,7 +2961,7 @@ xRayleigh<-rRayleigh(n=5400, scale = 2)
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
 
 #test of effect size
-effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xRayleigh<-rRayleigh(n=5400, scale = 1.1) 
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
@@ -3000,7 +3000,7 @@ xpois<-rpois(5400,19)
 ypois<-rpois(5400,8)
 
 #test of effect size
-effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xpois<-rpois(5400,9)
 ypois<-rpois(5400,8)
@@ -3026,7 +3026,7 @@ xnorm<-c(rnorm(5400,2))
 ynorm<-c(rnorm(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xnorm<-c(rnorm(5400,1.1))
 ynorm<-c(rnorm(5400,1))
@@ -3051,7 +3051,7 @@ xlogis<-c(rlogis(5400,2))
 ylogis<-c(rlogis(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xlogis<-c(rlogis(5400,1.1))
 ylogis<-c(rlogis(5400,1))
@@ -3076,7 +3076,7 @@ xlaplace<-c(rLaplace(5400,2))
 ylaplace<-c(rLaplace(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xlaplace<-c(rLaplace(5400,1.1))
 ylaplace<-c(rLaplace(5400,1))
@@ -3108,7 +3108,7 @@ xpareto<-c(rPareto(5400, scale  = 2, shape=2+a/100))
 ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
 
 #test of effect size
-effectsizeNRSs(x=xpareto,y=ypareto,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xpareto,y=ypareto,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xpareto<-c(rPareto(5400, scale  = 1.1, shape=2+a/100))
 ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
@@ -3136,7 +3136,7 @@ xlnorm<-c(rlnorm(5400,meanlog=2,sdlog=a/100))
 ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
 
 #test of effect size
-effectsizeNRSs(x=xlnorm,y=ylnorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xlnorm,y=ylnorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xlnorm<-c(rlnorm(5400,meanlog=1.1,sdlog=a/100))
 ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
@@ -3165,7 +3165,7 @@ xweibull<-c(rweibull(5400, shape=a/100, scale = 2))
 yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
 
 #test of effect size
-effectsizeNRSs(x=xweibull,y=yweibull,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xweibull,y=yweibull,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xweibull<-c(rweibull(5400, shape=a/100, scale = 1.1))
 yweibull<-c(rweibull(5400, shape=a/100, scale = 1))

@@ -2801,7 +2801,81 @@ effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE
     return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
   } 
   else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist))
-}}
+  }}
+winsor<-function (x, fraction=1/9)
+{
+  lim <- quantile(x, probs=c(fraction, 1-fraction))
+  x[ x < lim[1] ] <- lim[1]
+  x[ x > lim[2] ] <- lim[2]
+  x
+}
+twmean1<-function(x,fraction=1/9,type=1){
+  c(mean=mean(x),trimmedmean=mean(x,fraction),winsorizedmean=mean(winsor(x,fraction)))[type]
+}
+twmean<-function(x,fraction=1/9){
+  c(mean=mean(x),trimmedmean=mean(x,fraction),winsorizedmean=mean(winsor(x,fraction)))
+}
+twcov<-function (x,y=NULL){
+  matrix1 <- cbind(x, y)
+  matrix1 <- na.omit(matrix1)
+  x <- matrix1[, 1]
+  y <- matrix1[, 2]
+  productxy<-x*y
+  productx2<-x*x
+  producty2<-y*y
+  meanx <- twmean(x,fraction=1/9)
+  meany <- twmean(y,fraction=1/9)
+  meanxy <- twmean(productxy,fraction=1/9)
+  meanx2 <- twmean(productx2,fraction=1/9)
+  meany2 <- twmean(producty2,fraction=1/9)
+  mean1<-(meanxy[1]-meanx[1]*meany[1])
+  tm1<-(meanxy[2]-meanx[2]*meany[2])
+  wm1<-(meanxy[3]-meanx[3]*meany[3])
+  twcov <- c(mean1=mean1,tm1=tm1,wm1=wm1)
+  return(twcov)
+}
+twreg<-function(x,y=NULL,iter = 20){
+  x <- as.matrix(x)
+  xy <- cbind(x, y)
+  xy <- na.omit(xy)
+  ncolx<-ncol(x)
+  ncolx1<-ncol(x)+1
+  x <- xy[, 1:ncolx]
+  y <- xy[, ncolx1]
+  x = as.matrix(x)
+  matrix1 <- matrix(0, ncol(x), 1)
+  matrix2 <- matrix(0, ncol(x), ncol(x))
+  coef<-c()
+  for (type in (1:3)){
+    mval1 <- apply(x, 2, twmean1,fraction=1/9,type=type)
+    for (i in 1:ncol(x)) {
+      matrix1[i, 1] <- twcov(x=x[, i],y=y)[type]
+      for (j in 1:ncol(x)) matrix2[i, j] <-twcov(x=x[, i],y=x[, j])[type]
+    }
+    slope <- solve(matrix2, matrix1)
+    inter <- twmean1(x=y,fraction=1/9,type=type) - sum(slope %*% mval1)
+    for (it in 1:iter) {
+      res <- y - x %*% slope - inter
+      for (i in 1:ncol(x)) matrix1[i, 1] <- twcov(x=x[, i],y=res)[type]
+      sadd <- solve(matrix2, matrix1)
+      inadd <- twmean1(x=res,fraction=1/9,type=type) - sum(sadd %*% mval1)
+      if (max(abs(sadd), abs(inadd)) < 1e-04) 
+        break
+      slope <- slope + sadd
+      inter <- inter + inadd
+    }
+    if (max(abs(sadd), abs(inadd)) >= 1e-04) {
+      namestype<-c("mean", "tm", "wm")  
+      print(paste(namestype[type],"failed to converge within", iter, "iterations"))}
+    all1<-(c(Intercept=inter, slope=slope,ResidualSE=sd(res)))
+    coef<-rbind(coef,all1)
+  }
+  rownames(coef) <- c("mean", "tm", "wm")  
+  coef
+}
+
+
+
 rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
   matrix1 <- cbind(x, y)
   matrix1 <- na.omit(matrix1)
@@ -2847,21 +2921,21 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
   x <- xy[, 1:ncolx]
   y <- xy[, ncolx1]
   x = as.matrix(x)
-  ma <- matrix(0, ncol(x), 1)
-  m <- matrix(0, ncol(x), ncol(x))
+  matrix1 <- matrix(0, ncol(x), 1)
+  matrix2 <- matrix(0, ncol(x), ncol(x))
   coef<-c()
   for (type in (1:4)){
     mval1 <- apply(x, 2, mmme,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type)
     for (i in 1:ncol(x)) {
-      ma[i, 1] <- rqcov(x=x[, i],y=y,interval=interval,fast=fast,batch=batch,standist=standist)[type]
-      for (j in 1:ncol(x)) m[i, j] <-rqcov(x=x[, i],y=x[, j],interval=interval,fast=fast,batch=batch,standist=standist)[type]
+      matrix1[i, 1] <- rqcov(x=x[, i],y=y,interval=interval,fast=fast,batch=batch,standist=standist)[type]
+      for (j in 1:ncol(x)) matrix2[i, j] <-rqcov(x=x[, i],y=x[, j],interval=interval,fast=fast,batch=batch,standist=standist)[type]
     }
-    slope <- solve(m, ma)
+    slope <- solve(matrix2, matrix1)
     inter <- mmme(x=y,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type) - sum(slope %*% mval1)
     for (it in 1:iter) {
       res <- y - x %*% slope - inter
-      for (i in 1:ncol(x)) ma[i, 1] <- rqcov(x=x[, i],y=res,interval=interval,fast=fast,batch=batch,standist=standist)[type]
-      sadd <- solve(m, ma)
+      for (i in 1:ncol(x)) matrix1[i, 1] <- rqcov(x=x[, i],y=res,interval=interval,fast=fast,batch=batch,standist=standist)[type]
+      sadd <- solve(matrix2, matrix1)
       inadd <- mmme(x=res,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,type=type) - sum(sadd %*% mval1)
       if (max(abs(sadd), abs(inadd)) < 1e-04) 
         break
@@ -2879,7 +2953,6 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
 }
 
 #robust regression test
-library(lmtest)
 #Gaussian outliers
 n<-5400
 y<-as.numeric(n)
@@ -2896,9 +2969,9 @@ for (i in 1:n){
 }
 hist(error)
 
-m1=lm(y~x)
-summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+twreg(x=x, y=y,iter = 200)
+
 
 #exponential outliers
 n<-5400
@@ -2916,10 +2989,8 @@ for (i in 1:n){
 }
 hist(error)
 
-m1=lm(y~x)
-summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
-
+twreg(x=x, y=y,iter = 200)
 
 #Rayleigh outliers
 n<-5400
@@ -2937,10 +3008,8 @@ for (i in 1:n){
 }
 hist(error)
 
-m1=lm(y~x)
-summary(m1)
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
-
+twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
 
 

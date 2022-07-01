@@ -2834,11 +2834,9 @@ effectsizeNRSs(x=xexp,y=yexp,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRU
 #the confidence interval of effect size can be estimated by bootstrap. With the help of parallel computing, the running time is around 1 mins
 #because for every estimators, the standard deviation of the corresponding U statistics needs to be estimated by etsd, rsd, qsd.
 
-
 #to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
 effectsizeNRSs(x=xexp,y=yexp,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 #the se is the standard error of effect size.
-
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.
 xexp<-c(rexp(5400,1))
@@ -2891,7 +2889,6 @@ htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot
 
 library(lmom)
 
-
 a=500
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
 targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
@@ -2908,6 +2905,24 @@ NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
+xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of effect size
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of null hypothesis
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
 a=150
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
 targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
@@ -2915,6 +2930,24 @@ NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 #even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
 NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of effect size
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of null hypothesis
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 
 xRayleigh<-rRayleigh(n=5400, scale = 1) 
@@ -2924,10 +2957,23 @@ NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standi
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=sqrt(pi/2),null_sd=sqrt(2-(pi/2)),null_skew=2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),null_kurt=(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),null_l2=0.5*(sqrt(2)-1)*sqrt(pi),null_l3=((1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))/(0.5*(sqrt(2)-1)*sqrt(pi)),null_l4=((sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))/(0.5*(sqrt(2)-1)*sqrt(pi)))
 
 
-xRayleigh<-rRayleigh(n=5400, scale = 1.08) 
+xRayleigh<-rRayleigh(n=5400, scale = 2) 
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
-pbh2parallel(x=xRayleigh,y=yRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
+#test of effect size
+effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xRayleigh<-rRayleigh(n=5400, scale = 1.1) 
+yRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+#empirical bootstrap hypothesis test
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xRayleigh<-rRayleigh(n=5400, scale = 1) 
+yRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+#test of null hypothesis
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 xpois<-rpois(5400,8)
 #the population mean is 8
@@ -2949,6 +2995,26 @@ NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="
 NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
 
 
+
+xpois<-rpois(5400,19)
+ypois<-rpois(5400,8)
+
+#test of effect size
+effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xpois<-rpois(5400,9)
+ypois<-rpois(5400,8)
+
+#empirical bootstrap hypothesis test
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xpois<-rpois(5400,8)
+ypois<-rpois(5400,8)
+
+#test of null hypothesis
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
 xnorm<-c(rnorm(5400))
 
 NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
@@ -2956,17 +3022,74 @@ NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="
 
 NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
 
+xnorm<-c(rnorm(5400,2))
+ynorm<-c(rnorm(5400,1))
+
+#test of effect size
+effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xnorm<-c(rnorm(5400,1.1))
+ynorm<-c(rnorm(5400,1))
+
+#empirical bootstrap hypothesis test
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xnorm<-c(rnorm(5400,1))
+ynorm<-c(rnorm(5400,1))
+
+#test of null hypothesis
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
 xlogis<-c(rlogis(5400, location = 0, scale = 1))
 
 NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
 NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
 
+xlogis<-c(rlogis(5400,2))
+ylogis<-c(rlogis(5400,1))
+
+#test of effect size
+effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xlogis<-c(rlogis(5400,1.1))
+ylogis<-c(rlogis(5400,1))
+
+#empirical bootstrap hypothesis test
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xlogis<-c(rlogis(5400,1))
+ylogis<-c(rlogis(5400,1))
+
+#test of null hypothesis
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
 
 xlaplace<-c(rLaplace(n=5400, location = 0, scale = 1))
 NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
 NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
+
+
+xlaplace<-c(rLaplace(5400,2))
+ylaplace<-c(rLaplace(5400,1))
+
+#test of effect size
+effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xlaplace<-c(rLaplace(5400,1.1))
+ylaplace<-c(rLaplace(5400,1))
+
+#empirical bootstrap hypothesis test
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xlaplace<-c(rLaplace(5400,1))
+ylaplace<-c(rLaplace(5400,1))
+
+#test of null hypothesis
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
 
 #NRSs have excellent performance even for heavy tailed distributions.
 
@@ -2981,6 +3104,25 @@ NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist
 #the standard errors are lower, especially for robust moments and L-moments
 NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
 
+xpareto<-c(rPareto(5400, scale  = 2, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#test of effect size
+effectsizeNRSs(x=xpareto,y=ypareto,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xpareto<-c(rPareto(5400, scale  = 1.1, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#empirical bootstrap hypothesis test
+htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#test of null hypothesis
+htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
 a=100
 xlnorm<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
 targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
@@ -2990,6 +3132,26 @@ NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=
 #the standard errors are lower, especially for robust moments and L-moments
 NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
 
+xlnorm<-c(rlnorm(5400,meanlog=2,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#test of effect size
+effectsizeNRSs(x=xlnorm,y=ylnorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xlnorm<-c(rlnorm(5400,meanlog=1.1,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#empirical bootstrap hypothesis test
+htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xlnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#test of null hypothesis
+htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
+
 a=150
 xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
 library(lmom)
@@ -2998,6 +3160,24 @@ NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standis
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
 NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
 
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 2))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#test of effect size
+effectsizeNRSs(x=xweibull,y=yweibull,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1.1))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#test of null hypothesis
+htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
 
 #for more tests, use the codes in consistency.R

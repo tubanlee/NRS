@@ -2873,9 +2873,6 @@ twreg<-function(x,y=NULL,iter = 20){
   rownames(coef) <- c("mean", "tm", "wm")  
   coef
 }
-
-
-
 rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
   matrix1 <- cbind(x, y)
   matrix1 <- na.omit(matrix1)
@@ -2970,7 +2967,9 @@ for (i in 1:n){
 hist(error)
 m1=lm(y~x)
 summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 
 
@@ -2991,7 +2990,9 @@ for (i in 1:n){
 hist(error)
 m1=lm(y~x)
 summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 
 #Rayleigh outliers
@@ -3011,7 +3012,9 @@ for (i in 1:n){
 hist(error)
 m1=lm(y~x)
 summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
 rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
 

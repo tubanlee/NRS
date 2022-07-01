@@ -2833,7 +2833,11 @@ effectsizeNRSs(x=xexp,y=yexp,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRU
 
 #the confidence interval of effect size can be estimated by bootstrap. With the help of parallel computing, the running time is around 1 mins
 #because for every estimators, the standard deviation of the corresponding U statistics needs to be estimated by etsd, rsd, qsd.
+
+
+#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
 effectsizeNRSs(x=xexp,y=yexp,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+#the se is the standard error of effect size.
 
 
 #The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.

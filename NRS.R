@@ -3072,20 +3072,20 @@ NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standis
 NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
 
 
-xlaplace<-c(rLaplace(5400,2))
-ylaplace<-c(rLaplace(5400,1))
+xlaplace<-c(rLaplace(n=5400,location = 2,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
 
 #test of effect size
 effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
-xlaplace<-c(rLaplace(5400,1.1))
-ylaplace<-c(rLaplace(5400,1))
+xlaplace<-c(rLaplace(n=5400,location = 1.1,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
 
 #empirical bootstrap hypothesis test
 htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
-xlaplace<-c(rLaplace(5400,1))
-ylaplace<-c(rLaplace(5400,1))
+xlaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
 
 #test of null hypothesis
 htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)

@@ -2871,7 +2871,7 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
     if (max(abs(sadd), abs(inadd)) >= 1e-04) {
       namestype<-c("mean", "etm", "rm", "qm")  
       print(paste(namestype[type],"failed to converge within", iter, "iterations"))}
-    all1<-(c(Intercept=inter, slope=slope))
+    all1<-(c(Intercept=inter, slope=slope,ResidualSE=sd(res)))
     coef<-rbind(coef,all1)
   }
   rownames(coef) <- c("mean", "etm", "rm", "qm")  

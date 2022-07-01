@@ -2909,19 +2909,19 @@ xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
 
 #test of effect size
-effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
 
 #empirical bootstrap hypothesis test
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
 
 #test of null hypothesis
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 a=150
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
@@ -2961,19 +2961,19 @@ xRayleigh<-rRayleigh(n=5400, scale = 2)
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
 
 #test of effect size
-effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xRayleigh<-rRayleigh(n=5400, scale = 1.1) 
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
 
 #empirical bootstrap hypothesis test
-htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xRayleigh<-rRayleigh(n=5400, scale = 1) 
 yRayleigh<-rRayleigh(n=5400, scale = 1) 
 
 #test of null hypothesis
-htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xpois<-rpois(5400,8)
 #the population mean is 8
@@ -3000,19 +3000,19 @@ xpois<-rpois(5400,19)
 ypois<-rpois(5400,8)
 
 #test of effect size
-effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xpois<-rpois(5400,9)
 ypois<-rpois(5400,8)
 
 #empirical bootstrap hypothesis test
-htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xpois<-rpois(5400,8)
 ypois<-rpois(5400,8)
 
 #test of null hypothesis
-htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 
 xnorm<-c(rnorm(5400))
@@ -3026,19 +3026,19 @@ xnorm<-c(rnorm(5400,2))
 ynorm<-c(rnorm(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xnorm<-c(rnorm(5400,1.1))
 ynorm<-c(rnorm(5400,1))
 
 #empirical bootstrap hypothesis test
-htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xnorm<-c(rnorm(5400,1))
 ynorm<-c(rnorm(5400,1))
 
 #test of null hypothesis
-htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 
 xlogis<-c(rlogis(5400, location = 0, scale = 1))
@@ -3051,19 +3051,19 @@ xlogis<-c(rlogis(5400,2))
 ylogis<-c(rlogis(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xlogis<-c(rlogis(5400,1.1))
 ylogis<-c(rlogis(5400,1))
 
 #empirical bootstrap hypothesis test
-htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xlogis<-c(rlogis(5400,1))
 ylogis<-c(rlogis(5400,1))
 
 #test of null hypothesis
-htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 
 xlaplace<-c(rLaplace(n=5400, location = 0, scale = 1))
@@ -3076,19 +3076,19 @@ xlaplace<-c(rLaplace(5400,2))
 ylaplace<-c(rLaplace(5400,1))
 
 #test of effect size
-effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xlaplace<-c(rLaplace(5400,1.1))
 ylaplace<-c(rLaplace(5400,1))
 
 #empirical bootstrap hypothesis test
-htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 xlaplace<-c(rLaplace(5400,1))
 ylaplace<-c(rLaplace(5400,1))
 
 #test of null hypothesis
-htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
 
 
 #NRSs have excellent performance even for heavy tailed distributions.
@@ -3181,4 +3181,3 @@ htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto
 
 
 #for more tests, use the codes in consistency.R
-

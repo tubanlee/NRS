@@ -3003,7 +3003,7 @@ xexp<-rexp(5400,1)
 
 #the finite sample bias of the fourth moment is around 0.004 (n=5400).
 
-#L-moments are unbiased, so a good reference for validation.
+#L-moments are unbiased, so a good reference for validation. The subsamples for L-moments and moments are the same, so the accuracy should be very similar.
 
 #the standard deviation of the distribution of corresponding U-statistic is used to standardize the differences, since it directly related to the standard error of the estimator
 

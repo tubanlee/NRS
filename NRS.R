@@ -1,5 +1,4 @@
 
-
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -2994,14 +2993,15 @@ x<-as.numeric(n)
 error<-as.numeric(n)
 for (i in 1:n){
   x1 <- rnorm(1,0,1)
-  x2 <- runif(1,200,201)
+  x2 <- runif(1,100,200)
   u <- runif(1)
-  k <- as.integer(u > 0.99) 
+  k <- as.integer(u > 0.9) 
   error[i] <- (1-k)* x1 +  k* x2 
   x[i]<-runif(1,0,10)
   y[i]<-10+2*x[i]+error[i]
 }
 hist(error)
+plot(x,y)
 m1=lm(y~x)
 summary(m1)
 #robust linear regression based on ETM, robust mean and quantile mean
@@ -3017,9 +3017,9 @@ x<-as.numeric(n)
 error<-as.numeric(n)
 for (i in 1:n){
   x1 <- rexp(1,1)-1
-  x2 <- runif(1,200,201)
+  x2 <- runif(1,100,200)
   u <- runif(1)
-  k <- as.integer(u > 0.99) 
+  k <- as.integer(u > 0.9) 
   error[i] <- (1-k)* x1 +  k* x2 
   x[i]<-runif(1,0,10)
   y[i]<-10+2*x[i]+error[i]
@@ -3039,9 +3039,9 @@ x<-as.numeric(n)
 error<-as.numeric(n)
 for (i in 1:n){
   x1 <- rRayleigh(1,1)-sqrt(pi/2)
-  x2 <- runif(1,200,201)
+  x2 <- runif(1,100,200)
   u <- runif(1)
-  k <- as.integer(u > 0.99) 
+  k <- as.integer(u > 0.9) 
   error[i] <- (1-k)* x1 +  k* x2 
   x[i]<-runif(1,0,10)
   y[i]<-10+2*x[i]+error[i]

@@ -2901,6 +2901,43 @@ rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponent
   rqcov <- c(mean1=mean1,etm1=etm1,rm1=rm1,qm1=qm1)
   return(rqcov)
 }
+rcor<- function (n, xparamater1, xparamater2, yparamater1, yparamater2, correlation,FUN1,FUN2) {
+  Sigma <- matrix(c(1,correlation,correlation,1),2,2)
+  mvrnorm <- function(n = 1, mu = 0, Sigma) {
+    nvars <- nrow(Sigma)
+    nmls <- matrix(rnorm(n * nvars), nrow = nvars)
+    scales <- t(chol(Sigma)) %*% nmls
+    samples <- mu + scales
+    t(samples)
+  }
+  multiva<-mvrnorm(n = n, mu=0, Sigma)
+  U <- pnorm(multiva, mean = 0, sd = 1)
+  xresult <- FUN1(U[, 1], xparamater1, xparamater2)
+  yresult <- FUN2(U[, 2], yparamater1, yparamater2)
+  data.frame(x=xresult,y=yresult)
+}
+
+rqcor<-function (x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
+  if(standist=="exponential"|| standist=="exp"){
+    drm=0.3665
+    dqm=0.82224
+    
+    drmscale=0.7930
+    dqmscale=0.7825
+    
+  }else if (standist=="Rayleigh"|| standist=="Ray"){
+    drm=0.4025526
+    dqm=0.4452798
+    
+    drmscale=0.3862421
+    dqmscale=1.097661
+  }
+  rqsdx<-rqsd(x=x,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drmscale,dqm=dqmscale)
+  rqsdy<-rqsd(x=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drmscale,dqm=dqmscale)
+  rqregxy<-rqreg(x=x,y=y,iter = iter,interval=interval,fast=fast,batch=batch,standist=standist)
+  rqcor <- rqregxy[,2]*rqsdx/rqsdy
+  return(rqcor)
+}
 rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
   if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
@@ -3017,6 +3054,50 @@ rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 #based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
+
+
+#this robust correlation is based on the slope of robust regression, and then times the standard deviation ratio of x and y
+#Gaussian
+xy<-rcor(n = 5130, xparamater1 = 1, xparamater2 = 1, yparamater1 = 1, yparamater2 = 1, correlation = 0.8,FUN1=qnorm,FUN2=qnorm)
+x<-c(xy[,1])
+y<-c(xy[,2])
+cor(x=x, y=y,method="pearson")
+x<-c(xy[,1],rnorm(270,0,300))
+y<-c(xy[,2],rnorm(270,0,300))
+rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
+cor(x=x, y=y,method="pearson")
+cor(x=x, y=y,method="kendall")
+cor(x=x, y=y,method="spearman")
+
+#regression based correlation is much better than other robust correlation estimators when the data are Guassian.
+
+#exponential
+xy<-rcor(n = 5130, xparamater1 = 1, xparamater2 = 1, yparamater1 = 1, yparamater2 = 1, correlation = 0.8,FUN1=qexp,FUN2=qexp)
+x<-c(xy[,1])
+y<-c(xy[,2])
+cor(x=x, y=y,method="pearson")
+x<-c(xy[,1],rnorm(270,0,300))
+y<-c(xy[,2],rnorm(270,0,300))
+rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
+
+cor(x=x, y=y,method="pearson")
+cor(x=x, y=y,method="kendall")
+cor(x=x, y=y,method="spearman")
+
+#gamma
+xy<-rcor(n = 5130, xparamater1 = 1.5, xparamater2 = 1, yparamater1 = 1.5, yparamater2 = 1, correlation = 0.8,FUN1=qgamma,FUN2=qgamma)
+x<-c(xy[,1])
+y<-c(xy[,2])
+cor(x=x, y=y,method="pearson")
+x<-c(xy[,1],rnorm(270,0,300))
+y<-c(xy[,2],rnorm(270,0,300))
+rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
+
+cor(x=x, y=y,method="pearson")
+cor(x=x, y=y,method="kendall")
+cor(x=x, y=y,method="spearman")
+
+#but not for non-gaussian
 
 
 #test

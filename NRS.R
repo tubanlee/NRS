@@ -3095,11 +3095,11 @@ xexp<-rexp(5400,1)
 #Bickel, P. J., & Freedman, D. A. (1981). Some asymptotic theory for the bootstrap. The annals of statistics, 9(6), 1196-1217.
 #Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
 
-#In addition, unlike other types of bootstrap that users are unable to varify the results, the validaty of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
+#In addition, unlike other types of bootstrap that users are unable to verify the results, the accuracy of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
 
 #noted that the sample third and fourth moment is biased (the third moment is symmetric unbiased, but not general unbiased), and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
 
-#L-moments are unbiased, so a good reference for varifications.
+#L-moments are unbiased, so a good reference for validation.
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
 

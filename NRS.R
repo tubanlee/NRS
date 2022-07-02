@@ -1,4 +1,5 @@
 
+
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -390,13 +391,12 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
   bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
   bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
-    }
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
+  }
   if(sd){
     first<-c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4])
     second<-c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -611,12 +611,11 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,acc
   bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
   bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
   bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
                c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -1035,12 +1034,11 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
   bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
   bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
               c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -1606,13 +1604,13 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
   bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
   bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
+  
   momentsy<-moments(x=sortedy)
   Lmomentsy<-Lmoments(sortedy)
   bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
@@ -1621,12 +1619,11 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
   bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
   bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
   estimate1<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
@@ -2187,12 +2184,11 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
   bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
   bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
   momentsy<-moments(x=sortedy)
   Lmomentsy<-Lmoments(sortedy)
@@ -2202,12 +2198,11 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
   bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
   bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
-  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
   accuracy1<-accuracy
   if (max(allbv) >= accuracy1) {
-    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
-    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
-    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    print(paste("The differences of exact results and bootstrap approximation are"))
+    print(allbv)
   }
   estimate<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
@@ -3100,8 +3095,14 @@ xexp<-rexp(5400,1)
 #Bickel, P. J., & Freedman, D. A. (1981). Some asymptotic theory for the bootstrap. The annals of statistics, 9(6), 1196-1217.
 #Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
 
+#In addition, unlike other types of bootstrap that users are unable to varify the results, the validaty of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
+
+#noted that the sample fourth moment is biased, and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
+
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =540000,accuracy=1e-03,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-02,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
 #Arguments
 #x:a numeric vector
 #interval: The b value in equinterval trimmed mean and complement trimmed mean, notifying that the breakdown points for higher order moments/L-moments are b*k, not b.

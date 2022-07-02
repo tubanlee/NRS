@@ -3101,7 +3101,7 @@ xexp<-rexp(5400,1)
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
 
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =540000,accuracy=1e-04,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 #Arguments
 #x:a numeric vector
@@ -3481,7 +3481,7 @@ htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto
 
 #for more tests, use the codes in consistency.R
 
-
+#this regression is just shown an application and not plan to include (if think needed I can also include)
 library(lmtest)
 #robust regression test
 #Gaussian outliers
@@ -3552,6 +3552,7 @@ rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 #based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
+
 
 
 

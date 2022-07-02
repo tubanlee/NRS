@@ -27,8 +27,8 @@ moments<-function (x){
   n<-length(x)
   m1<-mean(x)
   sd1<-sd(x)
-  tm1<-(sum((x - mean(x))^3)/n)*(n^2/((n-1)*(n-2)))
-  fm1<-(sum((x - mean(x))^4)/n)
+  tm1<-(sum((x - m1)^3)/n)*(n^2/((n-1)*(n-2)))
+  fm1<-(sum((x - m1)^4)/n)
   listall<-c(mean=m1,variance=(sd1)^2,tm=tm1,fm=fm1)
   (listall)
 }

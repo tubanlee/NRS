@@ -3101,7 +3101,7 @@ xexp<-rexp(5400,1)
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
 
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-02,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 #Arguments
 #x:a numeric vector
@@ -3110,6 +3110,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e
 #batch: if fast=FALSE, the approximation solution based on multiple-imputation, the "auto" option is 500000/(length of x), which is corresponding to five decimal accuracy.
 #boot: logical; if "TRUE", bootstrap is used for second and higher order moments/L-moments estimations, if not used, the computational time is often unacceptable due to the combinatorial explosion.
 #times : the number of subsampling times, a multiple of 9, used in bootstrap.
+#accuracy: if the maximum difference of exact results and bootstrap approximation is within the accuracy, the differences will not print. 
 #standist: a character string giving the standard distribution to be used to calibrate the d value. This must partially match either "exponential" or "Rayleigh", with default "exponential" and may be abbreviated to a unique prefix (the first three letters).
 #cise: logical; if "TRUE", the confidence interval and standard error will be estimated using bootstrap.  
 #parallel: logical; whether use parallel computing for the confidential interval and standard error, if not used, 100 nboot takes >10 mins, while if used, in a typical PC, the running time is about 1 min. Additional foreach and doparallel packages are required.
@@ -3155,7 +3156,7 @@ rqmean(x=xexp,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = TR
 
 #the P value is two-side.
 
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
 
 
 #two-goup comparison can also be done with a similar approach.
@@ -3191,18 +3192,18 @@ library(lmom)
 a=500
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
 targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
 #A rule of thumb for desired consistency performance (all four moments > 90%) is that 
 #the kurtosis of the underlying distribution should be within [1/2,2] times that of the standard distribution used to calibrate the d values. 
 #That means, using exponential as the standard distribution, the kurtosis should be within 4.5 to 18.
 
 #While accurately estimating population kurtosis is hard, finding a rough range and choosing the right standard should be easy in practice.
 #Also, if the quantile kurtosis is less than 4.7, it highly indicates the need to change to Rayleigh.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
 #parallel is default for confidential interval.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
@@ -3225,10 +3226,10 @@ htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",bo
 a=150
 xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
 targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
 #even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
 
 xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
 ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
@@ -3251,9 +3252,9 @@ htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",bo
 
 xRayleigh<-rRayleigh(n=5400, scale = 1) 
 
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=sqrt(pi/2),null_sd=sqrt(2-(pi/2)),null_skew=2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),null_kurt=(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),null_l2=0.5*(sqrt(2)-1)*sqrt(pi),null_l3=((1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))/(0.5*(sqrt(2)-1)*sqrt(pi)),null_l4=((sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))/(0.5*(sqrt(2)-1)*sqrt(pi)))
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=sqrt(pi/2),null_sd=sqrt(2-(pi/2)),null_skew=2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),null_kurt=(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),null_l2=0.5*(sqrt(2)-1)*sqrt(pi),null_l3=((1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))/(0.5*(sqrt(2)-1)*sqrt(pi)),null_l4=((sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))/(0.5*(sqrt(2)-1)*sqrt(pi)))
 
 
 xRayleigh<-rRayleigh(n=5400, scale = 2) 
@@ -3288,10 +3289,10 @@ xpois<-rpois(5400,8)
 
 #because the kurtosis of poisson is close to 3, the biases of robust/quantile kurtosis based on the exponential distribution are large.
 
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
 
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
 
 
 
@@ -3316,10 +3317,10 @@ htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot
 
 xnorm<-c(rnorm(5400))
 
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
 
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
 
 xnorm<-c(rnorm(5400,2))
 ynorm<-c(rnorm(5400,1))
@@ -3342,9 +3343,9 @@ htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot
 
 xlogis<-c(rlogis(5400, location = 0, scale = 1))
 
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
 
 xlogis<-c(rlogis(5400,2))
 ylogis<-c(rlogis(5400,1))
@@ -3366,9 +3367,9 @@ htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",bo
 
 
 xlaplace<-c(rLaplace(n=5400, location = 0, scale = 1))
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
 
 
 xlaplace<-c(rLaplace(n=5400,location = 2,scale = 1))
@@ -3398,10 +3399,10 @@ a=500
 xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
 targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)
 
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
 #the standard errors are lower, especially for robust moments and L-moments
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
 
 xpareto<-c(rPareto(5400, scale  = 2, shape=2+a/100))
 ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
@@ -3426,10 +3427,10 @@ a=100
 xlnorm<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
 targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
 
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
 #the standard errors are lower, especially for robust moments and L-moments
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
 
 xlnorm<-c(rlnorm(5400,meanlog=2,sdlog=a/100))
 ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
@@ -3455,9 +3456,9 @@ a=150
 xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
 library(lmom)
 targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential")
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="Rayleigh")
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
 
 
 xweibull<-c(rweibull(5400, shape=a/100, scale = 2))
@@ -3551,7 +3552,6 @@ rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 #based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
-
 
 
 

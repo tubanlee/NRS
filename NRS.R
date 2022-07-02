@@ -6,6 +6,12 @@
 #Run one function each time. If there is an error, try to restart, and then it will be fixed. 
 #It will be completely fixed in the future by rewriting the code in C++.
 
+
+
+#require library "Lmoments" to varify the asymptotic validity of bootstrap.
+if (!require("Lmoments")) install.packages("Lmoments")
+library(Lmoments)
+
 #require foreach and doparallel for parallel processing of bootstrap (not available for some types of computers)
 if (!require("foreach")) install.packages("foreach")
 library(foreach)
@@ -15,6 +21,16 @@ library(doParallel)
 numCores <- detectCores()
 registerDoParallel(numCores) 
 
+
+moments<-function (x){
+  n<-length(x)
+  m1<-mean(x)
+  sd1<-sd(x)
+  tm1<-(sum((x - mean(x))^3)/n)*(n^2/((n-1)*(n-2)))
+  fm1<-(sum((x - mean(x))^4)/n)
+  listall<-c(mean=m1,variance=(sd1)^2,tm=tm1,fm=fm1)
+  (listall)
+}
 greatest_common_divisor<- function(a, b) {
   if (b == 0) a else Recall(b, a %% b)
 }
@@ -321,8 +337,7 @@ rPareto<-function (n, scale, shape) {
   sample1[shape <= 0] <- NaN
   sample1
 }
-
-NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
+NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -367,7 +382,21 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=sd)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=sd,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=sd,drsd=drmscale,dqsd=dqmscale)
-  
+  moments1<-moments(x=sortedx)
+  Lmoments1<-Lmoments(sortedx)
+  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
+  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
+  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
+  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
+  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
+  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+    }
   if(sd){
     first<-c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4])
     second<-c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -423,7 +452,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   return(all)
 }
 
-NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -574,6 +603,21 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,sta
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
+  moments1<-moments(x=sortedx)
+  Lmoments1<-Lmoments(sortedx)
+  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
+  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
+  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
+  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
+  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
+  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
                c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
                  rsd=sqrt(rqscale1[7]),qsd=sqrt(rqscale1[8])),
@@ -629,7 +673,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,sta
 
 
 
-NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential" || standist=="exp"){
@@ -672,6 +716,17 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   estimate0<-foreach (i=1:nboot, .combine=rbind) %dopar% {
+    library(Lmoments)
+    moments<-function (x){
+      n<-length(x)
+      m1<-mean(x)
+      sd1<-sd(x)
+      tm1<-(sum((x - mean(x))^3)/n)*(n^2/((n-1)*(n-2)))
+      fm1<-(sum((x - mean(x))^4)/n)
+      listall<-c(mean=m1,variance=(sd1),skewness=tm1/(sd1^3),kurtosis=fm1/(sd1^4))
+      (listall)
+    }
+    
     greatest_common_divisor<- function(a, b) {
       if (b == 0) a else Recall(b, a %% b)
     }
@@ -972,6 +1027,21 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
+  moments1<-moments(x=sortedx)
+  Lmoments1<-Lmoments(sortedx)
+  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
+  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
+  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
+  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
+  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
+  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
               c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
                 rsd=sqrt(rqscale1[7]),qsd=sqrt(rqscale1[8])),
@@ -1025,7 +1095,7 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
@@ -1528,7 +1598,36 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscaley<-rqscale(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  
+  momentsx<-moments(x=sortedx)
+  Lmomentsx<-Lmoments(sortedx)
+  bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
+  bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
+  bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
+  bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
+  bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
+  bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
+  momentsy<-moments(x=sortedy)
+  Lmomentsy<-Lmoments(sortedy)
+  bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
+  bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
+  bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
+  bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
+  bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
+  bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
   estimate1<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
                  rsdx=sqrt(rqscalex[7]),qsdx=sqrt(rqscalex[8])),
@@ -1604,7 +1703,7 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
@@ -2080,7 +2179,36 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscaley<-rqscale(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  
+  momentsx<-moments(x=sortedx)
+  Lmomentsx<-Lmoments(sortedx)
+  bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
+  bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
+  bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
+  bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
+  bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
+  bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
+  momentsy<-moments(x=sortedy)
+  Lmomentsy<-Lmoments(sortedy)
+  bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
+  bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
+  bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
+  bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
+  bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
+  bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
+  allbv<-c(bootstrapvalidityl2,bootstrapvalidityl3,bootstrapvalidityl4,bootstrapvalidityvar,bootstrapvaliditytm)
+  accuracy1<-accuracy
+  if (max(allbv) >= accuracy1) {
+    namestype<-c("l2", "l3", "l4", "var", "tm", "fm")  
+    print(paste("The bootstrap approximation of the U-statistic of",namestype[which.max(allbv)],"failed to reach", accuracy1, "accuracy."))
+    print(paste("The maximum difference of exact results and bootstrap approximation is",max(allbv)))
+  }
   estimate<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
                  rsdx=sqrt(rqscalex[7]),qsdx=sqrt(rqscalex[8])),
@@ -2212,22 +2340,22 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
   }
   if(cise & parallel){
-    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
-  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
   }
-  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times ,standist=standist,sd=sd))
+  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,sd=sd))
 }}
 
-htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   if (boottype=="empirial"){
-    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
+    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot))
   } 
-  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
+  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot))
 }}
 effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
@@ -2801,6 +2929,7 @@ effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE
   } 
   else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist))
   }}
+
 winsor<-function (x, fraction=1/9)
 {
   lim <- quantile(x, probs=c(fraction, 1-fraction))
@@ -2870,7 +2999,7 @@ twreg<-function(x,y=NULL,iter = 20){
     coef<-rbind(coef,all1)
   }
   rownames(coef) <- c("mean", "tm", "wm")  
-  coef
+  return(coef)
 }
 rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
   matrix1 <- cbind(x, y)
@@ -2899,43 +3028,6 @@ rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponent
   qm1<-(meanxy[4]-meanx[4]*meany[4])
   rqcov <- c(mean1=mean1,etm1=etm1,rm1=rm1,qm1=qm1)
   return(rqcov)
-}
-rcor<- function (n, xparamater1, xparamater2, yparamater1, yparamater2, correlation,FUN1,FUN2) {
-  Sigma <- matrix(c(1,correlation,correlation,1),2,2)
-  mvrnorm <- function(n = 1, mu = 0, Sigma) {
-    nvars <- nrow(Sigma)
-    nmls <- matrix(rnorm(n * nvars), nrow = nvars)
-    scales <- t(chol(Sigma)) %*% nmls
-    samples <- mu + scales
-    t(samples)
-  }
-  multiva<-mvrnorm(n = n, mu=0, Sigma)
-  U <- pnorm(multiva, mean = 0, sd = 1)
-  xresult <- FUN1(U[, 1], xparamater1, xparamater2)
-  yresult <- FUN2(U[, 2], yparamater1, yparamater2)
-  data.frame(x=xresult,y=yresult)
-}
-
-rqcor<-function (x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
-  if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
-    
-    drmscale=0.7930
-    dqmscale=0.7825
-    
-  }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
-    
-    drmscale=0.3862421
-    dqmscale=1.097661
-  }
-  rqsdx<-rqsd(x=x,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drmscale,dqm=dqmscale)
-  rqsdy<-rqsd(x=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,drm=drmscale,dqm=dqmscale)
-  rqregxy<-rqreg(x=x,y=y,iter = iter,interval=interval,fast=fast,batch=batch,standist=standist)
-  rqcor <- rqregxy[,2]*rqsdx/rqsdy
-  return(rqcor)
 }
 rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c("exponential","Rayleigh","exp","Ray")){
   if(standist=="exponential"|| standist=="exp"){
@@ -2977,127 +3069,14 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
     }
     if (max(abs(sadd), abs(inadd)) >= 1e-04) {
       namestype<-c("mean", "etm", "rm", "qm")  
-      print(paste(namestype[type],"failed to converge within", iter, "iterations"))}
+      print(paste(namestype[type],"failed to converge within", iter, "iterations."))}
     all1<-(c(Intercept=inter, slope=slope,ResidualSE=sd(res)))
     coef<-rbind(coef,all1)
   }
   rownames(coef) <- c("mean", "etm", "rm", "qm")  
-  coef
+  return(coef)
 }
-library(lmtest)
-#robust regression test
-#Gaussian outliers
-n<-5400
-y<-as.numeric(n)
-x<-as.numeric(n)
-error<-as.numeric(n)
-for (i in 1:n){
-  x1 <- rnorm(1,0,1)
-  x2 <- runif(1,100,200)
-  u <- runif(1)
-  k <- as.integer(u > 0.9) 
-  error[i] <- (1-k)* x1 +  k* x2 
-  x[i]<-runif(1,0,10)
-  y[i]<-10+2*x[i]+error[i]
-}
-hist(error)
-plot(x,y)
-m1=lm(y~x)
-summary(m1)
-#robust linear regression based on ETM, robust mean and quantile mean
-rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
-#based on trimmed mean and winsorized mean
-twreg(x=x, y=y,iter = 200)
 
-
-#exponential outliers
-n<-5400
-y<-as.numeric(n)
-x<-as.numeric(n)
-error<-as.numeric(n)
-for (i in 1:n){
-  x1 <- rexp(1,1)-1
-  x2 <- runif(1,100,200)
-  u <- runif(1)
-  k <- as.integer(u > 0.9) 
-  error[i] <- (1-k)* x1 +  k* x2 
-  x[i]<-runif(1,0,10)
-  y[i]<-10+2*x[i]+error[i]
-}
-hist(error)
-m1=lm(y~x)
-summary(m1)
-#robust linear regression based on ETM, robust mean and quantile mean
-rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
-#based on trimmed mean and winsorized mean
-twreg(x=x, y=y,iter = 200)
-
-#Rayleigh outliers
-n<-5400
-y<-as.numeric(n)
-x<-as.numeric(n)
-error<-as.numeric(n)
-for (i in 1:n){
-  x1 <- rRayleigh(1,1)-sqrt(pi/2)
-  x2 <- runif(1,100,200)
-  u <- runif(1)
-  k <- as.integer(u > 0.9) 
-  error[i] <- (1-k)* x1 +  k* x2 
-  x[i]<-runif(1,0,10)
-  y[i]<-10+2*x[i]+error[i]
-}
-hist(error)
-m1=lm(y~x)
-summary(m1)
-#robust linear regression based on ETM, robust mean and quantile mean
-rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
-#based on trimmed mean and winsorized mean
-twreg(x=x, y=y,iter = 200)
-#the performance of rm and qm is not as good as etm
-
-
-#this robust correlation is based on the slope of robust regression, and then times the standard deviation ratio of x and y
-#Gaussian
-xy<-rcor(n = 5130, xparamater1 = 1, xparamater2 = 1, yparamater1 = 1, yparamater2 = 1, correlation = 0.8,FUN1=qnorm,FUN2=qnorm)
-x<-c(xy[,1])
-y<-c(xy[,2])
-cor(x=x, y=y,method="pearson")
-x<-c(xy[,1],rnorm(270,0,300))
-y<-c(xy[,2],rnorm(270,0,300))
-rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
-cor(x=x, y=y,method="pearson")
-cor(x=x, y=y,method="kendall")
-cor(x=x, y=y,method="spearman")
-
-#regression based correlation is much better than other robust correlation estimators when the data are Guassian.
-
-#exponential
-xy<-rcor(n = 5130, xparamater1 = 1, xparamater2 = 1, yparamater1 = 1, yparamater2 = 1, correlation = 0.8,FUN1=qexp,FUN2=qexp)
-x<-c(xy[,1])
-y<-c(xy[,2])
-cor(x=x, y=y,method="pearson")
-x<-c(xy[,1],rnorm(270,0,300))
-y<-c(xy[,2],rnorm(270,0,300))
-rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
-
-cor(x=x, y=y,method="pearson")
-cor(x=x, y=y,method="kendall")
-cor(x=x, y=y,method="spearman")
-
-#gamma
-xy<-rcor(n = 5130, xparamater1 = 1.5, xparamater2 = 1, yparamater1 = 1.5, yparamater2 = 1, correlation = 0.8,FUN1=qgamma,FUN2=qgamma)
-x<-c(xy[,1])
-y<-c(xy[,2])
-cor(x=x, y=y,method="pearson")
-x<-c(xy[,1],rnorm(270,0,300))
-y<-c(xy[,2],rnorm(270,0,300))
-rqcor(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp")
-
-cor(x=x, y=y,method="pearson")
-cor(x=x, y=y,method="kendall")
-cor(x=x, y=y,method="spearman")
-
-#but not for non-gaussian
 
 
 #test
@@ -3122,7 +3101,7 @@ xexp<-rexp(5400,1)
 #Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =540000,accuracy=1e-03,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 #Arguments
 #x:a numeric vector
 #interval: The b value in equinterval trimmed mean and complement trimmed mean, notifying that the breakdown points for higher order moments/L-moments are b*k, not b.
@@ -3498,5 +3477,80 @@ yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
 #test of null hypothesis
 htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
 
-
 #for more tests, use the codes in consistency.R
+
+
+library(lmtest)
+#robust regression test
+#Gaussian outliers
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rnorm(1,0,1)
+  x2 <- runif(1,100,200)
+  u <- runif(1)
+  k <- as.integer(u > 0.9) 
+  error[i] <- (1-k)* x1 +  k* x2 
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+plot(x,y)
+m1=lm(y~x)
+summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
+twreg(x=x, y=y,iter = 200)
+
+
+#exponential outliers
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rexp(1,1)-1
+  x2 <- runif(1,100,200)
+  u <- runif(1)
+  k <- as.integer(u > 0.9) 
+  error[i] <- (1-k)* x1 +  k* x2 
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+m1=lm(y~x)
+summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
+twreg(x=x, y=y,iter = 200)
+
+#Rayleigh outliers
+n<-5400
+y<-as.numeric(n)
+x<-as.numeric(n)
+error<-as.numeric(n)
+for (i in 1:n){
+  x1 <- rRayleigh(1,1)-sqrt(pi/2)
+  x2 <- runif(1,100,200)
+  u <- runif(1)
+  k <- as.integer(u > 0.9) 
+  error[i] <- (1-k)* x1 +  k* x2 
+  x[i]<-runif(1,0,10)
+  y[i]<-10+2*x[i]+error[i]
+}
+hist(error)
+m1=lm(y~x)
+summary(m1)
+#robust linear regression based on ETM, robust mean and quantile mean
+rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
+#based on trimmed mean and winsorized mean
+twreg(x=x, y=y,iter = 200)
+#the performance of rm and qm is not as good as etm
+
+
+
+

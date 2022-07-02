@@ -9,7 +9,7 @@
 
 
 
-#require library "Lmoments" to varify the asymptotic validity of bootstrap.
+#require library "Lmoments" to check the accuracy of bootstrap.
 if (!require("Lmoments")) install.packages("Lmoments")
 library(Lmoments)
 
@@ -22,7 +22,7 @@ library(doParallel)
 numCores <- detectCores()
 registerDoParallel(numCores) 
 
-
+#moments for checking the accuracy of bootstrap 
 moments<-function (x){
   n<-length(x)
   m1<-mean(x)
@@ -95,33 +95,7 @@ etm<-function (x,interval=9,fast=TRUE,batch="auto"){
     Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
     return(Groupmean)}
 }
-mmme<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,type=1){
-  sortedx<-sort(x,decreasing = FALSE,method ="radix")
-  etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
-  if(etm1[2]==Inf){
-    return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
-  }
-  mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-  mx2<-1/2
-  if (mx1>0.5){
-    quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
-  }else{
-    quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
-  }
-  upper1<-(1-1/interval)
-  lower1<-1/interval
-  if (!is.na(quatiletarget) & quatiletarget>(upper1)){
-    print(paste("Warning: the percentile exceeds ",as.character(upper1*interval),"/",as.character(interval),", the robustness shrinks."))
-  }else if(!is.na(quatiletarget) & quatiletarget<(lower1)){
-    print(paste("Warning: the percentile exceeds ",as.character(lower1*interval),"/",as.character(interval),", the robustness shrinks."))
-  }
-  qm1<-quantile(sortedx,quatiletarget)
-  rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
-  names(rm1)<-NULL
-  output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
-  return(output1[type])
-}
-
+#return four location estimators, arithmetic mean, ETM, robust mean, quantile mean
 mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
@@ -169,7 +143,6 @@ mmmci<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,alpha
                  ciqm=c(bootlist4[low],bootlist4[up]),semean=sd(bootlist1),seetm=sd(bootlist2),serm=sd(bootlist3),seqm=sd(bootlist4))
   return(result)
 }
-
 rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.3659,drm=0.7930,dlqm=0.8218,dqm=0.7825,sd=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
@@ -207,11 +180,10 @@ rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dl
     all<-c(allmo,allsd)
   }else{
     all<-c(l2=lmo[1],etl2=lmo[2],rl2=lmo[3],ql2=lmo[4],
-      var=mo[1],etvar=mo[2],rvar=mo[3],qvar=mo[4])
+      var=mo[1],etvar=mo[2],rvar=mo[3],qvar=mo[4],sdl2=sd(dp2lm),sdvar=sd(dp2m))
   }
   return(all)
 }
-
 rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0.7930,dqm=0.7825){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
@@ -236,7 +208,6 @@ rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0
   all<-c(sd=sqrt(mo[1]),etsd=sqrt(mo[2]),rsd=sqrt(mo[3]),qsd=sqrt(mo[4]))
   return(all)
 }
-
 rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.1808,drm=1.7492,dlqm=1.1753,dqm=0.5715,sd=FALSE,drsd=0.7930,dqsd=0.7825){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
@@ -269,11 +240,10 @@ rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
     all<-c(allmo,allsd)
   }else{
     all<-c(l3=lmo[1],etl3=lmo[2],rl3=lmo[3],ql3=lmo[4],
-           tm=mo[1],ettm=mo[2],rtm=mo[3],qtm=mo[4])
+           tm=mo[1],ettm=mo[2],rtm=mo[3],qtm=mo[4],sdl3=sd(dp2lm),sdtm=sd(dp2m))
   }
   return(all)
 }
-
 rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=-0.3542,drm=3.4560,dlqm=NaN,dqm=0.1246,sd=FALSE,drsd=0.7930,dqsd=0.7825){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
@@ -301,7 +271,6 @@ rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
   getlm<-function(vector){ 
     (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
   }
-  
   dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
   
   lmo<-mmm(x=dp2lm,interval=interval,fast=fast,batch=batch,drm=dlrm,dqm=dlqm)
@@ -316,7 +285,7 @@ rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
     all<-c(allmo,allsd)
   }else{
     all<-c(l4=lmo[1],etl4=lmo[2],rl4=lmo[3],ql4=lmo[4],
-           fm=mo[1],etfm=mo[2],rfm=mo[3],qfm=mo[4])
+           fm=mo[1],etfm=mo[2],rfm=mo[3],qfm=mo[4],sdl4=sd(dp2lm),sdfm=sd(dp2m))
   }
   return(all)
 }
@@ -338,7 +307,7 @@ rPareto<-function (n, scale, shape) {
   sample1[shape <= 0] <- NaN
   sample1
 }
-NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
+NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -383,19 +352,40 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=sd)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=sd,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=sd,drsd=drmscale,dqsd=dqmscale)
-  moments1<-moments(x=sortedx)
-  Lmoments1<-Lmoments(sortedx)
-  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
-  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
-  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
-  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
-  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
-  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
+  if (check){
+    moments1<-moments(x=sortedx)
+    Lmoments1<-Lmoments(sortedx)
+    bootstrapvalidityl2<-(Lmoments1[2]-rqscale1[1])
+    bootstrapvalidityl3<-(Lmoments1[3]-rqtm1[1])
+    bootstrapvalidityl4<-(Lmoments1[4]-rqfm1[1])
+    bootstrapvalidityvar<-(moments1[2]-rqscale1[5])
+    bootstrapvaliditytm<-(moments1[3]-rqtm1[5])
+    bootstrapvalidityfm<-(moments1[4]-rqfm1[5])
+    if (sd){
+      rqscale1sdl<-rqscale1[9]
+      rqscale1sd<-rqscale1[13]
+      rqtm1sdl<-rqtm1[9]
+      rqtm1sd<-rqtm1[13]
+      rqfm1sdl<-rqfm1[9]
+      rqfm1sd<-rqfm1[13]
+      allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    }else{
+      rqscale1sdl<-rqscale1[9]
+      rqscale1sd<-rqscale1[10]
+      rqtm1sdl<-rqtm1[9]
+      rqtm1sd<-rqtm1[10]
+      rqfm1sdl<-rqfm1[9]
+      rqfm1sd<-rqfm1[10]
+      allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    }
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
     print(paste("The differences of exact results and bootstrap approximation are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation are"))
+    print(allbv/allsd)
+    if(length(sortedx)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
   if(sd){
     first<-c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4])
@@ -452,7 +442,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   return(all)
 }
 
-NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -603,19 +593,30 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,acc
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  moments1<-moments(x=sortedx)
-  Lmoments1<-Lmoments(sortedx)
-  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
-  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
-  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
-  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
-  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
-  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
+  if (check){
+    moments1<-moments(x=sortedx)
+    Lmoments1<-Lmoments(sortedx)
+    bootstrapvalidityl2<-(Lmoments1[2]-rqscale1[1])
+    bootstrapvalidityl3<-(Lmoments1[3]-rqtm1[1])
+    bootstrapvalidityl4<-(Lmoments1[4]-rqfm1[1])
+    bootstrapvalidityvar<-(moments1[2]-rqscale1[5])
+    bootstrapvaliditytm<-(moments1[3]-rqtm1[5])
+    bootstrapvalidityfm<-(moments1[4]-rqfm1[5])
+    rqscale1sdl<-rqscale1[9]
+    rqscale1sd<-rqscale1[10]
+    rqtm1sdl<-rqtm1[9]
+    rqtm1sd<-rqtm1[10]
+    rqfm1sdl<-rqfm1[9]
+    rqfm1sd<-rqfm1[10]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
     print(paste("The differences of exact results and bootstrap approximation are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation are"))
+    print(allbv/allsd)
+    if(length(sortedx)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
                c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -670,9 +671,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,acc
   return(all)
 }
 
-
-
-NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential" || standist=="exp"){
@@ -715,17 +714,6 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   estimate0<-foreach (i=1:nboot, .combine=rbind) %dopar% {
-    library(Lmoments)
-    moments<-function (x){
-      n<-length(x)
-      m1<-mean(x)
-      sd1<-sd(x)
-      tm1<-(sum((x - mean(x))^3)/n)*(n^2/((n-1)*(n-2)))
-      fm1<-(sum((x - mean(x))^4)/n)
-      listall<-c(mean=m1,variance=(sd1),skewness=tm1/(sd1^3),kurtosis=fm1/(sd1^4))
-      (listall)
-    }
-    
     greatest_common_divisor<- function(a, b) {
       if (b == 0) a else Recall(b, a %% b)
     }
@@ -1026,19 +1014,30 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfm1<-rqfm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  moments1<-moments(x=sortedx)
-  Lmoments1<-Lmoments(sortedx)
-  bootstrapvalidityl2<-abs(Lmoments1[2]-rqscale1[1])
-  bootstrapvalidityl3<-abs(Lmoments1[3]-rqtm1[1])
-  bootstrapvalidityl4<-abs(Lmoments1[4]-rqfm1[1])
-  bootstrapvalidityvar<-abs(moments1[2]-rqscale1[5])
-  bootstrapvaliditytm<-abs(moments1[3]-rqtm1[5])
-  bootstrapvalidityfm<-abs(moments1[4]-rqfm1[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
+  if (check){
+    moments1<-moments(x=sortedx)
+    Lmoments1<-Lmoments(sortedx)
+    bootstrapvalidityl2<-(Lmoments1[2]-rqscale1[1])
+    bootstrapvalidityl3<-(Lmoments1[3]-rqtm1[1])
+    bootstrapvalidityl4<-(Lmoments1[4]-rqfm1[1])
+    bootstrapvalidityvar<-(moments1[2]-rqscale1[5])
+    bootstrapvaliditytm<-(moments1[3]-rqtm1[5])
+    bootstrapvalidityfm<-(moments1[4]-rqfm1[5])
+    rqscale1sdl<-rqscale1[9]
+    rqscale1sd<-rqscale1[10]
+    rqtm1sdl<-rqtm1[9]
+    rqtm1sd<-rqtm1[10]
+    rqfm1sdl<-rqfm1[9]
+    rqfm1sd<-rqfm1[10]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
     print(paste("The differences of exact results and bootstrap approximation are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation are"))
+    print(allbv/allsd)
+    if(length(sortedx)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
   estimate<-c(c(mean=mmm1[1],etm=mmm1[2],rm=mmm1[3],qm=mmm1[4]),
               c(l2=rqscale1[1],etl2=rqscale1[2],rl2=rqscale1[3],ql2=rqscale1[4],sd=sqrt(rqscale1[5]),etsd=sqrt(rqscale1[6]),
@@ -1093,7 +1092,7 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
@@ -1596,35 +1595,60 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscaley<-rqscale(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  momentsx<-moments(x=sortedx)
-  Lmomentsx<-Lmoments(sortedx)
-  bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
-  bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
-  bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
-  bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
-  bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
-  bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
-    print(paste("The differences of exact results and bootstrap approximation are"))
+  if (check){
+    momentsx<-moments(x=sortedx)
+    Lmomentsx<-Lmoments(sortedx)
+    bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
+    bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
+    bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
+    bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
+    bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
+    bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
+    rqscale1sdl<-rqscalex[9]
+    rqscale1sd<-rqscalex[10]
+    rqtm1sdl<-rqtmx[9]
+    rqtm1sd<-rqtmx[10]
+    rqfm1sdl<-rqfmx[9]
+    rqfm1sd<-rqfmx[10]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
+    print(paste("The differences of exact results and bootstrap approximation of sample x are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation of sample x are"))
+    print(allbv/allsd)
+    if(length(sortedx)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
   
-  momentsy<-moments(x=sortedy)
-  Lmomentsy<-Lmoments(sortedy)
-  bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
-  bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
-  bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
-  bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
-  bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
-  bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
-    print(paste("The differences of exact results and bootstrap approximation are"))
+  if (check){
+    momentsy<-moments(x=sortedy)
+    Lmomentsy<-Lmoments(sortedy)
+    bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
+    bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
+    bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
+    bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
+    bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
+    bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
+    rqscale1sdl<-rqscaley[9]
+    rqscale1sd<-rqscaley[13]
+    rqtm1sdl<-rqtmy[9]
+    rqtm1sd<-rqtmy[13]
+    rqfm1sdl<-rqfmy[9]
+    rqfm1sd<-rqfmy[13]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
+    print(paste("The differences of exact results and bootstrap approximation of sample x are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation of sample y are"))
+    print(allbv/allsd)
+    if(length(sortedy)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
+
   estimate1<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
                  rsdx=sqrt(rqscalex[7]),qsdx=sqrt(rqscalex[8])),
@@ -2176,34 +2200,60 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   rqscaley<-rqscale(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=FALSE)
   rqtmy<-rqtm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
   rqfmy<-rqfm(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmfm,drm=drmfm,dlqm=dlqmfm,dqm=dqmfm,sd=FALSE,drsd=drmscale,dqsd=dqmscale)
-  momentsx<-moments(x=sortedx)
-  Lmomentsx<-Lmoments(sortedx)
-  bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
-  bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
-  bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
-  bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
-  bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
-  bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
-    print(paste("The differences of exact results and bootstrap approximation are"))
+  if (check){
+    momentsx<-moments(x=sortedx)
+    Lmomentsx<-Lmoments(sortedx)
+    bootstrapvalidityl2<-abs(Lmomentsx[2]-rqscalex[1])
+    bootstrapvalidityl3<-abs(Lmomentsx[3]-rqtmx[1])
+    bootstrapvalidityl4<-abs(Lmomentsx[4]-rqfmx[1])
+    bootstrapvalidityvar<-abs(momentsx[2]-rqscalex[5])
+    bootstrapvaliditytm<-abs(momentsx[3]-rqtmx[5])
+    bootstrapvalidityfm<-abs(momentsx[4]-rqfmx[5])
+    rqscale1sdl<-rqscalex[9]
+    rqscale1sd<-rqscalex[10]
+    rqtm1sdl<-rqtmx[9]
+    rqtm1sd<-rqtmx[10]
+    rqfm1sdl<-rqfmx[9]
+    rqfm1sd<-rqfmx[10]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
+    print(paste("The differences of exact results and bootstrap approximation of sample x are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation of sample x are"))
+    print(allbv/allsd)
+    if(length(sortedx)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
-  momentsy<-moments(x=sortedy)
-  Lmomentsy<-Lmoments(sortedy)
-  bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
-  bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
-  bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
-  bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
-  bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
-  bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
-  allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
-  accuracy1<-accuracy
-  if (max(allbv) >= accuracy1) {
-    print(paste("The differences of exact results and bootstrap approximation are"))
+  
+  if (check){
+    momentsy<-moments(x=sortedy)
+    Lmomentsy<-Lmoments(sortedy)
+    bootstrapvalidityl2<-abs(Lmomentsy[2]-rqscaley[1])
+    bootstrapvalidityl3<-abs(Lmomentsy[3]-rqtmy[1])
+    bootstrapvalidityl4<-abs(Lmomentsy[4]-rqfmy[1])
+    bootstrapvalidityvar<-abs(momentsy[2]-rqscaley[5])
+    bootstrapvaliditytm<-abs(momentsy[3]-rqtmy[5])
+    bootstrapvalidityfm<-abs(momentsy[4]-rqfmy[5])
+    rqscale1sdl<-rqscaley[9]
+    rqscale1sd<-rqscaley[10]
+    rqtm1sdl<-rqtmy[9]
+    rqtm1sd<-rqtmy[10]
+    rqfm1sdl<-rqfmy[9]
+    rqfm1sd<-rqfmy[10]
+    allsd<-c(l2=rqscale1sdl,l3=rqtm1sdl,l4=rqfm1sdl,var=rqscale1sd,tm=rqtm1sd,fm=rqfm1sd)
+    
+    allbv<-c(l2=bootstrapvalidityl2,l3=bootstrapvalidityl3,l4=bootstrapvalidityl4,var=bootstrapvalidityvar,tm=bootstrapvaliditytm,fm=bootstrapvalidityfm)
+    print(paste("The differences of exact results and bootstrap approximation of sample y are"))
     print(allbv)
+    print(paste("The standardized differences of exact results and bootstrap approximation of sample y are"))
+    print(allbv/allsd)
+    if(length(sortedy)<300){
+      print(paste("The sample third and fourth moments are biased while the U-statistics are unbiased, the differences might not reflect the accuracy of bootstrap."))
+    }
   }
+  
   estimate<-c(c(meanx=mmmx[1],etmx=mmmx[2],rmx=mmmx[3],qmx=mmmx[4]),
                c(l2x=rqscalex[1],etl2x=rqscalex[2],rl2x=rqscalex[3],ql2x=rqscalex[4],sdx=sqrt(rqscalex[5]),etsdx=sqrt(rqscalex[6]),
                  rsdx=sqrt(rqscalex[7]),qsdx=sqrt(rqscalex[8])),
@@ -2335,30 +2385,30 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
   }
   if(cise & parallel){
-    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
-  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
   }
-  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,sd=sd))
+  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=sd))
 }}
 
-htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   if (boottype=="empirial"){
-    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot))
+    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
   } 
-  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,accuracy=accuracy,standist=standist,alpha=alpha,nboot=nboot))
+  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
 }}
-effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
+effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray")){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
-  estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
-  estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
+  estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=TRUE)
+  estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=TRUE)
   firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))*0.5)^0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))*0.5)^0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))*0.5)^0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))*0.5)^0.5))
   
   secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))*0.5)^0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))*0.5)^0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))*0.5)^0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))*0.5)^0.5),
@@ -2375,11 +2425,10 @@ effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,t
   if(estimatex$fourth[5]<4.7 & standist=="exponential"){
     print("The quantile kurtosis is lower than 4.7, it might be better to use the Rayleigh distribution as the standard distribution.")
   }
-  
   return(all)
 }
 
-esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
@@ -2861,7 +2910,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
   low<-round((alpha/2)*nboot)
   up<-nboot-low
   low<-low+1
-  effectsizeNRSs2<-effectsizeNRSssimple(x=sortedx,y=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist)
+  effectsizeNRSs2<-effectsizeNRSssimple(x=sortedx,y=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist)
   estimate<-c(effectsizeNRSs2$firsteffectsize,effectsizeNRSs2$secondeffectsize,effectsizeNRSs2$thirdeffectsize,effectsizeNRSs2$fourtheffectsize)
   
   bootlist1a<-bootlist1a-(estimate[1])
@@ -2918,12 +2967,455 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
   return(all)
 }
 
-effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
   if (ci){
-    return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,alpha=alpha,nboot=nboot))
+    return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
   } 
-  else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist))
-  }}
+  else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist))
+}}
+
+
+
+#test
+xexp<-rexp(5400,1)
+
+#the population mean is 1
+#the population standard deviation is 1
+#the population L2-moment is 1/2
+#the population skewness is 2
+#the population L-skewness is 1/3
+#the population kurtosis is 9
+#the population L-kurtosis is 1/6
+#no d for ql4, because the distribution of U-statistic of L4-moment does not follow mean-ETM-median inequality
+
+#the bootstrap method for confidential interval, standard errors and hypothesis testing, are from three textbooks, including 
+#Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#Bickel, P. J., & Doksum, K. A. (2015). Mathematical statistics: basic ideas and selected topics, volumes I-II package. Chapman and Hall/CRC.
+#Rice, J. A. (2006). Mathematical statistics and data analysis. Cengage Learning.
+
+#the asymptotic validity of bootstrap of U-statistics, although haven't been proven yet, is verified by Monta Carlo study and suggested by 
+#Bickel, P. J., & Freedman, D. A. (1981). Some asymptotic theory for the bootstrap. The annals of statistics, 9(6), 1196-1217.
+#Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
+
+#In addition, unlike other types of bootstrap that users are unable to verify the results, the accuracy of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
+
+#noted that the sample third and fourth moment is biased (the third moment is symmetric unbiased, but not general unbiased), and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
+
+#the finite sample bias of the fourth moment is around 0.004 (n=5400).
+
+#L-moments are unbiased, so a good reference for validation.
+
+#the standard deviation of the distribution of corresponding U-statistic is used to standardize the differences, since it directly related to the standard error of the estimator
+
+#As a reference, 1/sqrt(5400)=0.01360828, using 54000 subsamples, the standardized differences are ~0.002, only 1/7 of the standard error.
+
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
+#Arguments
+#x:a numeric vector
+#interval: The b value in equinterval trimmed mean and complement trimmed mean, notifying that the breakdown points for higher order moments/L-moments are b*k, not b.
+#fast: logical; if "TRUE", the approximation solution based on data augmentation for n mod b =/ 0 is used, only available when the sample size is smaller than 10000.
+#batch: if fast=FALSE, the approximation solution based on multiple-imputation, the "auto" option is 500000/(length of x), which is corresponding to five decimal accuracy.
+#boot: logical; if "TRUE", bootstrap is used for second and higher order moments/L-moments estimations, if not used, the computational time is often unacceptable due to the combinatorial explosion.
+#times : the number of subsampling times, a multiple of 9, used in bootstrap.
+#check: logical; if "TRUE", the differences and standardized differences of exact results and bootstrap approximation will be printed. 
+#standist: a character string giving the standard distribution to be used to calibrate the d value. This must partially match either "exponential" or "Rayleigh", with default "exponential" and may be abbreviated to a unique prefix (the first three letters).
+#cise: logical; if "TRUE", the confidence interval and standard error will be estimated using bootstrap.  
+#parallel: logical; whether use parallel computing for the confidential interval and standard error, if not used, 100 nboot takes >10 mins, while if used, in a typical PC, the running time is about 1 min. Additional foreach and doparallel packages are required.
+#alpha: the alpha level for confidence interval computation.
+#nboot: the number of bootstrap samples for confidence interval computation.
+#sd: logical; if "TRUE", all standard deviations of the distributions of corresponding U-statistics will return.
+
+#To make comparisons easier, sample standardized moments and scaled L-moments are provided (this moments are estimated same based on U-statistics, not the formula approach
+#because if direct compare sample moments with NRSs, the variance from bootstrap also need to take into consideration.
+
+#ETM-based moments and L-moments are also provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
+
+#The standard deviations of the distributions of U-statistic is calculated based on the law of prorogation of uncertainty and can be used to estimate the consistency percentage.
+
+#another very interesting and probably novel approach is effect size based on the standard deviation of the U-statistics (I said novel is because I haven't found effect size of higher moments, e.g., standard deviation, skewness, kurtosis)
+xexp<-c(rexp(5400,2))
+yexp<-rexp(5400,1)
+
+effectsizeNRSs(x=xexp,y=yexp,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+#the standard deviation is estimated by the corresponding estimators, e.g., for rskew, the standard deviation of the distribution of U-statistics is estimated by rsd.
+
+#the confidence interval of effect size can be estimated by bootstrap. With the help of parallel computing, the running time is around 1 mins
+#because for every estimators, the standard deviation of the corresponding U statistics needs to be estimated by etsd, rsd, qsd.
+
+#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.The standardized differences are ~0.02, increase 10 times.
+effectsizeNRSs(x=xexp,y=yexp,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+#the se is the standard error of effect size.
+
+#The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.
+xexp<-c(rexp(5400,1))
+rqmean(x=xexp,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = TRUE,alpha = 0.05,nboot = 1000)
+#A similar approach can be applied to all NRSs, but just 100 nboot takes ~10 mins.
+
+#If you don't want to wait for a long time to compare, don't run the following code.
+#NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,parallel=FALSE,alpha = 0.05,nboot = 100)
+
+#A solution is parallel computing (takes 1 min with 12 cores, but is unavailable on some types of computers).
+
+#The standard errors of robust skewness and kurtosis are lower than those of sample skewness and kurtosis.
+
+#also, the one-sample hypothesis testing can be done with the equal-tail bootstrap P-value.
+
+#the null values are the corresponding population parameters.
+
+#the P value is two-side.
+
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
+
+
+#two-goup comparison can also be done with a similar approach.
+xexp<-rexp(5400,1.1)
+yexp<-rexp(5400,1)
+
+#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
+#empirical bootstrap hypothesis test
+htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+#percentile bootstrap hypothesis test (very controversial, but the results are similar.)
+htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+
+xexp<-c(rexp(5350,1),rnorm(50,30))
+yexp<-rexp(5400,1)
+
+#test of outliers.
+
+htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+
+htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+
+xexp<-c(rexp(5400,1))
+yexp<-rexp(5400,1)
+
+#test of null hypothesis
+
+htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exp",alpha=0.05,nboot=100)
+
+
+library(lmom)
+
+a=500
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+#A rule of thumb for desired consistency performance (all four moments > 90%) is that 
+#the kurtosis of the underlying distribution should be within [1/2,2] times that of the standard distribution used to calibrate the d values. 
+#That means, using exponential as the standard distribution, the kurtosis should be within 4.5 to 18.
+
+#While accurately estimating population kurtosis is hard, finding a rough range and choosing the right standard should be easy in practice.
+#Also, if the quantile kurtosis is less than 4.7, it highly indicates the need to change to Rayleigh.
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+#parallel is default for confidential interval.
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,check=TRUE,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of effect size
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of null hypothesis
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+a=150
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+#even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
+NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of effect size
+effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
+ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
+
+#test of null hypothesis
+htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
+xRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=sqrt(pi/2),null_sd=sqrt(2-(pi/2)),null_skew=2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),null_kurt=(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),null_l2=0.5*(sqrt(2)-1)*sqrt(pi),null_l3=((1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))/(0.5*(sqrt(2)-1)*sqrt(pi)),null_l4=((sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))/(0.5*(sqrt(2)-1)*sqrt(pi)))
+
+
+xRayleigh<-rRayleigh(n=5400, scale = 2) 
+yRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+#test of effect size
+effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xRayleigh<-rRayleigh(n=5400, scale = 1.1) 
+yRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+#empirical bootstrap hypothesis test
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xRayleigh<-rRayleigh(n=5400, scale = 1) 
+yRayleigh<-rRayleigh(n=5400, scale = 1) 
+
+#test of null hypothesis
+htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xpois<-rpois(5400,8)
+#the population mean is 8
+#quantile mean returns 7 or 9
+#the population variance is 8
+#the population L2-moment is 1.583
+#the population skewness is 0.3535534
+#the population L-skewness is 0.0592
+#the population kurtosis is 1/8+3
+#the population L-kurtosis is 0.1204
+
+#quantile L-moments are not suitable for discrete distributions
+
+#because the kurtosis of poisson is close to 3, the biases of robust/quantile kurtosis based on the exponential distribution are large.
+
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
+
+
+xpois<-rpois(5400,19)
+ypois<-rpois(5400,8)
+
+#test of effect size
+effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xpois<-rpois(5400,9)
+ypois<-rpois(5400,8)
+
+#empirical bootstrap hypothesis test
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xpois<-rpois(5400,8)
+ypois<-rpois(5400,8)
+
+#test of null hypothesis
+htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+
+xnorm<-c(rnorm(5400))
+
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+
+NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
+
+xnorm<-c(rnorm(5400,2))
+ynorm<-c(rnorm(5400,1))
+
+#test of effect size
+effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xnorm<-c(rnorm(5400,1.1))
+ynorm<-c(rnorm(5400,1))
+
+#empirical bootstrap hypothesis test
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xnorm<-c(rnorm(5400,1))
+ynorm<-c(rnorm(5400,1))
+
+#test of null hypothesis
+htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+
+xlogis<-c(rlogis(5400, location = 0, scale = 1))
+
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
+
+xlogis<-c(rlogis(5400,2))
+ylogis<-c(rlogis(5400,1))
+
+#test of effect size
+effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xlogis<-c(rlogis(5400,1.1))
+ylogis<-c(rlogis(5400,1))
+
+#empirical bootstrap hypothesis test
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xlogis<-c(rlogis(5400,1))
+ylogis<-c(rlogis(5400,1))
+
+#test of null hypothesis
+htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+
+xlaplace<-c(rLaplace(n=5400, location = 0, scale = 1))
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
+
+
+xlaplace<-c(rLaplace(n=5400,location = 2,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
+
+#test of effect size
+effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xlaplace<-c(rLaplace(n=5400,location = 1.1,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+xlaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
+ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
+
+#test of null hypothesis
+htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
+
+
+#NRSs have excellent performance even for heavy tailed distributions.
+
+#two performance criteria, consistency (or sensitive) and standard error
+library(lmom)
+a=500
+xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)
+
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+#the standard errors are lower, especially for robust moments and L-moments
+NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
+
+xpareto<-c(rPareto(5400, scale  = 2, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#test of effect size
+effectsizeNRSs(x=xpareto,y=ypareto,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xpareto<-c(rPareto(5400, scale  = 1.1, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#empirical bootstrap hypothesis test
+htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
+
+#test of null hypothesis
+htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+
+a=100
+xlnorm<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
+targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
+
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential")
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Rayleigh")
+#the standard errors are lower, especially for robust moments and L-moments
+NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
+
+xlnorm<-c(rlnorm(5400,meanlog=2,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#test of effect size
+effectsizeNRSs(x=xlnorm,y=ylnorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xlnorm<-c(rlnorm(5400,meanlog=1.1,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#empirical bootstrap hypothesis test
+htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xlnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
+
+#test of null hypothesis
+htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+a=150
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+library(lmom)
+targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
+NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
+
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 2))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#test of effect size
+effectsizeNRSs(x=xweibull,y=yweibull,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1.1))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#empirical bootstrap hypothesis test
+htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
+
+#test of null hypothesis
+htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
+
+#for more tests, use the codes in consistency.R
+
+
+
+#this regression is just shown and not plan to include (if think needed I can also include, my opinion is off-topic..)
+mmme<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,type=1){
+  sortedx<-sort(x,decreasing = FALSE,method ="radix")
+  etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
+  if(etm1[2]==Inf){
+    return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
+  }
+  mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+  mx2<-1/2
+  if (mx1>0.5){
+    quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+  }else{
+    quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+  }
+  upper1<-(1-1/interval)
+  lower1<-1/interval
+  if (!is.na(quatiletarget) & quatiletarget>(upper1)){
+    print(paste("Warning: the percentile exceeds ",as.character(upper1*interval),"/",as.character(interval),", the robustness shrinks."))
+  }else if(!is.na(quatiletarget) & quatiletarget<(lower1)){
+    print(paste("Warning: the percentile exceeds ",as.character(lower1*interval),"/",as.character(interval),", the robustness shrinks."))
+  }
+  qm1<-quantile(sortedx,quatiletarget)
+  rm1<--drm*etm1[3]+etm1[2]+drm*etm1[2]
+  names(rm1)<-NULL
+  output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
+  return(output1[type])
+}
 
 winsor<-function (x, fraction=1/9)
 {
@@ -3007,7 +3499,7 @@ rqcov<-function (x,y=NULL,interval=9,fast=TRUE,batch="auto",standist=c("exponent
   if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
     dqm=0.82224
-
+    
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -3074,416 +3566,7 @@ rqreg<-function(x,y=NULL,iter = 20,interval=9,fast=TRUE,batch="auto",standist=c(
 
 
 
-#test
-xexp<-rexp(5400,1)
 
-#the population mean is 1
-#the population standard deviation is 1
-#the population L2-moment is 1/2
-#the population skewness is 2
-#the population L-skewness is 1/3
-#the population kurtosis is 9
-#the population L-kurtosis is 1/6
-#no d for ql4, because the distribution of U-statistic of L4-moment does not follow mean-ETM-median inequality
-
-#the bootstrap method for confidential interval, standard errors and hypothesis testing, are from three textbooks, including 
-#Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
-#Bickel, P. J., & Doksum, K. A. (2015). Mathematical statistics: basic ideas and selected topics, volumes I-II package. Chapman and Hall/CRC.
-#Rice, J. A. (2006). Mathematical statistics and data analysis. Cengage Learning.
-
-#the asymptotic validity of bootstrap of U-statistics, although haven't been proven yet, is verified by Monta Carlo study and highly suggested by 
-#Bickel, P. J., & Freedman, D. A. (1981). Some asymptotic theory for the bootstrap. The annals of statistics, 9(6), 1196-1217.
-#Bickel, P. J., & Freedman, D. A. (1984). Asymptotic normality and the bootstrap in stratified sampling. The annals of statistics, 470-482.
-
-#In addition, unlike other types of bootstrap that users are unable to verify the results, the accuracy of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
-
-#noted that the sample third and fourth moment is biased (the third moment is symmetric unbiased, but not general unbiased), and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
-
-#L-moments are unbiased, so a good reference for validation.
-
-#this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
-
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =540000,accuracy=1e-04,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
-
-#Arguments
-#x:a numeric vector
-#interval: The b value in equinterval trimmed mean and complement trimmed mean, notifying that the breakdown points for higher order moments/L-moments are b*k, not b.
-#fast: logical; if "TRUE", the approximation solution based on data augmentation for n mod b =/ 0 is used, only available when the sample size is smaller than 10000.
-#batch: if fast=FALSE, the approximation solution based on multiple-imputation, the "auto" option is 500000/(length of x), which is corresponding to five decimal accuracy.
-#boot: logical; if "TRUE", bootstrap is used for second and higher order moments/L-moments estimations, if not used, the computational time is often unacceptable due to the combinatorial explosion.
-#times : the number of subsampling times, a multiple of 9, used in bootstrap.
-#accuracy: if the maximum difference of exact results and bootstrap approximation is within the accuracy, the differences will not print. 
-#standist: a character string giving the standard distribution to be used to calibrate the d value. This must partially match either "exponential" or "Rayleigh", with default "exponential" and may be abbreviated to a unique prefix (the first three letters).
-#cise: logical; if "TRUE", the confidence interval and standard error will be estimated using bootstrap.  
-#parallel: logical; whether use parallel computing for the confidential interval and standard error, if not used, 100 nboot takes >10 mins, while if used, in a typical PC, the running time is about 1 min. Additional foreach and doparallel packages are required.
-#alpha: the alpha level for confidence interval computation.
-#nboot: the number of bootstrap samples for confidence interval computation.
-
-#To make comparisons easier, sample standardized moments and scaled L-moments are provided (this moments are estimated same based on U-statistics, not the formula approach
-#because if direct compare sample moments with NRSs, the variance from bootstrap also need to take into consideration.
-
-#ETM-based moments and L-moments are also provided, although the biases are large compared to NRSs, ET-moments have near-optimum standard errors and so can be expected will have a place in hypothesis testing.
-
-#The standard deviations of the distributions of U-statistic can be used to estimate the consistency percentage.
-
-#another very interesting and probably novel approach is effect size based on the standard deviation of the U-statistics (I said novel is because I haven't found effect size of higher moments, e.g., standard deviation, skewness, kurtosis)
-xexp<-c(rexp(5400,2))
-yexp<-rexp(5400,1)
-
-effectsizeNRSs(x=xexp,y=yexp,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exp",alpha=0.05,nboot=100)
-#the standard deviation is estimated by the corresponding estimators, e.g., for rskew, the standard deviation of the distribution of U-statistics is estimated by rsd.
-
-#the confidence interval of effect size can be estimated by bootstrap. With the help of parallel computing, the running time is around 1 mins
-#because for every estimators, the standard deviation of the corresponding U statistics needs to be estimated by etsd, rsd, qsd.
-
-#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
-effectsizeNRSs(x=xexp,y=yexp,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-#the se is the standard error of effect size.
-
-#The standard error and confidential interval of the robust or quantile mean can be accurately estimated by bootstrapping.
-xexp<-c(rexp(5400,1))
-rqmean(x=xexp,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = TRUE,alpha = 0.05,nboot = 1000)
-#A similar approach can be applied to all NRSs, but just 100 nboot takes ~10 mins.
-
-#If you don't want to wait for a long time to compare, don't run the following code.
-#NRSs(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist="exponential",cise = TRUE,parallel=FALSE,alpha = 0.05,nboot = 100)
-
-#A solution is parallel computing (takes 1 min with 12 cores, but is unavailable on some types of computers).
-
-#The standard errors of robust skewness and kurtosis are lower than those of sample skewness and kurtosis.
-
-#also, the one-sample hypothesis testing can be done with the equal-tail bootstrap P-value.
-
-#the null values are the corresponding population parameters.
-
-#the P value is two-side.
-
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6)
-
-
-#two-goup comparison can also be done with a similar approach.
-xexp<-rexp(5400,1.1)
-yexp<-rexp(5400,1)
-
-#to reduce the test time, the boot times of U-statistics are 5400, instead of 54000.
-#empirical bootstrap hypothesis test
-htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-#percentile bootstrap hypothesis test (very controversial, but the results are similar.)
-htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xexp<-c(rexp(5350,1),rnorm(50,30))
-yexp<-rexp(5400,1)
-
-#test of outliers.
-
-htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xexp<-c(rexp(5400,1))
-yexp<-rexp(5400,1)
-
-#test of null hypothesis
-
-htest(x=xexp,y=yexp,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-htest(x=xexp,y=yexp,boottype="percentile",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-
-library(lmom)
-
-a=500
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
-targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-#A rule of thumb for desired consistency performance (all four moments > 90%) is that 
-#the kurtosis of the underlying distribution should be within [1/2,2] times that of the standard distribution used to calibrate the d values. 
-#That means, using exponential as the standard distribution, the kurtosis should be within 4.5 to 18.
-
-#While accurately estimating population kurtosis is hard, finding a rough range and choosing the right standard should be easy in practice.
-#Also, if the quantile kurtosis is less than 4.7, it highly indicates the need to change to Rayleigh.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-#parallel is default for confidential interval.
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
-
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#test of effect size
-effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#empirical bootstrap hypothesis test
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#test of null hypothesis
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-a=150
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
-targetgam<-lmrgam(para = c(a/100, 1), nmom = 4)
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-#even the kurtosis is not very high, 7, the standard errors are still lower than sample moments. 
-NRSs(x=xgamma,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetgam[1],null_sd=sqrt((a/100)),null_skew=2/sqrt(a/100),null_kurt=((6/(a/100))+3),null_l2=targetgam[2],null_l3=targetgam[3],null_l4=targetgam[4])
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 2))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#test of effect size
-effectsizeNRSs(x=xgamma,y=ygamma,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1.1))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#empirical bootstrap hypothesis test
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xgamma<-c(rgamma(5400, shape=a/100, rate = 1))
-ygamma<-c(rgamma(5400, shape=a/100, rate = 1))
-
-#test of null hypothesis
-htest(x=xgamma,y=ygamma,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-
-xRayleigh<-rRayleigh(n=5400, scale = 1) 
-
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=sqrt(pi/2),null_sd=sqrt(2-(pi/2)),null_skew=2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),null_kurt=(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),null_l2=0.5*(sqrt(2)-1)*sqrt(pi),null_l3=((1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))/(0.5*(sqrt(2)-1)*sqrt(pi)),null_l4=((sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))/(0.5*(sqrt(2)-1)*sqrt(pi)))
-
-
-xRayleigh<-rRayleigh(n=5400, scale = 2) 
-yRayleigh<-rRayleigh(n=5400, scale = 1) 
-
-#test of effect size
-effectsizeNRSs(x=xRayleigh,y=yRayleigh,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xRayleigh<-rRayleigh(n=5400, scale = 1.1) 
-yRayleigh<-rRayleigh(n=5400, scale = 1) 
-
-#empirical bootstrap hypothesis test
-htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xRayleigh<-rRayleigh(n=5400, scale = 1) 
-yRayleigh<-rRayleigh(n=5400, scale = 1) 
-
-#test of null hypothesis
-htest(x=xRayleigh,y=yRayleigh,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xpois<-rpois(5400,8)
-#the population mean is 8
-#quantile mean returns 7 or 9
-#the population variance is 8
-#the population L2-moment is 1.583
-#the population skewness is 0.3535534
-#the population L-skewness is 0.0592
-#the population kurtosis is 1/8+3
-#the population L-kurtosis is 0.1204
-
-#quantile L-moments are not suitable for discrete distributions
-
-#because the kurtosis of poisson is close to 3, the biases of robust/quantile kurtosis based on the exponential distribution are large.
-
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-NRSs(x=xpois,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,parallel=TRUE,alpha = 0.05,nboot=100,null_mean=8,null_sd=sqrt(8),null_skew=0.3535534,null_kurt=(1/8+3),null_l2=1.583,null_l3=0.0592,null_l4=0.1204)
-
-
-
-xpois<-rpois(5400,19)
-ypois<-rpois(5400,8)
-
-#test of effect size
-effectsizeNRSs(x=xpois,y=ypois,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xpois<-rpois(5400,9)
-ypois<-rpois(5400,8)
-
-#empirical bootstrap hypothesis test
-htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xpois<-rpois(5400,8)
-ypois<-rpois(5400,8)
-
-#test of null hypothesis
-htest(x=xpois,y=ypois,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-
-xnorm<-c(rnorm(5400))
-
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-
-NRSs(x=xnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=1,null_skew=0,null_kurt=3,null_l2=1/sqrt(pi),null_l3=0,null_l4=(30*(1/(pi))*(atan(sqrt(2)))-9))
-
-xnorm<-c(rnorm(5400,2))
-ynorm<-c(rnorm(5400,1))
-
-#test of effect size
-effectsizeNRSs(x=xnorm,y=ynorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xnorm<-c(rnorm(5400,1.1))
-ynorm<-c(rnorm(5400,1))
-
-#empirical bootstrap hypothesis test
-htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xnorm<-c(rnorm(5400,1))
-ynorm<-c(rnorm(5400,1))
-
-#test of null hypothesis
-htest(x=xnorm,y=ynorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-
-xlogis<-c(rlogis(5400, location = 0, scale = 1))
-
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-NRSs(x=xlogis,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(((pi^2)/3)),null_skew=0,null_kurt=(((6/5)+3)*((sqrt((pi^2)/3))^4))/(sqrt(((pi^2)/3))^(4)),null_l2=1,null_l3=0,null_l4=1/6)
-
-xlogis<-c(rlogis(5400,2))
-ylogis<-c(rlogis(5400,1))
-
-#test of effect size
-effectsizeNRSs(x=xlogis,y=ylogis,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xlogis<-c(rlogis(5400,1.1))
-ylogis<-c(rlogis(5400,1))
-
-#empirical bootstrap hypothesis test
-htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xlogis<-c(rlogis(5400,1))
-ylogis<-c(rlogis(5400,1))
-
-#test of null hypothesis
-htest(x=xlogis,y=ylogis,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-
-xlaplace<-c(rLaplace(n=5400, location = 0, scale = 1))
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-NRSs(x=xlaplace,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=0,null_sd=sqrt(2),null_skew=0,null_kurt=(6*(sqrt(2)^4))/(4),null_l2=3/4,null_l3=0,null_l4=1/(3*sqrt(2)))
-
-
-xlaplace<-c(rLaplace(n=5400,location = 2,scale = 1))
-ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
-
-#test of effect size
-effectsizeNRSs(x=xlaplace,y=ylaplace,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xlaplace<-c(rLaplace(n=5400,location = 1.1,scale = 1))
-ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
-
-#empirical bootstrap hypothesis test
-htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-xlaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
-ylaplace<-c(rLaplace(n=5400,location = 1,scale = 1))
-
-#test of null hypothesis
-htest(x=xlaplace,y=ylaplace,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="Rayleigh",alpha=0.05,nboot=100)
-
-
-#NRSs have excellent performance even for heavy tailed distributions.
-
-#two performance criteria, consistency (or sensitive) and standard error
-library(lmom)
-a=500
-xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
-targetlpareto<-lmrgpa(para = c(1,1/(2+a/100),- 1/(2+a/100)), nmom = 4)
-
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-#the standard errors are lower, especially for robust moments and L-moments
-NRSs(x=xpareto,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlpareto[1],null_sd=(sqrt(((2+a/100))*(1)/((-2+(2+a/100))*((-1+(2+a/100))^2)))),null_skew=((((2+a/100)+1)*(2)*(sqrt(a/100)))/((-3+(2+a/100))*(((2+a/100))^(1/2)))),null_kurt=((3+(6*((2+a/100)^3+(2+a/100)^2-6*(2+a/100)-2)/(((2+a/100))*((-3+(2+a/100)))*((-4+(2+a/100))))))),null_l2=targetlpareto[2],null_l3=targetlpareto[3],null_l4=targetlpareto[4])
-
-xpareto<-c(rPareto(5400, scale  = 2, shape=2+a/100))
-ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
-
-#test of effect size
-effectsizeNRSs(x=xpareto,y=ypareto,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xpareto<-c(rPareto(5400, scale  = 1.1, shape=2+a/100))
-ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
-
-#empirical bootstrap hypothesis test
-htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xpareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
-ypareto<-c(rPareto(5400, scale  = 1, shape=2+a/100))
-
-#test of null hypothesis
-htest(x=xpareto,y=ypareto,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-
-a=100
-xlnorm<-c(rlnorm(5400,meanlog=0,sdlog=a/100))
-targetlnorm<-lmrln3(para = c(0,0, a/100), nmom = 4)
-
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-#the standard errors are lower, especially for robust moments and L-moments
-NRSs(x=xlnorm,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=targetlnorm[1],null_sd=sqrt((exp((a/100)^2)*(-1+exp((a/100)^2)))),null_skew=sqrt(exp((a/100)^2)-1)*((2+exp((a/100)^2))),null_kurt=(((-3+exp(4*((a/100)^2))+2*exp(3*((a/100)^2))+3*exp(2*((a/100)^2))))),null_l2=targetlnorm[2],null_l3=targetlnorm[3],null_l4=targetlnorm[4])
-
-xlnorm<-c(rlnorm(5400,meanlog=2,sdlog=a/100))
-ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
-
-#test of effect size
-effectsizeNRSs(x=xlnorm,y=ylnorm,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xlnorm<-c(rlnorm(5400,meanlog=1.1,sdlog=a/100))
-ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
-
-#empirical bootstrap hypothesis test
-htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xlnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
-ylnorm<-c(rlnorm(5400,meanlog=1,sdlog=a/100))
-
-#test of null hypothesis
-htest(x=xlnorm,y=ylnorm,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-
-
-a=150
-xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
-library(lmom)
-targetwei<-lmrwei(para = c(0, 1, a/100), nmom = 4)
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential")
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="Rayleigh")
-NRSs(x=xweibull,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist="exponential",cise = TRUE,alpha = 0.05,nboot = 100,null_mean=gamma(1+1/(a/100)),null_sd=(sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2)),null_skew=(gamma(1+3/(a/100))-3*(gamma(1+1/(a/100)))*((gamma(1+2/(a/100))))+2*((gamma(1+1/(a/100)))^3))/((sqrt(gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(3)),null_kurt=((gamma(1+4/(a/100))-4*(gamma(1+3/(a/100)))*((gamma(1+1/(a/100))))+6*(gamma(1+2/(a/100)))*((gamma(1+1/(a/100)))^2)-3*((gamma(1+1/(a/100)))^4))/(((gamma(1+2/(a/100))-(gamma(((1+1/(a/100)))))^2))^(2))),null_l2=targetwei[2],null_l3=targetwei[3],null_l4=targetwei[4])
-
-
-xweibull<-c(rweibull(5400, shape=a/100, scale = 2))
-yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
-
-#test of effect size
-effectsizeNRSs(x=xweibull,y=yweibull,ci=FALSE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xweibull<-c(rweibull(5400, shape=a/100, scale = 1.1))
-yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
-
-#empirical bootstrap hypothesis test
-htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-xweibull<-c(rweibull(5400, shape=a/100, scale = 1))
-yweibull<-c(rweibull(5400, shape=a/100, scale = 1))
-
-#test of null hypothesis
-htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5400,standist="exp",alpha=0.05,nboot=100)
-
-#for more tests, use the codes in consistency.R
-
-#this regression is just shown an application and not plan to include (if think needed I can also include)
 library(lmtest)
 #robust regression test
 #Gaussian outliers
@@ -3554,7 +3637,4 @@ rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 #based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
-
-
-
 

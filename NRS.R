@@ -3097,7 +3097,9 @@ xexp<-rexp(5400,1)
 
 #In addition, unlike other types of bootstrap that users are unable to varify the results, the validaty of bootstrap can be estimated by comparing the exact results of sample moments/L-moments to bootstrap results.
 
-#noted that the sample fourth moment is biased, and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
+#noted that the sample third and fourth moment is biased (the third moment is symmetric unbiased, but not general unbiased), and that based on U-statistic is unbiased, so the differences will be larger than other estimators.
+
+#L-moments are unbiased, so a good reference for varifications.
 
 #this standard deviation of the distribution of U-statistic is calculated based on the law of prorogation of uncertainty.
 

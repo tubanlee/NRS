@@ -1,3 +1,5 @@
+
+
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -3344,8 +3346,23 @@ sd(x)
 #the finite sample bias is larger, but the trend is similar.
 
 xexp<-eexp(n=90,scale = 1)
+#the population mean is 1
+#the population standard deviation is 1
+#the population L2-moment is 1/2
+#the population skewness is 2
+#the population L-skewness is 1/3
+#the population kurtosis is 9
+#the population L-kurtosis is 1/6
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 xRayleigh<-eRayleigh(n=90,scale =1)
+#the population mean is 1.253314
+#the population standard deviation is 0.6551364
+#the population L2-moment is 0.3670872
+#the population skewness is 0.6311107
+#the population L-skewness is 0.1139671
+#the population kurtosis is 3.245089
+#the population L-kurtosis is 0.1053695
+
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 xexp<-eexp(n=5400,scale = 1)
@@ -3353,7 +3370,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,
 xRayleigh<-eRayleigh(n=5400,scale =1)
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
-#when sample size smaller than 20, the biases become large
+#when sample size smaller than 90, the biases become very large
 xexp<-eexp(n=19,scale = 1)
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 xRayleigh<-eRayleigh(n=19,scale =1)
@@ -3364,13 +3381,7 @@ NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=
 #test
 xexp<-rexp(5400,1)
 
-#the population mean is 1
-#the population standard deviation is 1
-#the population L2-moment is 1/2
-#the population skewness is 2
-#the population L-skewness is 1/3
-#the population kurtosis is 9
-#the population L-kurtosis is 1/6
+
 #no d for ql4, because the distribution of U-statistic of L4-moment does not follow mean-ETM-median inequality
 
 #the bootstrap method for confidential interval, standard errors and hypothesis testing, are from three textbooks, including 

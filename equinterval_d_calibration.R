@@ -2,7 +2,6 @@
 
 
 
-
 greatest_common_divisor<- function(a, b) {
   if (b == 0) a else Recall(b, a %% b)
 }
@@ -87,7 +86,7 @@ finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorte
   return(listd)
 }
 
-finddtm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
+finddtm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
@@ -121,14 +120,14 @@ finddtm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,s
   
   expectdps<-lm1[3]
   expectdp2s<-((sum((sortedx - mean(sortedx))^3)/lengthn)*(lengthn^2/((lengthn-1)*(lengthn-2))))
-  dlmo<-finddmmm(expectboot=mean(dp2lm),expecttrue=expectdps,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-  dmo<-finddmmm(expectboot=mean(dp2m),expecttrue=expectdp2s,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
+  dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
+  dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
   all<-c(drl3=dlmo[1],dql3=dlmo[2],
          drtm=dmo[1],dqtm=dmo[2]
   )
   return(all)
 }
-finddfm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
+finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
@@ -170,13 +169,13 @@ finddfm<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,s
   lm1<-Lmoments(sortedx)
   expectdps<-lm1[4]
   expectdp2s<-(sum((sortedx - mean(sortedx))^4)/lengthn)
-  dlmo<-finddmmm(expectboot=mean(dp2lm),expecttrue=expectdps,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-  dmo<-finddmmm(expectboot=mean(dp2m),expecttrue=expectdp2s,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
+  dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
+  dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
   all<-c(drl4=dlmo[1],dql4=dlmo[2],
          drfm=dmo[1],dqfm=dmo[2]  )
   return(all)
 }
-finddscale<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
+finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
   if(sorted){
     sortedx<-x
   }else{
@@ -218,8 +217,8 @@ finddscale<-function (x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=5400
   lm1<-Lmoments(sortedx)
   expectdps<-lm1[2]
   expectdp2s<-(sd(sortedx))^2
-  dlmo<-finddmmm(expectboot=mean(dp2lm),expecttrue=expectdps,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-  dmo<-finddmmm(expectboot=mean(dp2m),expecttrue=expectdp2s,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
+  dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
   all<-c(drl2=dlmo[1],dql2=dlmo[2],
          drvar=dmo[1],dqvar=dmo[2]   )
   return(all)
@@ -236,6 +235,7 @@ eRayleigh<-function(n, scale){
   sample1
 }
 
+
 library(foreach)
 library(doParallel)
 numCores <- detectCores()
@@ -246,9 +246,9 @@ simulatedbatch<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=1305, b
   x<-c(eexp(n=i,scale=1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   dmmm<-finddmmm(expectboot=mean(x),expecttrue=mean(x),x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
-  dscale1boot<-finddscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dtm1boot<-finddtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dfm1boot<-finddfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dscale1boot<-finddscale(x,expectbootl=1/2,expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dtm1boot<-finddtm(x,expectbootl=1/6,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dfm1boot<-finddfm(x,expectbootl=1/12,expectboot=9,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
 
@@ -260,9 +260,9 @@ simulatedbatchRayleigh<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to
   x<-c(eRayleigh(n=i,scale=1))
   x<-sort(x,decreasing = FALSE,method ="radix")
   dmmm<-finddmmm(expectboot=mean(x),expecttrue=mean(x),x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
-  dscale1boot<-finddscale(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dtm1boot<-finddtm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dfm1boot<-finddfm(x,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dscale1boot<-finddscale(x,expectbootl=0.5*(sqrt(2)-1)*sqrt(pi),expectboot=(2-(pi/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dtm1boot<-finddtm(x,expectbootl=(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),expectboot=((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dfm1boot<-finddfm(x,expectbootl=(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),expectboot=((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
 

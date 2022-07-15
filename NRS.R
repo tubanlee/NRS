@@ -1,12 +1,9 @@
-
-
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
 #but because R is prone to producing errors for such a large function. 
 #Run one function each time. If there is an error, try to restart, and then it will be fixed. 
 #It will be completely fixed in the future by rewriting the code in C++.
-
 
 
 #require library "Lmoments" to check the accuracy of bootstrap.
@@ -95,8 +92,62 @@ etm<-function (x,interval=9,fast=TRUE,batch="auto"){
     Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
     return(Groupmean)}
 }
+
+#load finite sample bias corrected d
+fd <- read.csv(("resultsfd_exp.csv"))
+
+finited<-function(n,fd,type){
+  indextypelist<-c("rm","qm","rl2","ql2","rvar","qvar","rl3","ql3","rtm","qtm","rl4","ql4","rfm","qfm")
+  indextype<-which(indextypelist==(type))+1
+  if (type=="qm"){
+    if(n%in% fd[,1]){
+      return(fd[which(fd[,1] == n),indextype])
+    }
+    else if(n>5400){
+      return(0.821497)
+    }
+    else{
+      maxn<-max(which(fd[,1] < n))
+      minn<-min(which(fd[,1] > n))
+      size1<-fd[maxn,1]
+      size2<-fd[minn,1]
+      d1<-fd[maxn,indextype]
+      d2<-fd[minn,indextype]
+      return(((d2-d1)*((n-size1)/(size2-size1)))+d1)}}
+  if (type=="rm"){
+    if(n%in% fd[,1]){
+      return(fd[which(fd[,1] == n),indextype])
+    }
+    else if(n>5400){
+      return(0.366919)
+    }
+    else{
+      maxn<-max(which(fd[,1] < n))
+      minn<-min(which(fd[,1] > n))
+      size1<-fd[maxn,1]
+      size2<-fd[minn,1]
+      d1<-fd[maxn,indextype]
+      d2<-fd[minn,indextype]
+      return(((d2-d1)*((n-size1)/(size2-size1)))+d1)}}
+  else{
+    if(n%in% fd[,1]){
+      return(fd[which(fd[,1] == n),indextype])
+    }
+    else if(n>5400){
+      return(fd[117,indextype])
+    }
+    else{
+      maxn<-max(which(fd[,1] < n))
+      minn<-min(which(fd[,1] > n))
+      size1<-fd[maxn,1]
+      size2<-fd[minn,1]
+      d1<-fd[maxn,indextype]
+      d2<-fd[minn,indextype]
+      return(((d2-d1)*((n-size1)/(size2-size1)))+d1)}}
+}
+
 #return four location estimators, arithmetic mean, ETM, robust mean, quantile mean
-mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
   if(etm1[2]==Inf){
@@ -108,6 +159,9 @@ mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
     quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
   }else{
     quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+  }
+  if (mx1==mx2){
+    print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
   }
   upper1<-(1-1/interval)
   lower1<-1/interval
@@ -122,13 +176,21 @@ mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
   output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
   return(output1)
 }
-rqmean<-function (x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = FALSE,alpha = 0.05,nboot = 1000){
+rqmean<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,cise = FALSE,alpha = 0.05,nboot = 1000,fsbc=FALSE){
+  samplesize<-length(x)
+  if (fsbc){
+    drm<-finited(n=samplesize,fd=fd,type="rm")
+    dqm<-finited(n=samplesize,fd=fd,type="qm")
+  }
+  if (samplesize<100){
+    print("Warning: the sample size is too small, quantile mean might be undefined or highly biased.")
+  }
   if(cise){
     return (mmmci(x, interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm,alpha = alpha,nboot = nboot))
   } 
   else {return (mmm(x,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm))}
 }
-mmmci<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,alpha=0.05,nboot=1000){
+mmmci<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224,alpha=0.05,nboot=1000){
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   batchresults<-apply(data,1,mmm,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
   bootlist1<-sort(as.matrix(batchresults[1,]))
@@ -143,7 +205,8 @@ mmmci<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,alpha
                  ciqm=c(bootlist4[low],bootlist4[up]),semean=sd(bootlist1),seetm=sd(bootlist2),serm=sd(bootlist3),seqm=sd(bootlist4))
   return(result)
 }
-rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.3659,drm=0.7930,dlqm=0.8218,dqm=0.7825,sd=FALSE){
+
+rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.36594,drm=0.7930,dlqm=0.82183,dqm=0.7828,sd=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
   if (boot){
@@ -184,7 +247,7 @@ rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dl
   }
   return(all)
 }
-rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0.7930,dqm=0.7825){
+rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0.7930,dqm=0.7828){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
   if (boot){
@@ -208,7 +271,7 @@ rqsd<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,drm=0
   all<-c(sd=sqrt(mo[1]),etsd=sqrt(mo[2]),rsd=sqrt(mo[3]),qsd=sqrt(mo[4]))
   return(all)
 }
-rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.1808,drm=1.7492,dlqm=1.1753,dqm=0.5715,sd=FALSE,drsd=0.7930,dqsd=0.7825){
+rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.18078,drm=1.7492,dlqm=1.17586,dqm=0.5720,sd=FALSE,drsd=0.7930,dqsd=0.7828){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
   if (boot){
@@ -244,7 +307,7 @@ rqtm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
   }
   return(all)
 }
-rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=-0.3542,drm=3.4560,dlqm=NaN,dqm=0.1246,sd=FALSE,drsd=0.7930,dqsd=0.7825){
+rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=-0.3542,drm=3.4560,dlqm=NaN,dqm=0.1245,sd=FALSE,drsd=0.7930,dqsd=0.7828){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthn<-length(sortedx)
   
@@ -290,24 +353,9 @@ rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
   return(all)
 }
 
-rLaplace<-function (n,location,scale) {
-  sample1<-runif(n)
-  sample1<-location - sign(sample1 - 0.5) * scale * (log(2) + ifelse(sample1 < 0.5, log(sample1), log1p(-sample1)))
-  sample1[scale <= 0] <- NaN
-  sample1
-}
-rRayleigh<-function (n, scale) {
-  sample1 <- scale * sqrt(-2 * log(runif(n)))
-  sample1[scale <= 0] <- NaN
-  sample1
-}
-rPareto<-function (n, scale, shape) {
-  sample1 <- scale*(runif(n))^(-1/shape)
-  sample1[scale <= 0] <- NaN
-  sample1[shape <= 0] <- NaN
-  sample1
-}
-NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
+
+
+NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,fsbc=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -328,7 +376,28 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -347,6 +416,9 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
   rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=sd)
@@ -441,8 +513,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   }
   return(all)
 }
-
-NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
@@ -463,7 +534,28 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -482,6 +574,9 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   pairs1 <- data.frame()
@@ -670,11 +765,10 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
   }
   return(all)
 }
-
-NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
-  if(standist=="exponential" || standist=="exp"){
+  if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
     dqm=0.82224
     
@@ -692,7 +786,28 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -711,6 +826,9 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   estimate0<-foreach (i=1:nboot, .combine=rbind) %dopar% {
@@ -1092,12 +1210,12 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
-  if(standist=="exponential" || standist=="exp"){
+  if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
     dqm=0.82224
     
@@ -1115,7 +1233,28 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -1134,6 +1273,9 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   datay<-matrix(sample(y,size=length(y)*nboot,replace=TRUE),nrow=nboot)
@@ -1724,12 +1866,12 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
-  if(standist=="exponential" || standist=="exp"){
+  if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
     dqm=0.82224
     
@@ -1747,7 +1889,28 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -1766,6 +1929,9 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   datay<-matrix(sample(y,size=length(y)*nboot,replace=TRUE),nrow=nboot)
@@ -2385,30 +2551,30 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
   }
   if(cise & parallel){
-    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
-  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+    return (NRSsciparallel(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
+  } else if(cise){return (NRSsci(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot,null_mean=null_mean,null_sd=null_sd,null_skew=null_skew,null_kurt=null_kurt,null_l2=null_l2,null_l3=null_l3,null_l4=null_l4))
   }
-  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=sd))
+  else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,sd=sd))
 }}
 
-htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
   if (boottype=="empirial"){
-    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
+    return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
   } 
-  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
+  else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
 }}
-effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray")){
+effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
-  estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=TRUE)
-  estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,sd=TRUE)
+  estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,sd=TRUE)
+  estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,sd=TRUE)
   firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))*0.5)^0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))*0.5)^0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))*0.5)^0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))*0.5)^0.5))
   
   secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))*0.5)^0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))*0.5)^0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))*0.5)^0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))*0.5)^0.5),
@@ -2428,12 +2594,12 @@ effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,t
   return(all)
 }
 
-esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
-  if(standist=="exponential" || standist=="exp"){
+  if(standist=="exponential"|| standist=="exp"){
     drm=0.3665
     dqm=0.82224
     
@@ -2451,7 +2617,28 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     drmfm=3.4560
     dlqmfm=NaN
     dqmfm=0.1246
-    
+    if (fsbc){
+      drm<-finited(n=lengthx,fd=fd,type="rm")
+      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+    }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
     drm=0.4025526
     dqm=0.4452798
@@ -2470,6 +2657,9 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     drmfm=0.8758908
     dlqmfm=0.6571804
     dqmfm=0.7304692
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
   datay<-matrix(sample(y,size=length(y)*nboot,replace=TRUE),nrow=nboot)
@@ -2716,7 +2906,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       return(all)
     }
     
-    NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE){
+    NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,sd=FALSE){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       lengthx<-length(sortedx)
       if(standist=="exponential"|| standist=="exp"){
@@ -2737,7 +2927,28 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         drmfm=3.4560
         dlqmfm=NaN
         dqmfm=0.1246
-        
+        if (fsbc){
+          drm<-finited(n=lengthx,fd=fd,type="rm")
+          dqm<-finited(n=lengthx,fd=fd,type="qm")
+          
+          dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+          
+          dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+          
+          dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+        }
+        if (lengthx<100){
+          print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
+        }
       }else if (standist=="Rayleigh"|| standist=="Ray"){
         drm=0.4025526
         dqm=0.4452798
@@ -2756,6 +2967,9 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         drmfm=0.8758908
         dlqmfm=0.6571804
         dqmfm=0.7304692
+        if (fsbc){
+          return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+        }
       }
       
       mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
@@ -2817,13 +3031,13 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       }
       return(all)
     }
-    effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray")){
+    effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       lengthx<-length(sortedx)
       sortedy<-sort(y,decreasing = FALSE,method ="radix")
       lengthy<-length(sortedy)
-      estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
-      estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,sd=TRUE)
+      estimatex<-NRSssimple(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,fsbc=fsbc,sd=TRUE)
+      estimatey<-NRSssimple(x=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,fsbc=fsbc,sd=TRUE)
       firsteffectsize<-c(mean=(estimatex$first[1]-estimatey$first[1])/(((((estimatex$first[1])^2)+((estimatey$first[1])^2))*0.5)^0.5),etm=(estimatex$first[2]-estimatey$first[2])/(((((estimatex$first[2])^2)+((estimatey$first[2])^2))*0.5)^0.5),rm=(estimatex$first[3]-estimatey$first[3])/(((((estimatex$first[3])^2)+((estimatey$first[3])^2))*0.5)^0.5),qm=(estimatex$first[4]-estimatey$first[4])/(((((estimatex$first[4])^2)+((estimatey$first[4])^2))*0.5)^0.5))
       
       secondeffectsize<-c(l2=(estimatex$second[1]-estimatey$second[1])/(((((estimatex$second[1])^2)+((estimatey$second[1])^2))*0.5)^0.5),etl2=(estimatex$second[2]-estimatey$second[2])/(((((estimatex$second[2])^2)+((estimatey$second[2])^2))*0.5)^0.5),rl2=(estimatex$second[3]-estimatey$second[3])/(((((estimatex$second[3])^2)+((estimatey$second[3])^2))*0.5)^0.5),ql2=(estimatex$second[4]-estimatey$second[4])/(((((estimatex$second[4])^2)+((estimatey$second[4])^2))*0.5)^0.5),
@@ -2844,7 +3058,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       return(all)
     }
     
-    effectsizeNRSs1<-effectsizeNRSssimple(x=datax[i,],y=datay[i,],interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist)
+    effectsizeNRSs1<-effectsizeNRSssimple(x=datax[i,],y=datay[i,],interval=interval,fast=fast,batch=batch,boot=boot,times =times,standist=standist,fsbc=fsbc)
     estimate1<-c(effectsizeNRSs1$firsteffectsize,effectsizeNRSs1$secondeffectsize,effectsizeNRSs1$thirdeffectsize,effectsizeNRSs1$fourtheffectsize)
   }
   
@@ -2910,7 +3124,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
   low<-round((alpha/2)*nboot)
   up<-nboot-low
   low<-low+1
-  effectsizeNRSs2<-effectsizeNRSssimple(x=sortedx,y=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist)
+  effectsizeNRSs2<-effectsizeNRSssimple(x=sortedx,y=sortedy,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc)
   estimate<-c(effectsizeNRSs2$firsteffectsize,effectsizeNRSs2$secondeffectsize,effectsizeNRSs2$thirdeffectsize,effectsizeNRSs2$fourtheffectsize)
   
   bootlist1a<-bootlist1a-(estimate[1])
@@ -2967,12 +3181,183 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
   return(all)
 }
 
-effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),alpha=0.05,nboot=100){
+effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
   if (ci){
-    return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,alpha=alpha,nboot=nboot))
+    return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
   } 
-  else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist))
+  else{return (effectsizeNRSssimple(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc))
 }}
+
+rLaplace<-function (n,location,scale) {
+  sample1<-runif(n)
+  sample1<-location - sign(sample1 - 0.5) * scale * (log(2) + ifelse(sample1 < 0.5, log(sample1), log1p(-sample1)))
+  sample1[scale <= 0] <- NaN
+  sample1
+}
+rRayleigh<-function (n, scale) {
+  sample1 <- scale * sqrt(-2 * log(runif(n)))
+  sample1[scale <= 0] <- NaN
+  sample1
+}
+rPareto<-function (n, scale, shape) {
+  sample1 <- scale*(runif(n))^(-1/shape)
+  sample1[scale <= 0] <- NaN
+  sample1[shape <= 0] <- NaN
+  sample1
+}
+
+#equinterval Rayleigh distribution simulation
+eRayleigh<-function (n, scale) {
+  sample1 <- scale * sqrt(-2 * log((seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
+  sample1[scale <= 0] <- NaN
+  sample1
+}
+eexp<-function (n, scale) {
+  sample1 <- (-1/scale)*(log(1-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
+  sample1[scale <= 0] <- NaN
+  sample1
+}
+enorm<-function (n, location,scale) {
+  library(pracma)
+  sample1 <- location+(scale)*sqrt(2)*erfinv(2*(1-seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))-1)
+  sample1
+}
+ePareto<-function (n, scale, shape) {
+  sample1 <- scale*((seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1))))^(-1/shape)
+  sample1[scale <= 0] <- NaN
+  sample1[shape <= 0] <- NaN
+  sample1
+}
+eLaplace<-function (n,location,scale) {
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-location - sign(sample1 - 0.5) * scale * (log(2) + ifelse(sample1 < 0.5, log(sample1), log1p(-sample1)))
+  sample1
+}
+
+elogis<-function (n,location,scale) {
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-location + scale * log((1-sample1)/sample1)
+  sample1
+}
+
+elnorm<-function (n,location,scale) {
+  library(pracma)
+  sample1 <- exp(location+sqrt(scale^2)*sqrt(2)*erfinv(2*(1-seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))-1))
+  sample1
+}
+
+egamma<-function (n,shape,scale = 1) {
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-qgamma(sample1,shape=shape,scale=scale)
+  sample1
+}
+
+eWeibull<-function (n,shape, scale = 1){
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-qweibull(sample1,shape=shape, scale = scale)
+  sample1
+}
+
+#equinterval simulation is based on simulating the distribution from an arithmetic sequence (seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1))), instead of uniform distribution.
+
+n=3
+#see what the arithmetic sequence is when n=3
+(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+
+#then, any unimodal distributions can be translated from this sequence.
+
+#equinterval simulation is deterministic and returns a result that is very close to the aymptotic value, if setting the sample size to be large enough
+
+#so it is a very cheap and simple method to study the consistency of different estimators.
+
+x<-eexp(n=1000000,scale = 1)
+#the result is 0.9999469, four decimal accuracy
+sd(x)
+#the aymptotic value
+1
+
+x<-rexp(n=1000000,1)
+
+sd(x)
+#comparing to the pseudorandom simulation, often just two decimal accuracy.
+
+x<-enorm(n=1000000,location=1,scale = 1)
+
+sd(x)
+
+1
+
+x<-ePareto(n=10000000, scale=1, shape=3)
+
+sd(x)
+
+sqrt(1*3/(((3-1)^2)*(3-2)))
+
+x<-eLaplace(n=1000000,location=1,scale = 1)
+
+sd(x)
+
+sqrt(2)
+
+x<-elnorm(n=1000000,location=1,scale = 1)
+
+sd(x)
+
+sqrt((exp(1)-1)*exp(2*1+1))
+
+x<-egamma(n=1000000,shape=1,scale = 1)
+
+sd(x)
+
+1
+
+x<-eWeibull(n=1000000,shape=2, scale =sqrt(2))
+
+sd(x)
+
+sqrt((4-pi)/2)
+
+x<-eRayleigh(n=1000000,scale =1)
+
+sd(x)
+
+sqrt((4-pi)/2)
+
+x<-elogis(n=1000000,location=1,scale=1)
+
+sd(x)
+
+pi/sqrt(3)
+
+#Another application is getting a quick qualitative understanding of finite sample bias.
+
+x<-enorm(n=10,location=0,scale = 1)
+sd(x)
+#the analytical result when n=10 is (128/105)*sqrt(2/pi)
+(128/105)*sqrt(2/pi)
+
+x<-enorm(n=100,location=0,scale = 1)
+sd(x)
+#the analytical result when n=100 is 0.99747798
+0.99747798
+
+#the finite sample bias is larger, but the trend is similar.
+
+xexp<-eexp(n=90,scale = 1)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+xRayleigh<-eRayleigh(n=90,scale =1)
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
+xexp<-eexp(n=5400,scale = 1)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+xRayleigh<-eRayleigh(n=5400,scale =1)
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
+#when sample size smaller than 90, the biases become very large
+xexp<-eexp(n=19,scale = 1)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+xRayleigh<-eRayleigh(n=19,scale =1)
+NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 
 
@@ -3009,7 +3394,10 @@ xexp<-rexp(5400,1)
 
 #As a reference, 1/sqrt(5400)=0.01360828, using 54000 subsamples, the standardized differences are ~0.002, only 1/7 of the standard error.
 
-NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
+#bootstrap 108000 times
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =108000,check=TRUE,standist="exp",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 #Arguments
 #x:a numeric vector
@@ -3020,6 +3408,7 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,
 #times : the number of subsampling times, a multiple of 9, used in bootstrap.
 #check: logical; if "TRUE", the differences and standardized differences of exact results and bootstrap approximation will be printed. 
 #standist: a character string giving the standard distribution to be used to calibrate the d value. This must partially match either "exponential" or "Rayleigh", with default "exponential" and may be abbreviated to a unique prefix (the first three letters).
+#fsbc: logical; if "TRUE", finite sample bias corrected d based on equinterval simulation will be used.
 #cise: logical; if "TRUE", the confidence interval and standard error will be estimated using bootstrap.  
 #parallel: logical; whether use parallel computing for the confidential interval and standard error, if not used, 100 nboot takes >10 mins, while if used, in a typical PC, the running time is about 1 min. Additional foreach and doparallel packages are required.
 #alpha: the alpha level for confidence interval computation.
@@ -3389,6 +3778,7 @@ htest(x=xweibull,y=yweibull,boottype="empirial",interval=9,fast=TRUE,batch="auto
 
 
 
+
 #this regression is just shown and not plan to include (if think needed I can also include, my opinion is off-topic..)
 mmme<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224,type=1){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
@@ -3637,4 +4027,3 @@ rqreg(x=x, y=y,iter = 200,interval=9,fast=TRUE,batch="auto",standist="exp")
 #based on trimmed mean and winsorized mean
 twreg(x=x, y=y,iter = 200)
 #the performance of rm and qm is not as good as etm
-

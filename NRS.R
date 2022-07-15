@@ -3370,10 +3370,10 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,
 xRayleigh<-eRayleigh(n=5400,scale =1)
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
-#when sample size smaller than 90, the biases become very large
-xexp<-eexp(n=19,scale = 1)
+#when sample size smaller than 20, the biases become very large, especially kurtosis and L-kurtosis
+xexp<-eexp(n=18,scale = 1)
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
-xRayleigh<-eRayleigh(n=19,scale =1)
+xRayleigh<-eRayleigh(n=18,scale =1)
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 

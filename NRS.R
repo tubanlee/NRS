@@ -19,8 +19,23 @@ if (!require("doParallel")) install.packages("doParallel")
 library(doParallel)
 #registering clusters, can set a smaller number using numCores-1 
 numCores <- detectCores()
-registerDoParallel(numCores) 
+registerDoParallel(numCores)
 
+
+factdivide<-function(n1,n2){
+  decin1<-n1-floor(n1)
+  if(decin1==0){decin1=1}
+  decin2<-n2-floor(n2)
+  if(decin2==0){decin2=1}
+  n1seq<-seq(decin1,n1, by=1)
+  n2seq<-seq(decin2,n2,by=1)
+  all<-list(n1seq,n2seq)
+  maxlen <- max(lengths(all))
+  all2 <- as.data.frame(lapply(all, function(lst) c(lst, rep(1, maxlen - length(lst)))))
+  division<-all2[,1]/all2[,2]
+  answer<-exp(sum(log(division)))*(gamma(decin1)/gamma(decin2))
+  return(answer)
+}
 #moments for checking the accuracy of bootstrap 
 moments<-function (x){
   n<-length(x)
@@ -147,20 +162,23 @@ finited<-function(n,fd,type){
       d2<-fd[minn,indextype]
       return(((d2-d1)*((n-size1)/(size2-size1)))+d1)}}
 }
-
 #return four location estimators, arithmetic mean, ETM, robust mean, quantile mean
+
 mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
   if(etm1[2]==Inf){
     return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
   }
-  mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+  lengthx<-length(x)
+  mx1<-(min(which(sortedx>(etm1[2])))-1)/lengthx
   mx2<-1/2
   if (mx1>0.5){
     quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
   }else{
-    quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+    mx1<-1-mx1
+    quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+    quatiletarget<-1-quatiletarget
   }
   if (mx1==mx2){
     print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
@@ -897,18 +915,25 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
         Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
         return(Groupmean)}
     }
-    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+    
+    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
       if(etm1[2]==Inf){
         return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
       }
-      mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+      lengthx<-length(x)
+      mx1<-(min(which(sortedx>(etm1[2])))-1)/lengthx
       mx2<-1/2
       if (mx1>0.5){
         quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
       }else{
-        quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        mx1<-1-mx1
+        quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        quatiletarget<-1-quatiletarget
+      }
+      if (mx1==mx2){
+        print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
       }
       upper1<-(1-1/interval)
       lower1<-1/interval
@@ -1346,18 +1371,25 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
         Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
         return(Groupmean)}
     }
-    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+    
+    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
       if(etm1[2]==Inf){
         return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
       }
-      mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+      lengthx<-length(x)
+      mx1<-(min(which(sortedx>(etm1[2])))-1)/lengthx
       mx2<-1/2
       if (mx1>0.5){
         quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
       }else{
-        quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        mx1<-1-mx1
+        quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        quatiletarget<-1-quatiletarget
+      }
+      if (mx1==mx2){
+        print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
       }
       upper1<-(1-1/interval)
       lower1<-1/interval
@@ -2002,18 +2034,25 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
         Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
         return(Groupmean)}
     }
-    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+    
+    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
       if(etm1[2]==Inf){
         return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
       }
-      mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+      lengthx<-length(x)
+      mx1<-(min(which(sortedx>(etm1[2])))-1)/lengthx
       mx2<-1/2
       if (mx1>0.5){
         quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
       }else{
-        quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        mx1<-1-mx1
+        quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        quatiletarget<-1-quatiletarget
+      }
+      if (mx1==mx2){
+        print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
       }
       upper1<-(1-1/interval)
       lower1<-1/interval
@@ -2730,18 +2769,25 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         Groupmean<-etmass(x,IntKsamples,target1,sorted=FALSE)
         return(Groupmean)}
     }
-    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.3665,dqm=0.82224){
+    
+    mmm<-function(x,interval=9,fast=TRUE,batch="auto",drm=0.36652,dqm=0.82224){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       etm1<-etm(sortedx,interval=interval,fast=fast,batch=batch)
       if(etm1[2]==Inf){
         return(print("ETM is infinity, due to the double precision floating point limits. Usually, the solution is transforming your original data."))
       }
-      mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
+      lengthx<-length(x)
+      mx1<-(min(which(sortedx>(etm1[2])))-1)/lengthx
       mx2<-1/2
       if (mx1>0.5){
         quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
       }else{
-        quatiletarget<-abs(0-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        mx1<-1-mx1
+        quatiletarget<-abs(1-mx1)*((mx1-mx2)*2)*(((abs(mx1-mx2)*2))^dqm)+mx1
+        quatiletarget<-1-quatiletarget
+      }
+      if (mx1==mx2){
+        print("Warning: the percentile of ETM is the same as the median, quantile mean is undefined.")
       }
       upper1<-(1-1/interval)
       lower1<-1/interval
@@ -2756,7 +2802,6 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       output1<-c(mean=mean(sortedx),etm=etm1[2],rm=rm1,qm=qm1)
       return(output1)
     }
-
     rqscale<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=0.3659,drm=0.7930,dlqm=0.8218,dqm=0.7825,sd=FALSE){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       lengthn<-length(sortedx)
@@ -3272,6 +3317,99 @@ n=3
 
 #so it is a very cheap and simple method to study the consistency of different estimators.
 
+
+
+x<-eRayleigh(n=9000,scale =1)
+
+mean(x)
+#the bias of equinterval simulation
+abs(1.253193-sqrt(pi/2))
+sd(x)
+n=9000
+#an approximation formula to estimate the bias
+sd(x)*(1-(sqrt(2/(n-1)))*factdivide(n1=(n/2)-3.5,n2=((n-1)/2)-3.5))
+
+x<-eRayleigh(n=90000,scale =1)
+
+mean(x)
+abs(1.253299-sqrt(pi/2))
+sd(x)
+n=90000
+sd(x)*(1-(sqrt(2/(n-1)))*factdivide(n1=(n/2)-3.5,n2=((n-1)/2)-3.5))
+
+x<-eRayleigh(n=900000,scale =1)
+
+mean(x)
+abs(1.253312-sqrt(pi/2))
+sd(x)
+n=900000
+sd(x)*(1-(sqrt(2/(n-1)))*factdivide(n1=(n/2)-3.5,n2=((n-1)/2)-3.5))
+
+x<-eRayleigh(n=9000000,scale =1)
+
+mean(x)
+abs(1.253314-sqrt(pi/2))
+sd(x)
+n=9000000
+sd(x)*(1-(sqrt(2/(n-1)))*factdivide(n1=(n/2)-3.5,n2=((n-1)/2)-3.5))
+
+
+library(Lmoments)
+
+x<-eRayleigh(n=9000,scale =1)
+Lmoments(x)
+moments(x)
+#the bias of equinterval simulation
+#var
+abs(0.4285605-((2-(pi/2))))
+#tm
+abs(0.1755594 -((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)))
+#fm
+abs(0.5900809 -((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))))
+
+#l2
+abs(0.3669501-0.5*(sqrt(2)-1)*sqrt(pi))
+#l3
+abs(0.04174286 -(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))
+#l4
+abs(0.03858559 -(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))
+
+x<-eRayleigh(n=90000,scale =1)
+#the bias of equinterval simulation
+#var
+abs(0.4291203 -((2-(pi/2))))
+#tm
+abs(0.1771689  -((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)))
+#fm
+abs(0.5965140  -((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))))
+
+#l2
+abs(0.3670709 -0.5*(sqrt(2)-1)*sqrt(pi))
+#l3
+abs(0.04182399  -(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))
+#l4
+abs(0.03866775 -(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))
+
+x<-eRayleigh(n=9000000,scale =1)
+Lmoments(x)
+moments(x)
+#the bias of equinterval simulation
+#var
+abs(0.4292024 -((2-(pi/2))))
+#tm
+abs(0.1774547  -((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)))
+#fm
+abs(0.5977691  -((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))))
+
+#l2
+abs(0.367087 -0.5*(sqrt(2)-1)*sqrt(pi))
+#l3
+abs(0.04183571  -(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi))
+#l4
+abs(0.03867962 -(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi))
+
+#so, with sample size 9 million is enough to ensure three decimal accuracy.
+
 x<-eexp(n=1000000,scale = 1)
 #the result is 0.9999469, four decimal accuracy
 sd(x)
@@ -3370,10 +3508,10 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,
 xRayleigh<-eRayleigh(n=5400,scale =1)
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
-#when sample size smaller than 20, the biases become very large, especially kurtosis and L-kurtosis
-xexp<-eexp(n=18,scale = 1)
+#when sample size smaller than 90, the biases become very large
+xexp<-eexp(n=19,scale = 1)
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
-xRayleigh<-eRayleigh(n=18,scale =1)
+xRayleigh<-eRayleigh(n=19,scale =1)
 NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 

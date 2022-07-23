@@ -373,29 +373,27 @@ rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
   return(all)
 }
 
-
-
-NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),sd=FALSE,fsbc=FALSE){
+NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),sd=FALSE,fsbc=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -419,25 +417,88 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
@@ -533,27 +594,27 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
   }
   return(all)
 }
-NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -577,25 +638,88 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -785,27 +909,27 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
   }
   return(all)
 }
-NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -829,25 +953,88 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -1237,29 +1424,29 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
+pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -1283,25 +1470,88 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -1900,29 +2150,29 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
+ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,accuracy=1e-04,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -1946,25 +2196,88 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -2592,7 +2905,7 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
   return(all)
 }
 
-NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
+NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,sd=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100,null_mean=1,null_sd=1,null_skew=2,null_kurt=9,null_l2=0.5,null_l3=1/3,null_l4=1/6){
   if (times%%9!=0){
     return ("Please set times as a multiple of 9.")
   }
@@ -2603,13 +2916,13 @@ NRSs<-function(x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=
   else{return (NRSssimple(x, interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,sd=sd))
 }}
 
-htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
+htest<-function(x,y,boottype=c("empirial","percentile"),interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100){
   if (boottype=="empirial"){
     return(ebh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
   } 
   else{return (pbh2parallel(x,y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
 }}
-effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE){
+effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
@@ -2635,29 +2948,29 @@ effectsizeNRSssimple<-function(x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,t
   return(all)
 }
 
-esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
+esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
   sortedy<-sort(y,decreasing = FALSE,method ="radix")
   lengthy<-length(sortedy)
   if(standist=="exponential"|| standist=="exp"){
-    drm=0.3665
-    dqm=0.82224
+    drm=0.366919 
+    dqm=0.821497
     
-    dlrmscale=0.3659
-    drmscale=0.7930
-    dlqmscale=0.8218
-    dqmscale=0.7825
+    dlrmscale=0.3688834
+    drmscale=0.7981252
+    dlqmscale=0.8120538
+    dqmscale=0.7828360
     
-    dlrmtm=0.1808
-    drmtm=1.7492
-    dlqmtm=1.1753
-    dqmtm=0.5715
+    dlrmtm=0.2058536
+    drmtm=1.7664509
+    dlqmtm=1.1002532
+    dqmtm=0.5608014
     
-    dlrmfm=-0.3542
-    drmfm=3.4560
+    dlrmfm=-0.5323384
+    drmfm=3.4049884
     dlqmfm=NaN
-    dqmfm=0.1246
+    dqmfm=0.1281504
     if (fsbc){
       drm<-finited(n=lengthx,fd=fd,type="rm")
       dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -2681,25 +2994,88 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Rayleigh"|| standist=="Ray"){
-    drm=0.4025526
-    dqm=0.4452798
+    drm=0.4029587
+    dqm=0.4446060
     
-    dlrmscale=0.3095063
-    drmscale=0.3862421
-    dlqmscale=0.7055909
-    dqmscale=1.097661
+    dlrmscale=0.3123991
+    drmscale=0.3854743
+    dlqmscale=0.7012772
+    dqmscale=1.0888696
     
-    dlrmtm=0.1561753
-    drmtm=0.7855876
-    dlqmtm=0.8038741
-    dqmtm=0.9621217
+    dlrmtm=0.2000203
+    drmtm=0.7498544
+    dlqmtm=0.8058858
+    dqmtm=0.9525510
     
-    dlrmfm=0.2290345
-    drmfm=0.8758908
-    dlqmfm=0.6571804
-    dqmfm=0.7304692
+    dlrmfm=0.2365445
+    drmfm=0.8650588
+    dlqmfm=0.6095717
+    dqmfm=0.7357742
     if (fsbc){
       return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+    }
+  }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3052527
+    drmscale=0.3603831
+    dlqmscale=0.7018281
+    dqmscale=1.1340563
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.2605070
+    drmfm=0.5980700
+    dlqmfm=0.5310159
+    dqmfm=1.0450408
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+    }
+  }else if (standist=="Laplace"|| standist=="Lap"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3644669
+    drmscale=0.6288201
+    dlqmscale=0.7345233
+    dqmscale=0.8559045
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=-0.2403203
+    drmfm=1.8731383
+    dlqmfm=NaN
+    dqmfm=0.3289117
+    if (fsbc){
+      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+    }
+  }else if (standist=="logistic"|| standist=="log"){
+    drm=0
+    dqm=0
+    
+    dlrmscale=0.3678197
+    drmscale=0.5049591
+    dlqmscale=0.6333906
+    dqmscale=0.9112189
+    
+    dlrmtm=0
+    drmtm=0
+    dlqmtm=0
+    dqmtm=0
+    
+    dlrmfm=0.1370912
+    drmfm=1.2769506
+    dlqmfm=0.6271149
+    dqmfm=0.4818406
+    if (fsbc){
+      return("Finite sample bias correction is not supported for logistic distribution yet.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -2953,27 +3329,27 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
       return(all)
     }
     
-    NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,sd=FALSE){
+    NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,sd=FALSE){
       sortedx<-sort(x,decreasing = FALSE,method ="radix")
       lengthx<-length(sortedx)
       if(standist=="exponential"|| standist=="exp"){
-        drm=0.3665
-        dqm=0.82224
+        drm=0.366919 
+        dqm=0.821497
         
-        dlrmscale=0.3659
-        drmscale=0.7930
-        dlqmscale=0.8218
-        dqmscale=0.7825
+        dlrmscale=0.3688834
+        drmscale=0.7981252
+        dlqmscale=0.8120538
+        dqmscale=0.7828360
         
-        dlrmtm=0.1808
-        drmtm=1.7492
-        dlqmtm=1.1753
-        dqmtm=0.5715
+        dlrmtm=0.2058536
+        drmtm=1.7664509
+        dlqmtm=1.1002532
+        dqmtm=0.5608014
         
-        dlrmfm=-0.3542
-        drmfm=3.4560
+        dlrmfm=-0.5323384
+        drmfm=3.4049884
         dlqmfm=NaN
-        dqmfm=0.1246
+        dqmfm=0.1281504
         if (fsbc){
           drm<-finited(n=lengthx,fd=fd,type="rm")
           dqm<-finited(n=lengthx,fd=fd,type="qm")
@@ -2997,25 +3373,88 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
           print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
         }
       }else if (standist=="Rayleigh"|| standist=="Ray"){
-        drm=0.4025526
-        dqm=0.4452798
+        drm=0.4029587
+        dqm=0.4446060
         
-        dlrmscale=0.3095063
-        drmscale=0.3862421
-        dlqmscale=0.7055909
-        dqmscale=1.097661
+        dlrmscale=0.3123991
+        drmscale=0.3854743
+        dlqmscale=0.7012772
+        dqmscale=1.0888696
         
-        dlrmtm=0.1561753
-        drmtm=0.7855876
-        dlqmtm=0.8038741
-        dqmtm=0.9621217
+        dlrmtm=0.2000203
+        drmtm=0.7498544
+        dlqmtm=0.8058858
+        dqmtm=0.9525510
         
-        dlrmfm=0.2290345
-        drmfm=0.8758908
-        dlqmfm=0.6571804
-        dqmfm=0.7304692
+        dlrmfm=0.2365445
+        drmfm=0.8650588
+        dlqmfm=0.6095717
+        dqmfm=0.7357742
         if (fsbc){
           return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+        }
+      }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
+        drm=0
+        dqm=0
+        
+        dlrmscale=0.3052527
+        drmscale=0.3603831
+        dlqmscale=0.7018281
+        dqmscale=1.1340563
+        
+        dlrmtm=0
+        drmtm=0
+        dlqmtm=0
+        dqmtm=0
+        
+        dlrmfm=0.2605070
+        drmfm=0.5980700
+        dlqmfm=0.5310159
+        dqmfm=1.0450408
+        if (fsbc){
+          return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+        }
+      }else if (standist=="Laplace"|| standist=="Lap"){
+        drm=0
+        dqm=0
+        
+        dlrmscale=0.3644669
+        drmscale=0.6288201
+        dlqmscale=0.7345233
+        dqmscale=0.8559045
+        
+        dlrmtm=0
+        drmtm=0
+        dlqmtm=0
+        dqmtm=0
+        
+        dlrmfm=-0.2403203
+        drmfm=1.8731383
+        dlqmfm=NaN
+        dqmfm=0.3289117
+        if (fsbc){
+          return("Finite sample bias correction is not supported for Laplace distribution yet.")
+        }
+      }else if (standist=="logistic"|| standist=="log"){
+        drm=0
+        dqm=0
+        
+        dlrmscale=0.3678197
+        drmscale=0.5049591
+        dlqmscale=0.6333906
+        dqmscale=0.9112189
+        
+        dlrmtm=0
+        drmtm=0
+        dlqmtm=0
+        dqmtm=0
+        
+        dlrmfm=0.1370912
+        drmfm=1.2769506
+        dlqmfm=0.6271149
+        dqmfm=0.4818406
+        if (fsbc){
+          return("Finite sample bias correction is not supported for logistic distribution yet.")
         }
       }
       
@@ -3228,7 +3667,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
   return(all)
 }
 
-effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray"),fsbc=FALSE,alpha=0.05,nboot=100){
+effectsizeNRSs<-function(x,y,ci=TRUE,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),fsbc=FALSE,alpha=0.05,nboot=100){
   if (ci){
     return(esbootparallel(x=x,y=y,interval=interval,fast=fast,batch=batch,boot=boot,times =times,check=check,standist=standist,fsbc=fsbc,alpha=alpha,nboot=nboot))
   } 
@@ -3304,6 +3743,21 @@ eWeibull<-function (n,shape, scale = 1){
   sample1<-qweibull(sample1,shape=shape, scale = scale)
   sample1
 }
+
+
+
+xexp<-eexp(5400,1)
+#exponential
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Raylaigh
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Ray",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Gaussian
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Gau",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Laplace
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Lap",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#logistic
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="log",fsbc=FALSE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
 
 #equinterval simulation is based on simulating the distribution from an arithmetic sequence (seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1))), instead of uniform distribution.
 
@@ -3518,6 +3972,7 @@ NRSs(x=xRayleigh,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=
 
 #test
 xexp<-rexp(5400,1)
+
 
 
 #no d for ql4, because the distribution of U-statistic of L4-moment does not follow mean-ETM-median inequality

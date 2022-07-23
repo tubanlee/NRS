@@ -2,6 +2,8 @@
 
 
 #the goal of this file is to estimate the asymptotic d for five single parameter distributions with accuracy to three decimal places, i.e..
+#the batchsize should be 20000 to ensure the accuracy of fourth moments, but 20 were set for easy testing.
+
 moments<-function (x){
   n<-length(x)
   m1<-mean(x)

@@ -439,7 +439,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -448,8 +448,8 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -460,7 +460,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -469,8 +469,8 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -481,7 +481,7 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -490,8 +490,8 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -660,7 +660,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -669,8 +669,8 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -681,7 +681,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -690,8 +690,8 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -702,7 +702,7 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -711,8 +711,8 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -975,7 +975,7 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -984,8 +984,8 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -996,7 +996,7 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -1005,8 +1005,8 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -1017,7 +1017,7 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -1026,8 +1026,8 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -1492,7 +1492,7 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -1501,8 +1501,8 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -1513,7 +1513,7 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -1522,8 +1522,8 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -1534,7 +1534,7 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -1543,8 +1543,8 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -2218,7 +2218,7 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -2227,8 +2227,8 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -2239,7 +2239,7 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -2248,8 +2248,8 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -2260,7 +2260,7 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -2269,8 +2269,8 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -3016,7 +3016,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -3025,8 +3025,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.2605070
     drmfm=0.5980700
@@ -3037,7 +3037,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -3046,8 +3046,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
@@ -3058,7 +3058,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=0
+    dqm=100
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -3067,8 +3067,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=0
-    dqmtm=0
+    dlqmtm=100
+    dqmtm=100
     
     dlrmfm=0.1370912
     drmfm=1.2769506
@@ -3395,7 +3395,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         }
       }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
         drm=0
-        dqm=0
+        dqm=100
         
         dlrmscale=0.3052527
         drmscale=0.3603831
@@ -3404,8 +3404,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=0
-        dqmtm=0
+        dlqmtm=100
+        dqmtm=100
         
         dlrmfm=0.2605070
         drmfm=0.5980700
@@ -3416,7 +3416,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         }
       }else if (standist=="Laplace"|| standist=="Lap"){
         drm=0
-        dqm=0
+        dqm=100
         
         dlrmscale=0.3644669
         drmscale=0.6288201
@@ -3425,8 +3425,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=0
-        dqmtm=0
+        dlqmtm=100
+        dqmtm=100
         
         dlrmfm=-0.2403203
         drmfm=1.8731383
@@ -3437,7 +3437,7 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         }
       }else if (standist=="logistic"|| standist=="log"){
         drm=0
-        dqm=0
+        dqm=100
         
         dlrmscale=0.3678197
         drmscale=0.5049591
@@ -3446,8 +3446,8 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=0
-        dqmtm=0
+        dlqmtm=100
+        dqmtm=100
         
         dlrmfm=0.1370912
         drmfm=1.2769506
@@ -3457,7 +3457,6 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
           return("Finite sample bias correction is not supported for logistic distribution yet.")
         }
       }
-      
       mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
       rqscale1<-rqscale(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmscale,drm=drmscale,dlqm=dlqmscale,dqm=dqmscale,sd=sd)
       rqtm1<-rqtm(x=sortedx,interval=interval,fast=fast,batch=batch,boot=boot,times =times,dlrm=dlrmtm,drm=drmtm,dlqm=dlqmtm,dqm=dqmtm,sd=sd,drsd=drmscale,dqsd=dqmscale)

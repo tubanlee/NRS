@@ -3882,10 +3882,10 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         dlqmscale=0.7018281
         dqmscale=1.1340563
         
-        dlrmtm=0
-        drmtm=0
-        dlqmtm=100000000
-        dqmtm=100000000
+        dlrmtm=-1.1356581
+        drmtm=-0.9185767
+        dlqmtm=NaN
+        dqmtm=NaN
         
         dlrmfm=0.2605070
         drmfm=0.5980700
@@ -3922,10 +3922,10 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         dlqmscale=0.7345233
         dqmscale=0.8559045
         
-        dlrmtm=0
-        drmtm=0
-        dlqmtm=100000000
-        dqmtm=100000000
+        dlrmtm=0.19551999
+        drmtm=2.51293029
+        dlqmtm=0.16949001
+        dqmtm=0.01177673
         
         dlrmfm=-0.2403203
         drmfm=1.8731383
@@ -3962,10 +3962,10 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         dlqmscale=0.6333906
         dqmscale=0.9112189
         
-        dlrmtm=0
-        drmtm=0
-        dlqmtm=100000000
-        dqmtm=100000000
+        dlrmtm=-0.3830268
+        drmtm=-0.9657112
+        dlqmtm=NaN
+        dqmtm=NaN
         
         dlrmfm=0.1370912
         drmfm=1.2769506

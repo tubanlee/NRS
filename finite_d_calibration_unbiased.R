@@ -431,6 +431,7 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
 for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080))){
   batchsize<-round(batchsizebase/i)+1
   dscale1boot<-c()
+  dtm1boot<-c()
   dfm1boot<-c()
   for (j in (1:batchsize)){
     x<-rLaplace(n=i,location =0,scale=1)
@@ -440,6 +441,9 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
     dscale1boot1<-finddscale(x,expectbootl=3/4,expectboot=(2),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],3/4,(2))
     dscale1boot<-rbind(dscale1boot,dscale1boot1)
+    dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+    dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+    dtm1boot<-rbind(dtm1boot,dtm1boot1)
     dfm1boot1<-finddfm(x,expectbootl=(3/4)*1/(3*sqrt(2)),expectboot=6*(sqrt(2)^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],(3/4)*1/(3*sqrt(2)),6*(sqrt(2)^4))
     dfm1boot<-rbind(dfm1boot,dfm1boot1)}
@@ -455,6 +459,18 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
                         expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
   
   write.csv(dscale_Laplace,paste("dscale_Laplace",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  
+  colMeans(dtm1boot)
+  write.csv(dtm1boot,paste("simulateddtm_Laplace",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  dtm1boot<-colMeans(dtm1boot)
+  
+  findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+        expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  dtm_Laplace<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                      expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  write.csv(dtm_Laplace,paste("dtm_Laplace",batchnumber,i,".csv", sep = ","), row.names = TRUE)
   
   colMeans(dfm1boot)
   write.csv(dfm1boot,paste("simulateddfm_Laplace",batchnumber,i,".csv", sep = ","), row.names = TRUE)
@@ -474,6 +490,7 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
 for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080))){
   batchsize<-round(batchsizebase/i)+1
   dscale1boot<-c()
+  dtm1boot<-c()
   dfm1boot<-c()
   for (j in (1:batchsize)){
     x<-rnorm(n=i,0,1)
@@ -483,6 +500,10 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
     dscale1boot1<-finddscale(x,expectbootl=1/sqrt(pi),expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],1/sqrt(pi),(1))
     dscale1boot<-rbind(dscale1boot,dscale1boot1)
+    dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+    dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+    dtm1boot<-rbind(dtm1boot,dtm1boot1)
+    
     dfm1boot1<-finddfm(x,expectbootl=(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),expectboot=3,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),3)
     dfm1boot<-rbind(dfm1boot,dfm1boot1)}
@@ -498,6 +519,18 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
                      expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
   
   write.csv(dscale_norm,paste("dscale_norm",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  
+  colMeans(dtm1boot)
+  write.csv(dtm1boot,paste("simulateddtm_norm",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  dtm1boot<-colMeans(dtm1boot)
+  
+  findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+        expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  dtm_norm<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                     expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  write.csv(dtm_norm,paste("dtm_norm",batchnumber,i,".csv", sep = ","), row.names = TRUE)
   
   
   colMeans(dfm1boot)
@@ -518,6 +551,7 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
 for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080))){
   batchsize<-round(batchsizebase/i)+1
   dscale1boot<-c()
+  dtm1boot<-c()
   dfm1boot<-c()
   for (j in (1:batchsize)){
     x<-rlogis(n=i,location = 0, scale = 1)
@@ -527,6 +561,10 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
     dscale1boot1<-finddscale(x,expectbootl=1,expectboot=((pi^2)/3),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],1,(((pi^2)/3)))
     dscale1boot<-rbind(dscale1boot,dscale1boot1)
+    dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+    dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+    dtm1boot<-rbind(dtm1boot,dtm1boot1)
+    
     dfm1boot1<-finddfm(x,expectbootl=1/6,expectboot=((6/5)+3)*((sqrt((pi^2)/3))^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
     dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],1/6,((6/5)+3)*((sqrt((pi^2)/3))^4))
     dfm1boot<-rbind(dfm1boot,dfm1boot1)}
@@ -541,6 +579,18 @@ for(i in c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=141
                       expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
   
   write.csv(dscale_logis,paste("dscale_logis",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  
+  colMeans(dtm1boot)
+  write.csv(dtm1boot,paste("simulateddtm_logis",batchnumber,i,".csv", sep = ","), row.names = TRUE)
+  dtm1boot<-colMeans(dtm1boot)
+  
+  findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+        expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  dtm_logis<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                     expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+  
+  write.csv(dtm_logis,paste("dtm_logis",batchnumber,i,".csv", sep = ","), row.names = TRUE)
   
   colMeans(dfm1boot)
   write.csv(dfm1boot,paste("simulateddfm_logis",batchnumber,i,".csv", sep = ","), row.names = TRUE)

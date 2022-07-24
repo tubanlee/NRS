@@ -1,5 +1,4 @@
 
-
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -111,7 +110,11 @@ etm<-function (x,interval=9,fast=TRUE,batch="auto"){
 }
 
 #load finite sample bias corrected d
-fd <- read.csv(("resultsfd_exp.csv"))
+fd_exp <- read.csv(("resultsfd_exp.csv"))
+fd_logis <- read.csv(("resultsfd_logis.csv"))
+fd_norm <- read.csv(("resultsfd_norm.csv"))
+fd_Laplace <- read.csv(("resultsfd_Laplace.csv"))
+fd_Rayleigh <- read.csv(("resultsfd_Rayleigh.csv"))
 
 finited<-function(n,fd,type){
   indextypelist<-c("rm","qm","rl2","ql2","rvar","qvar","rl3","ql3","rtm","qtm","rl4","ql4","rfm","qfm")
@@ -121,7 +124,7 @@ finited<-function(n,fd,type){
       return(fd[which(fd[,1] == n),indextype])
     }
     else if(n>5400){
-      return(0.821497)
+      return(fd[117,indextype])
     }
     else{
       maxn<-max(which(fd[,1] < n))
@@ -136,7 +139,7 @@ finited<-function(n,fd,type){
       return(fd[which(fd[,1] == n),indextype])
     }
     else if(n>5400){
-      return(0.366919)
+      return(fd[117,indextype])
     }
     else{
       maxn<-max(which(fd[,1] < n))
@@ -373,6 +376,7 @@ rqfm<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,dlrm=
   return(all)
 }
 
+
 NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist=c("exponential","Rayleigh","exp","Ray","Gaussian","Gau","norm","normal","Laplace","Lap","logistic","log"),sd=FALSE,fsbc=FALSE){
   sortedx<-sort(x,decreasing = FALSE,method ="radix")
   lengthx<-length(sortedx)
@@ -395,23 +399,23 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -435,11 +439,30 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -448,19 +471,38 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -469,19 +511,38 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -490,15 +551,34 @@ NRSssimple<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
@@ -616,23 +696,23 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -656,11 +736,30 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -669,19 +768,38 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -690,19 +808,38 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -711,15 +848,34 @@ NRSsci<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,che
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -931,23 +1087,23 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -971,11 +1127,30 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -984,19 +1159,38 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -1005,19 +1199,38 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -1026,15 +1239,34 @@ NRSsciparallel<-function (x,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   data<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -1448,23 +1680,23 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -1488,11 +1720,30 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -1501,19 +1752,38 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -1522,19 +1792,38 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -1543,15 +1832,34 @@ pbh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -2174,23 +2482,23 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -2214,11 +2522,30 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -2227,19 +2554,38 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -2248,19 +2594,38 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -2269,15 +2634,34 @@ ebh2parallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =5
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -2972,23 +3356,23 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     dlqmfm=NaN
     dqmfm=0.1281504
     if (fsbc){
-      drm<-finited(n=lengthx,fd=fd,type="rm")
-      dqm<-finited(n=lengthx,fd=fd,type="qm")
+      drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
       
-      dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-      drmscale=finited(n=lengthx,fd=fd,type="rvar")
-      dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-      dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+      dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
       
-      dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-      drmtm=finited(n=lengthx,fd=fd,type="rtm")
-      dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-      dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+      dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
       
-      dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-      drmfm=finited(n=lengthx,fd=fd,type="rfm")
-      dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-      dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+      dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
     }
     if (lengthx<100){
       print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -3012,11 +3396,30 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     dlqmfm=0.6095717
     dqmfm=0.7357742
     if (fsbc){
-      return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3052527
     drmscale=0.3603831
@@ -3025,19 +3428,38 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.2605070
     drmfm=0.5980700
     dlqmfm=0.5310159
     dqmfm=1.0450408
     if (fsbc){
-      return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="Laplace"|| standist=="Lap"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3644669
     drmscale=0.6288201
@@ -3046,19 +3468,38 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=-0.2403203
     drmfm=1.8731383
     dlqmfm=NaN
     dqmfm=0.3289117
     if (fsbc){
-      return("Finite sample bias correction is not supported for Laplace distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }else if (standist=="logistic"|| standist=="log"){
     drm=0
-    dqm=100
+    dqm=100000000
     
     dlrmscale=0.3678197
     drmscale=0.5049591
@@ -3067,15 +3508,34 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
     
     dlrmtm=0
     drmtm=0
-    dlqmtm=100
-    dqmtm=100
+    dlqmtm=100000000
+    dqmtm=100000000
     
     dlrmfm=0.1370912
     drmfm=1.2769506
     dlqmfm=0.6271149
     dqmfm=0.4818406
     if (fsbc){
-      return("Finite sample bias correction is not supported for logistic distribution yet.")
+      drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+      dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+      
+      dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+      drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+      dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+      dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+      
+      dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+      drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+      dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+      dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+      
+      dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+      drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+      dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+      dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+    }
+    if (lengthx<100){
+      print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
     }
   }
   datax<-matrix(sample(x,size=length(x)*nboot,replace=TRUE),nrow=nboot)
@@ -3351,23 +3811,23 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         dlqmfm=NaN
         dqmfm=0.1281504
         if (fsbc){
-          drm<-finited(n=lengthx,fd=fd,type="rm")
-          dqm<-finited(n=lengthx,fd=fd,type="qm")
+          drm<-finited(n=lengthx,fd=fd_exp,type="rm")
+          dqm<-finited(n=lengthx,fd=fd_exp,type="qm")
           
-          dlrmscale=finited(n=lengthx,fd=fd,type="rl2")
-          drmscale=finited(n=lengthx,fd=fd,type="rvar")
-          dlqmscale=finited(n=lengthx,fd=fd,type="ql2")
-          dqmscale=finited(n=lengthx,fd=fd,type="qvar")
+          dlrmscale=finited(n=lengthx,fd=fd_exp,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd_exp,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd_exp,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd_exp,type="qvar")
           
-          dlrmtm=finited(n=lengthx,fd=fd,type="rl3")
-          drmtm=finited(n=lengthx,fd=fd,type="rtm")
-          dlqmtm=finited(n=lengthx,fd=fd,type="ql3")
-          dqmtm=finited(n=lengthx,fd=fd,type="qtm")
+          dlrmtm=finited(n=lengthx,fd=fd_exp,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd_exp,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd_exp,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd_exp,type="qtm")
           
-          dlrmfm=finited(n=lengthx,fd=fd,type="rl4")
-          drmfm=finited(n=lengthx,fd=fd,type="rfm")
-          dlqmfm=finited(n=lengthx,fd=fd,type="ql4")
-          dqmfm=finited(n=lengthx,fd=fd,type="qfm")
+          dlrmfm=finited(n=lengthx,fd=fd_exp,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd_exp,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd_exp,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd_exp,type="qfm")
         }
         if (lengthx<100){
           print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
@@ -3391,11 +3851,30 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         dlqmfm=0.6095717
         dqmfm=0.7357742
         if (fsbc){
-          return("Finite sample bias correction is not supported for Rayleigh distribution yet.")
+          drm<-finited(n=lengthx,fd=fd_Rayleigh,type="rm")
+          dqm<-finited(n=lengthx,fd=fd_Rayleigh,type="qm")
+          
+          dlrmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd_Rayleigh,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd_Rayleigh,type="qvar")
+          
+          dlrmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd_Rayleigh,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd_Rayleigh,type="qtm")
+          
+          dlrmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd_Rayleigh,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd_Rayleigh,type="qfm")
+        }
+        if (lengthx<100){
+          print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
         }
       }else if (standist=="Gaussian"||standist=="Gau"|| standist=="norm"|| standist=="normal"){
         drm=0
-        dqm=100
+        dqm=100000000
         
         dlrmscale=0.3052527
         drmscale=0.3603831
@@ -3404,19 +3883,38 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=100
-        dqmtm=100
+        dlqmtm=100000000
+        dqmtm=100000000
         
         dlrmfm=0.2605070
         drmfm=0.5980700
         dlqmfm=0.5310159
         dqmfm=1.0450408
         if (fsbc){
-          return("Finite sample bias correction is not supported for Gaussian distribution yet.")
+          drm<-finited(n=lengthx,fd=fd_norm,type="rm")
+          dqm<-finited(n=lengthx,fd=fd_norm,type="qm")
+          
+          dlrmscale=finited(n=lengthx,fd=fd_norm,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd_norm,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd_norm,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd_norm,type="qvar")
+          
+          dlrmtm=finited(n=lengthx,fd=fd_norm,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd_norm,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd_norm,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd_norm,type="qtm")
+          
+          dlrmfm=finited(n=lengthx,fd=fd_norm,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd_norm,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd_norm,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd_norm,type="qfm")
+        }
+        if (lengthx<100){
+          print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
         }
       }else if (standist=="Laplace"|| standist=="Lap"){
         drm=0
-        dqm=100
+        dqm=100000000
         
         dlrmscale=0.3644669
         drmscale=0.6288201
@@ -3425,19 +3923,38 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=100
-        dqmtm=100
+        dlqmtm=100000000
+        dqmtm=100000000
         
         dlrmfm=-0.2403203
         drmfm=1.8731383
         dlqmfm=NaN
         dqmfm=0.3289117
         if (fsbc){
-          return("Finite sample bias correction is not supported for Laplace distribution yet.")
+          drm<-finited(n=lengthx,fd=fd_Laplace,type="rm")
+          dqm<-finited(n=lengthx,fd=fd_Laplace,type="qm")
+          
+          dlrmscale=finited(n=lengthx,fd=fd_Laplace,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd_Laplace,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd_Laplace,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd_Laplace,type="qvar")
+          
+          dlrmtm=finited(n=lengthx,fd=fd_Laplace,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd_Laplace,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd_Laplace,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd_Laplace,type="qtm")
+          
+          dlrmfm=finited(n=lengthx,fd=fd_Laplace,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd_Laplace,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd_Laplace,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd_Laplace,type="qfm")
+        }
+        if (lengthx<100){
+          print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
         }
       }else if (standist=="logistic"|| standist=="log"){
         drm=0
-        dqm=100
+        dqm=100000000
         
         dlrmscale=0.3678197
         drmscale=0.5049591
@@ -3446,15 +3963,34 @@ esbootparallel<-function (x,y,interval=9,fast=TRUE,batch="auto",boot=TRUE,times 
         
         dlrmtm=0
         drmtm=0
-        dlqmtm=100
-        dqmtm=100
+        dlqmtm=100000000
+        dqmtm=100000000
         
         dlrmfm=0.1370912
         drmfm=1.2769506
         dlqmfm=0.6271149
         dqmfm=0.4818406
         if (fsbc){
-          return("Finite sample bias correction is not supported for logistic distribution yet.")
+          drm<-finited(n=lengthx,fd=fd_logis,type="rm")
+          dqm<-finited(n=lengthx,fd=fd_logis,type="qm")
+          
+          dlrmscale=finited(n=lengthx,fd=fd_logis,type="rl2")
+          drmscale=finited(n=lengthx,fd=fd_logis,type="rvar")
+          dlqmscale=finited(n=lengthx,fd=fd_logis,type="ql2")
+          dqmscale=finited(n=lengthx,fd=fd_logis,type="qvar")
+          
+          dlrmtm=finited(n=lengthx,fd=fd_logis,type="rl3")
+          drmtm=finited(n=lengthx,fd=fd_logis,type="rtm")
+          dlqmtm=finited(n=lengthx,fd=fd_logis,type="ql3")
+          dqmtm=finited(n=lengthx,fd=fd_logis,type="qtm")
+          
+          dlrmfm=finited(n=lengthx,fd=fd_logis,type="rl4")
+          drmfm=finited(n=lengthx,fd=fd_logis,type="rfm")
+          dlqmfm=finited(n=lengthx,fd=fd_logis,type="ql4")
+          dqmfm=finited(n=lengthx,fd=fd_logis,type="qfm")
+        }
+        if (lengthx<100){
+          print("Warning: the sample size is too small, quantile estimators might be undefined or highly biased.")
         }
       }
       mmm1<-mmm(x=sortedx,interval=interval,fast=fast,batch=batch,drm=drm,dqm=dqm)
@@ -3743,6 +4279,17 @@ eWeibull<-function (n,shape, scale = 1){
   sample1
 }
 
+xexp<-eexp(9,1)
+#exponential
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Raylaigh
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Ray",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Gaussian
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Gau",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Laplace
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Lap",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#logistic
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="log",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 
 
 xexp<-eexp(5400,1)

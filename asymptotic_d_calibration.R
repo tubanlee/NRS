@@ -1,7 +1,8 @@
+batchnumber=1 
 
 
 
-#the goal of this file is to estimate the asymptotic d for five single parameter distributions with accuracy to three decimal places, i.e..
+#the goal of this file is to estimate the asymptotic d for five single parameter distributions with accuracy to three decimal places,
 #the batchsize should be 20000 to ensure the accuracy of fourth moments.
 
 moments<-function (x){
@@ -80,8 +81,8 @@ finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorte
   }else{
     sortedx<-sort(x,decreasing = FALSE,method ="radix")
   }
+  expectboot=mean(x)
   quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-  quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
   etm1<-etm(x,interval=interval,fast=fast,batch=batch)
   mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
   mx2<-1/2
@@ -89,7 +90,6 @@ finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorte
     dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
   }else{
     quatileexpectboot<-1-quatileexpectboot
-    quatileexpecttrue<-1-quatileexpecttrue
     mx1<-1-mx1
     dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
   }
@@ -483,171 +483,40 @@ abs(0.366919-0.3669170)
 abs(0.821497-0.8215006)
 
 samplesize=21600000
-bootsize=21600
-batchsize=20
-dscale1boot<-c()
-for(i in 1:batchsize){
-  finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 2))))
-      getlm<-function(vector){ 
-        (vector[2]-vector[1])/2
-      }
-      alllm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getlm)
-      }
-      
-      dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-      
-      getm<-function(vector){ 
-        ((vector[1]-vector[2])^2)/2
-      }
-      allm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getm)
-      }
-      
-      dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-      
-    }else{
-      subtract<-t(combn(sortedx, 2))
-      subtract<-sapply(sortedx, "-", sortedx)
-      subtract[lower.tri(subtract)] <- NA
-      diag(subtract)=NA
-      subtract<-na.omit(as.vector(subtract))
-      dp<-subtract[subtract>0]
-      dp2lm<-dp/2
-      dp2m<-(dp^2)/2
-    }
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rexp(n=samplesize,1))
-  dscale1boot1<-finddscale(x,expectbootl=1/2,expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dscale1boot<-rbind(dscale1boot,dscale1boot1)
-}
+bootsize=2160000
+batchsize=1
 
+library(Lmoments)
+
+dscale1boot<-c()
+dtm1boot<-c()
+dfm1boot<-c()
+for(i in 1:batchsize){
+  x<-c(rexp(n=samplesize,1))
+  momentsx<-moments(x)
+  lmomentsx<-Lmoments(x)
+  dscale1boot1<-finddscale(x,expectbootl=1/2,expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],1/2,1)
+  dscale1boot<-rbind(dscale1boot,dscale1boot1)
+  dtm1boot1<-finddtm(x,expectbootl=1/6,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],1/6,2)
+  dtm1boot<-rbind(dtm1boot,dtm1boot1)
+  dfm1boot1<-finddfm(x,expectbootl=1/12,expectboot=9,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],1/12,9)
+  dfm1boot<-rbind(dfm1boot,dfm1boot1)
+}
 colMeans(dscale1boot)
-write.csv(dscale1boot,paste("simulateddscale_exp.csv", sep = ","), row.names = TRUE)
+write.csv(dscale1boot,paste("simulateddscale_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 dscale1boot<-colMeans(dscale1boot)
 
 findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                 expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
 dscale_exp<-findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                   expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
-
-write.csv(dscale_exp,paste("dscale_exp.csv", sep = ","), row.names = TRUE)
-
-
-dtm1boot<-c()
-for(i in 1:batchsize){
-  eexp<-function (n, scale) {
-    sample1 <- (-1/scale)*(log(1-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
-    sample1[scale <= 0] <- NaN
-    sample1
-  }
-  finddtm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 3))))
-    }else{
-      subtract<-t(combn(sortedx, 3))
-    }
-    getlm<-function(vector){ 
-      (1/3)*(vector[3]-2*vector[2]+vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 3))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    getm<-function(vector){ 
-      ((1/6)*(2*vector[1]-vector[2]-vector[3])*(-1*vector[1]+2*vector[2]-vector[3])*(-vector[1]-vector[2]+2*vector[3]))
-    }
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 3))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  
-  x<-c(rexp(n=samplesize,1))
-  dtm1boot1<-finddtm(x,expectbootl=1/6,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dtm1boot<-rbind(dtm1boot,dtm1boot1)
-}
+write.csv(dscale_exp,paste("dscale_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dtm1boot)
-write.csv(dtm1boot,paste("simulateddtm_exp.csv", sep = ","), row.names = TRUE)
+write.csv(dtm1boot,paste("simulateddtm_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 dtm1boot<-colMeans(dtm1boot)
 
 findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
@@ -656,94 +525,10 @@ findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4]
 dtm_exp<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
                expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
 
-write.csv(dtm_exp,paste("dtm_exp.csv", sep = ","), row.names = TRUE)
-
-
-dfm1boot<-c()
-for(i in 1:batchsize){
-  eexp<-function (n, scale) {
-    sample1 <- (-1/scale)*(log(1-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
-    sample1[scale <= 0] <- NaN
-    sample1
-  }
-  
-  finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    getm<-function(vector){ 
-      resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
-                    4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
-                    vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
-                    6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
-                    vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
-                                 6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
-      (resd)
-    }
-    
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 4))))
-    }else{
-      subtract<-t(combn(sortedx, 4))
-    }
-    
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    getlm<-function(vector){ 
-      (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rexp(n=samplesize,1))
-  dfm1boot1<-finddfm(x,expectbootl=1/12,expectboot=9,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dfm1boot<-rbind(dfm1boot,dfm1boot1)
-}
+write.csv(dtm_exp,paste("dtm_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dfm1boot)
-write.csv(dfm1boot,paste("simulateddfm_exp.csv", sep = ","), row.names = TRUE)
+write.csv(dfm1boot,paste("simulateddfm_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 dfm1boot<-colMeans(dfm1boot)
 
 findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
@@ -752,7 +537,7 @@ findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4]
 dfm_exp<-findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
                expectboot=dfm1boot[6],etm=dfm1boot[7],ctm=dfm1boot[8],mx1=dfm1boot[9],quatileexpectboot=dfm1boot[10])
 
-write.csv(dfm_exp,paste("dfm_exp.csv", sep = ","), row.names = TRUE)
+write.csv(dfm_exp,paste("dfm_exp",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 
 #the analytical solution is shown in SI, which is very complex and time consuming, also, for some especial distributions, the analytical solution is quite remote.
@@ -782,82 +567,24 @@ rPareto<-function (n, scale, shape) {
 }
 
 dscale1boot<-c()
+dtm1boot<-c()
+dfm1boot<-c()
 for(i in 1:batchsize){
-  finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 2))))
-      getlm<-function(vector){ 
-        (vector[2]-vector[1])/2
-      }
-      alllm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getlm)
-      }
-      
-      dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-      
-      getm<-function(vector){ 
-        ((vector[1]-vector[2])^2)/2
-      }
-      allm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getm)
-      }
-      
-      dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-      
-    }else{
-      subtract<-t(combn(sortedx, 2))
-      subtract<-sapply(sortedx, "-", sortedx)
-      subtract[lower.tri(subtract)] <- NA
-      diag(subtract)=NA
-      subtract<-na.omit(as.vector(subtract))
-      dp<-subtract[subtract>0]
-      dp2lm<-dp/2
-      dp2m<-(dp^2)/2
-    }
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
   x<-c(rRayleigh(n=samplesize, scale = 1))
+  momentsx<-moments(x)
+  lmomentsx<-Lmoments(x)
   dscale1boot1<-finddscale(x,expectbootl=0.5*(sqrt(2)-1)*sqrt(pi),expectboot=(2-(pi/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],0.5*(sqrt(2)-1)*sqrt(pi),(2-(pi/2)))
   dscale1boot<-rbind(dscale1boot,dscale1boot1)
+  dtm1boot1<-finddtm(x,expectbootl=(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),expectboot=((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)))
+  dtm1boot<-rbind(dtm1boot,dtm1boot1)
+  dfm1boot1<-finddfm(x,expectbootl=(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),expectboot=((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))))
+  dfm1boot<-rbind(dfm1boot,dfm1boot1)
 }
 colMeans(dscale1boot)
-write.csv(dscale1boot,paste("simulateddscale_Rayleigh.csv", sep = ","), row.names = TRUE)
+write.csv(dscale1boot,paste("simulateddscale_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 dscale1boot<-colMeans(dscale1boot)
 
 findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
@@ -865,80 +592,11 @@ findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=ds
 dscale_Rayleigh<-findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
 
-write.csv(dscale_Rayleigh,paste("dscale_Rayleigh.csv", sep = ","), row.names = TRUE)
+write.csv(dscale_Rayleigh,paste("dscale_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 
-
-
-dtm1boot<-c()
-for(i in 1:batchsize){
-  finddtm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 3))))
-    }else{
-      subtract<-t(combn(sortedx, 3))
-    }
-    getlm<-function(vector){ 
-      (1/3)*(vector[3]-2*vector[2]+vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 3))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    getm<-function(vector){ 
-      ((1/6)*(2*vector[1]-vector[2]-vector[3])*(-1*vector[1]+2*vector[2]-vector[3])*(-vector[1]-vector[2]+2*vector[3]))
-    }
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 3))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  
-  x<-c(rRayleigh(n=samplesize, scale = 1))
-  dtm1boot1<-finddtm(x,expectbootl=(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),expectboot=((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dtm1boot<-rbind(dtm1boot,dtm1boot1)
-}
 
 colMeans(dtm1boot)
-write.csv(dtm1boot,paste("simulateddtm_Rayleigh.csv", sep = ","), row.names = TRUE)
+write.csv(dtm1boot,paste("simulateddtm_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 dtm1boot<-colMeans(dtm1boot)
 
 findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
@@ -947,88 +605,10 @@ findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4]
 dtm_Rayleigh<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
                     expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
 
-write.csv(dtm_Rayleigh,paste("dtm_Rayleigh.csv", sep = ","), row.names = TRUE)
-
-
-dfm1boot<-c()
-for(i in 1:batchsize){
-  finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    getm<-function(vector){ 
-      resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
-                    4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
-                    vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
-                    6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
-                    vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
-                                 6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
-      (resd)
-    }
-    
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 4))))
-    }else{
-      subtract<-t(combn(sortedx, 4))
-    }
-    
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    getlm<-function(vector){ 
-      (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rRayleigh(n=samplesize, scale = 1))
-  dfm1boot1<-finddfm(x,expectbootl=(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),expectboot=((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dfm1boot<-rbind(dfm1boot,dfm1boot1)
-}
+write.csv(dtm_Rayleigh,paste("dtm_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dfm1boot)
-write.csv(dfm1boot,paste("simulateddfm_Rayleigh.csv", sep = ","), row.names = TRUE)
+write.csv(dfm1boot,paste("simulateddfm_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 dfm1boot<-colMeans(dfm1boot)
 
 findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
@@ -1037,94 +617,34 @@ findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4]
 dfm_Rayleigh<-findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
                     expectboot=dfm1boot[6],etm=dfm1boot[7],ctm=dfm1boot[8],mx1=dfm1boot[9],quatileexpectboot=dfm1boot[10])
 
-write.csv(dfm_Rayleigh,paste("dfm_Rayleigh.csv", sep = ","), row.names = TRUE)
+write.csv(dfm_Rayleigh,paste("dfm_Rayleigh",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 
 x<-c(eLaplace(n=samplesize, location = 0, scale = 1))
 mean(x)
 abs(-1.273414e-15-0)
 #dmmm
-#0 0
-
+#0 Inf
 
 dscale1boot<-c()
+dtm1boot<-c()
+dfm1boot<-c()
 for(i in 1:batchsize){
-  
-  finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 2))))
-      getlm<-function(vector){ 
-        (vector[2]-vector[1])/2
-      }
-      alllm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getlm)
-      }
-      
-      dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-      
-      getm<-function(vector){ 
-        ((vector[1]-vector[2])^2)/2
-      }
-      allm<-function(sortedx){ 
-        subtract<-t(combn(sortedx, 2))
-        apply(subtract,MARGIN=1,FUN=getm)
-      }
-      
-      dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-      
-    }else{
-      subtract<-t(combn(sortedx, 2))
-      subtract<-sapply(sortedx, "-", sortedx)
-      subtract[lower.tri(subtract)] <- NA
-      diag(subtract)=NA
-      subtract<-na.omit(as.vector(subtract))
-      dp<-subtract[subtract>0]
-      dp2lm<-dp/2
-      dp2m<-(dp^2)/2
-    }
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
   x<-c(rLaplace(n=samplesize, location = 0, scale = 1))
+  momentsx<-moments(x)
+  lmomentsx<-Lmoments(x)
   dscale1boot1<-finddscale(x,expectbootl=3/4,expectboot=(2),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],3/4,(2))
   dscale1boot<-rbind(dscale1boot,dscale1boot1)
+  dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+  dtm1boot<-rbind(dtm1boot,dtm1boot1)
+  dfm1boot1<-finddfm(x,expectbootl=(3/4)*1/(3*sqrt(2)),expectboot=6*(sqrt(2)^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],(3/4)*1/(3*sqrt(2)),6*(sqrt(2)^4))
+  dfm1boot<-rbind(dfm1boot,dfm1boot1)
 }
 colMeans(dscale1boot)
-write.csv(dscale1boot,paste("simulateddscale_Laplace.csv", sep = ","), row.names = TRUE)
+write.csv(dscale1boot,paste("simulateddscale_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
 dscale1boot<-colMeans(dscale1boot)
 
 findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
@@ -1133,92 +653,22 @@ findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=ds
 dscale_Laplace<-findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                       expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
 
-write.csv(dscale_Laplace,paste("dscale_Laplace.csv", sep = ","), row.names = TRUE)
+write.csv(dscale_Laplace,paste("dscale_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
 
+colMeans(dtm1boot)
+write.csv(dtm1boot,paste("simulateddtm_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
+dtm1boot<-colMeans(dtm1boot)
 
-#dtm1boot
-#0 0
+findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+      expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
 
-dfm1boot<-c()
-for(i in 1:batchsize){
-  
-  finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    getm<-function(vector){ 
-      resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
-                    4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
-                    vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
-                    6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
-                    vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
-                                 6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
-      (resd)
-    }
-    
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 4))))
-    }else{
-      subtract<-t(combn(sortedx, 4))
-    }
-    
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    getlm<-function(vector){ 
-      (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rLaplace(n=samplesize, location = 0, scale = 1))
-  dfm1boot1<-finddfm(x,expectbootl=(3/4)*1/(3*sqrt(2)),expectboot=6*(sqrt(2)^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dfm1boot<-rbind(dfm1boot,dfm1boot1)
-}
+dtm_Laplace<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                    expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+
+write.csv(dtm_Laplace,paste("dtm_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dfm1boot)
-write.csv(dfm1boot,paste("simulateddfm_Laplace.csv", sep = ","), row.names = TRUE)
+write.csv(dfm1boot,paste("simulateddfm_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
 dfm1boot<-colMeans(dfm1boot)
 
 findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
@@ -1227,7 +677,8 @@ findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4]
 dfm_Laplace<-findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
                    expectboot=dfm1boot[6],etm=dfm1boot[7],ctm=dfm1boot[8],mx1=dfm1boot[9],quatileexpectboot=dfm1boot[10])
 
-write.csv(dfm_Laplace,paste("dfm_Laplace.csv", sep = ","), row.names = TRUE)
+write.csv(dfm_Laplace,paste("dfm_Laplace",batchnumber,".csv", sep = ","), row.names = TRUE)
+
 
 
 x<-c(enorm(n=samplesize,location=0,scale=1))
@@ -1235,82 +686,31 @@ mean(x)
 abs(4.580853e-16-0)
 
 #dmmm
-#0 0
-
+#0 Inf
+#dtm1boot
+#0 Inf
 
 dscale1boot<-c()
+dtm1boot<-c()
+dfm1boot<-c()
 for(i in 1:batchsize){
-  
-  finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        sort(sample(sortedx, size = 2))
-      }
-      dp2lm<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        getlm<-function(vector){ 
-          (vector[2]-vector[1])/2
-        }
-        getlm(subtract[i,])
-      }
-      dp2m<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        getm<-function(vector){ 
-          ((vector[1]-vector[2])^2)/2
-        }
-        getm(subtract[i,])
-      }
-    }else{
-      subtract<-t(combn(sortedx, 2))
-      subtract<-sapply(sortedx, "-", sortedx)
-      subtract[lower.tri(subtract)] <- NA
-      diag(subtract)=NA
-      subtract<-na.omit(as.vector(subtract))
-      dp<-subtract[subtract>0]
-      dp2lm<-dp/2
-      dp2m<-(dp^2)/2
-    }
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
   x<-c(rnorm(n=samplesize,0,1))
+  momentsx<-moments(x)
+  lmomentsx<-Lmoments(x)
   dscale1boot1<-finddscale(x,expectbootl=1/sqrt(pi),expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],1/sqrt(pi),(1))
   dscale1boot<-rbind(dscale1boot,dscale1boot1)
+  dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+  dtm1boot<-rbind(dtm1boot,dtm1boot1)
+  dfm1boot1<-finddfm(x,expectbootl=(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),expectboot=3,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),3)
+  dfm1boot<-rbind(dfm1boot,dfm1boot1)
+  
 }
 
 colMeans(dscale1boot)
-write.csv(dscale1boot,paste("simulateddscale_norm.csv", sep = ","), row.names = TRUE)
+write.csv(dscale1boot,paste("simulateddscale_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
 dscale1boot<-colMeans(dscale1boot)
 
 findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
@@ -1319,92 +719,23 @@ findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=ds
 dscale_norm<-findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                    expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
 
-write.csv(dscale_norm,paste("dscale_norm.csv", sep = ","), row.names = TRUE)
+write.csv(dscale_norm,paste("dscale_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 
-#dtm1boot
-#0 0
+colMeans(dtm1boot)
+write.csv(dtm1boot,paste("simulateddtm_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
+dtm1boot<-colMeans(dtm1boot)
 
-dfm1boot<-c()
-for(i in 1:batchsize){
-  
-  finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    getm<-function(vector){ 
-      resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
-                    4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
-                    vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
-                    6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
-                    vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
-                                 6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
-      (resd)
-    }
-    
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 4))))
-    }else{
-      subtract<-t(combn(sortedx, 4))
-    }
-    
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    getlm<-function(vector){ 
-      (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rnorm(n=samplesize,0,1))
-  dfm1boot1<-finddfm(x,expectbootl=(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),expectboot=3,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dfm1boot<-rbind(dfm1boot,dfm1boot1)
-}
+findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+      expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+
+dtm_norm<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                   expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+
+write.csv(dtm_norm,paste("dtm_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dfm1boot)
-write.csv(dfm1boot,paste("simulateddfm_norm.csv", sep = ","), row.names = TRUE)
+write.csv(dfm1boot,paste("simulateddfm_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
 dfm1boot<-colMeans(dfm1boot)
 
 findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
@@ -1413,7 +744,7 @@ findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4]
 dfm_norm<-findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
                 expectboot=dfm1boot[6],etm=dfm1boot[7],ctm=dfm1boot[8],mx1=dfm1boot[9],quatileexpectboot=dfm1boot[10])
 
-write.csv(dfm_norm,paste("dfm_norm.csv", sep = ","), row.names = TRUE)
+write.csv(dfm_norm,paste("dfm_norm",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 
 x<-c(elogis(n=samplesize, location = 0, scale = 1))
@@ -1421,82 +752,29 @@ mean(x)
 abs(1.395458e-15-0)
 
 #dmmm
-#0 0
-
+#0 Inf
 
 dscale1boot<-c()
+dtm1boot<-c()
+dfm1boot<-c()
 for(i in 1:batchsize){
-  
-  finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    if (boot){
-      subtract<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        sort(sample(sortedx, size = 2))
-      }
-      dp2lm<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        getlm<-function(vector){ 
-          (vector[2]-vector[1])/2
-        }
-        getlm(subtract[i,])
-      }
-      dp2m<-foreach (i=1:subsample, .combine=rbind) %dopar% {
-        getm<-function(vector){ 
-          ((vector[1]-vector[2])^2)/2
-        }
-        getm(subtract[i,])
-      }
-    }else{
-      subtract<-t(combn(sortedx, 2))
-      subtract<-sapply(sortedx, "-", sortedx)
-      subtract[lower.tri(subtract)] <- NA
-      diag(subtract)=NA
-      subtract<-na.omit(as.vector(subtract))
-      dp<-subtract[subtract>0]
-      dp2lm<-dp/2
-      dp2m<-(dp^2)/2
-    }
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=TRUE,batch=10000,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
   x<-c(rlogis(n=samplesize, location = 0, scale = 1))
+  momentsx<-moments(x)
+  lmomentsx<-Lmoments(x)
   dscale1boot1<-finddscale(x,expectbootl=1,expectboot=((pi^2)/3),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dscale1boot1<-c(dscale1boot1,lmomentsx[2],momentsx[2],1,(((pi^2)/3)))
   dscale1boot<-rbind(dscale1boot,dscale1boot1)
+  dtm1boot1<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dtm1boot1<-c(dtm1boot1,lmomentsx[3],momentsx[3],0,0)
+  dtm1boot<-rbind(dtm1boot,dtm1boot1)
+  dfm1boot1<-finddfm(x,expectbootl=1/6,expectboot=((6/5)+3)*((sqrt((pi^2)/3))^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
+  dfm1boot1<-c(dfm1boot1,lmomentsx[4],momentsx[4],1/6,((6/5)+3)*((sqrt((pi^2)/3))^4))
+  dfm1boot<-rbind(dfm1boot,dfm1boot1)
+  
 }
 
 colMeans(dscale1boot)
-write.csv(dscale1boot,paste("simulateddscale_logis.csv", sep = ","), row.names = TRUE)
+write.csv(dscale1boot,paste("simulateddscale_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
 dscale1boot<-colMeans(dscale1boot)
 
 findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
@@ -1504,96 +782,22 @@ findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=ds
 dscale_logis<-findd(expectbootl=dscale1boot[1],etml=dscale1boot[2],ctml=dscale1boot[3],mx1l=dscale1boot[4],quatileexpectbootl=dscale1boot[5],
                 expectboot=dscale1boot[6],etm=dscale1boot[7],ctm=dscale1boot[8],mx1=dscale1boot[9],quatileexpectboot=dscale1boot[10])
 
-write.csv(dscale_logis,paste("dscale_logis.csv", sep = ","), row.names = TRUE)
+write.csv(dscale_logis,paste("dscale_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
 
+colMeans(dtm1boot)
+write.csv(dtm1boot,paste("simulateddtm_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
+dtm1boot<-colMeans(dtm1boot)
 
-#dtm1boot
-#0 0
-dfm1boot<-c()
-for(i in 1:batchsize){
-  elogis<-function (n,location,scale) {
-    sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
-    sample1<-location + scale * log((1-sample1)/sample1)
-    sample1
-  }
-  
-  finddfm<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    getm<-function(vector){ 
-      resd<-1/12*(3*vector[1]^4 + 3*vector[2]^4 + 3*vector[3]^4 + 6*(vector[2]^2)*vector[3]*vector[4] - 4*(vector[3]^3)*vector[4] - 
-                    4*vector[3]*(vector[4]^3) + 3*(vector[4]^4) - 4*(vector[2]^3)*(vector[3] + vector[4]) - 4*(vector[1]^3)*(vector[2]+vector[3]+vector[4])+ 
-                    vector[2]*(-4*(vector[3]^3)+6*(vector[3]^2)*vector[4]+6*(vector[3])*(vector[4]^2) - 4*(vector[4]^3)) + 
-                    6*(vector[1]^2)*(vector[3]*vector[4] + vector[2]*(vector[3] + vector[4])) + 
-                    vector[1]*(-4*(vector[2]^3) - 4*(vector[3]^3) + 6*(vector[3]^2)*vector[4] + 6*vector[3]*(vector[4]^2) - 4*(vector[4]^3) + 
-                                 6*(vector[2]^2)*(vector[3] + vector[4]) + 6*vector[2]*((vector[3]^2) - 6*vector[3]*vector[4] + vector[4]^2)))
-      (resd)
-    }
-    
-    allm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getm)
-    }
-    if (boot){
-      subtract<-t(replicate(subsample, sort(sample(sortedx, size = 4))))
-    }else{
-      subtract<-t(combn(sortedx, 4))
-    }
-    
-    dp2m<-apply(subtract,MARGIN=1,FUN=getm)
-    
-    getlm<-function(vector){ 
-      (1/4)*(vector[4]-3*vector[3]+3*vector[2]-vector[1])
-    }
-    alllm<-function(sortedx){ 
-      subtract<-t(combn(sortedx, 4))
-      apply(subtract,MARGIN=1,FUN=getlm)
-    }
-    
-    dp2lm<-apply(subtract,MARGIN=1,FUN=getlm)
-    
-    lengthn<-length(sortedx)
-    dlmo<-finddmmm(expectboot=expectbootl,expecttrue=expectbootl,x=dp2lm,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    dmo<-finddmmm(expectboot=expectboot,expecttrue=expectboot,x=dp2m,interval=9,fast=fast,batch=batch,sorted=FALSE)
-    all<-c(expectbootl=dlmo[1],etml=dlmo[2],ctml=dlmo[3],mx1l=dlmo[4],quatileexpectbootl=dlmo[5],
-           expectboot=dmo[1],etm=dmo[2],ctm=dmo[3],mx1=dmo[4],quatileexpectboot=dmo[5]
-    )
-    return(all)
-  }
-  
-  finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorted=FALSE){
-    if(sorted){
-      sortedx<-x
-    }else{
-      sortedx<-sort(x,decreasing = FALSE,method ="radix")
-    }
-    quatileexpectboot<-(min(which(sortedx>(expectboot)))-1)/length(x)
-    quatileexpecttrue<-(min(which(sortedx>(expecttrue)))-1)/length(x)
-    etm1<-etm(x,interval=interval,fast=fast,batch=batch)
-    mx1<-(min(which(sortedx>(etm1[2])))-1)/length(x)
-    mx2<-1/2
-    if (mx1>0.5){
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }else{
-      quatileexpectboot<-1-quatileexpectboot
-      quatileexpecttrue<-1-quatileexpecttrue
-      mx1<-1-mx1
-      dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
-    }
-    drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
-    listd<-c(expectboot,etm1[2],etm1[3],mx1,quatileexpectboot)
-    return(listd)
-  }
-  x<-c(rlogis(n=samplesize, location = 0, scale = 1))
-  dfm1boot1<-finddfm(x,expectbootl=1/6,expectboot=((6/5)+3)*((sqrt((pi^2)/3))^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=FALSE)
-  dfm1boot<-rbind(dfm1boot,dfm1boot1)
-}
+findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+      expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+
+dtm_logis<-findd(expectbootl=dtm1boot[1],etml=dtm1boot[2],ctml=dtm1boot[3],mx1l=dtm1boot[4],quatileexpectbootl=dtm1boot[5],
+                   expectboot=dtm1boot[6],etm=dtm1boot[7],ctm=dtm1boot[8],mx1=dtm1boot[9],quatileexpectboot=dtm1boot[10])
+
+write.csv(dtm_logis,paste("dtm_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
 
 colMeans(dfm1boot)
-write.csv(dfm1boot,paste("simulateddfm_logis.csv", sep = ","), row.names = TRUE)
+write.csv(dfm1boot,paste("simulateddfm_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
 dfm1boot<-colMeans(dfm1boot)
 
 findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
@@ -1602,4 +806,5 @@ findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4]
 dfm_logis<-findd(expectbootl=dfm1boot[1],etml=dfm1boot[2],ctml=dfm1boot[3],mx1l=dfm1boot[4],quatileexpectbootl=dfm1boot[5],
                  expectboot=dfm1boot[6],etm=dfm1boot[7],ctm=dfm1boot[8],mx1=dfm1boot[9],quatileexpectboot=dfm1boot[10])
 
-write.csv(dfm_logis,paste("dfm_logis.csv", sep = ","), row.names = TRUE)
+write.csv(dfm_logis,paste("dfm_logis",batchnumber,".csv", sep = ","), row.names = TRUE)
+

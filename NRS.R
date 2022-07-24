@@ -1,4 +1,5 @@
 
+
 #NRS
 
 #I combined all the estimators into one function (easy for reviewing). There might be errors, and these are not bugs, 
@@ -4278,7 +4279,7 @@ eWeibull<-function (n,shape, scale = 1){
   sample1<-qweibull(sample1,shape=shape, scale = scale)
   sample1
 }
-
+#the bias is very large when the sample size is extremely small.
 xexp<-eexp(9,1)
 #exponential
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
@@ -4290,6 +4291,31 @@ NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Lap",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
 #logistic
 NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="log",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#better when the sample size larger than 27
+xexp<-eexp(27,1)
+#exponential
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Raylaigh
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Ray",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Gaussian
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Gau",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Laplace
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Lap",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#logistic
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="log",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#generally, figuring out whether the distribution is symmetric or asymmetric is important, since for symmetric distributions, the d is 0 for rm, inifity for qm.
+xexp<-eexp(90,1)
+#exponential
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="exp",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Raylaigh
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Ray",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Gaussian
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Gau",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#Laplace
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="Lap",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+#logistic
+NRSs(x=xexp,interval=9,fast=TRUE,batch="auto",boot=TRUE,times =54000,check=TRUE,standist="log",fsbc=TRUE,cise = FALSE,parallel=TRUE,alpha = 0.05,nboot = 100, sd=TRUE)
+
 
 
 xexp<-eexp(5400,1)

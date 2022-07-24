@@ -1,3 +1,7 @@
+
+
+
+
 greatest_common_divisor<- function(a, b) {
   if (b == 0) a else Recall(b, a %% b)
 }
@@ -259,7 +263,7 @@ simulatedbatchLaplace<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=
   x<-sort(x,decreasing = FALSE,method ="radix")
   dmmm<-c(0,1000000)
   dscale1boot<-finddscale(x,expectbootl=3/4,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
-  dtm1boot<-c(0,1000000,0,1000000)
+  dtm1boot<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   dfm1boot<-finddfm(x,expectbootl=(3/4)*1/(3*sqrt(2)),expectboot=6*(sqrt(2)^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
@@ -274,7 +278,7 @@ simulatedbatchnorm<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=130
   x<-sort(x,decreasing = FALSE,method ="radix")
   dmmm<-c(0,1000000)
   dscale1boot<-finddscale(x,expectbootl=1/sqrt(pi),expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
-  dtm1boot<-c(0,1000000,0,1000000)
+  dtm1boot<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   dfm1boot<-finddfm(x,expectbootl=(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),expectboot=3,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
@@ -288,7 +292,7 @@ simulatedbatchlogis<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=13
   x<-sort(x,decreasing = FALSE,method ="radix")
   dmmm<-c(0,1000000)
   dscale1boot<-finddscale(x,expectbootl=1,expectboot=((pi^2)/3),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
-  dtm1boot<-c(0,1000000,0,1000000)
+  dtm1boot<-finddtm(x,expectbootl=0,expectboot=0,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   dfm1boot<-finddfm(x,expectbootl=1/6,expectboot=((6/5)+3)*((sqrt((pi^2)/3))^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
@@ -323,4 +327,3 @@ simulatedbatchRayleigh<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to
 
 simulatedbatchRayleigh[is.infinite(simulatedbatchRayleigh)] <-NA
 write.csv(simulatedbatchRayleigh,paste("fdequinterval_Rayleigh.csv", sep = ","), row.names = TRUE)
-

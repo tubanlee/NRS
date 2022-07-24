@@ -1,7 +1,3 @@
-
-
-
-
 greatest_common_divisor<- function(a, b) {
   if (b == 0) a else Recall(b, a %% b)
 }
@@ -79,7 +75,9 @@ finddmmm<-function(expectboot,expecttrue,x,interval=9,fast=TRUE,batch=1000,sorte
   if (mx1>0.5){
     dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
   }else{
-    dqm1<-log(((quatileexpectboot-mx1)/(abs(0-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
+    quatileexpectboot<-1-quatileexpectboot
+    mx1<-1-mx1
+    dqm1<-log(((quatileexpectboot-mx1)/(abs(1-mx1)*((mx1-mx2)*2))),base=((abs(mx1-mx2)*2)))
   }
   drm1<-(expectboot-etm1[2])/(etm1[2]-etm1[3])
   listd<-c(drm1,dqm1)
@@ -224,31 +222,88 @@ finddscale<-function (x,expectbootl,expectboot,interval=9,fast=TRUE,batch=1000,b
   return(all)
 }
 
-eexp<-function(n, scale){
-  sample1 <- (-1/scale)*(log(1-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
-  sample1[scale <= 0] <- NaN
-  sample1
-}
-eRayleigh<-function(n, scale){
+eRayleigh<-function (n, scale) {
   sample1 <- scale * sqrt(-2 * log((seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
   sample1[scale <= 0] <- NaN
   sample1
 }
-
-
+eexp<-function (n, scale) {
+  sample1 <- (-1/scale)*(log(1-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))))
+  sample1[scale <= 0] <- NaN
+  sample1
+}
+enorm<-function (n, location,scale) {
+  library(pracma)
+  sample1 <- location+(scale)*sqrt(2)*erfinv(2*(1-seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))-1)
+  sample1
+}
+eLaplace<-function (n,location,scale) {
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-location - sign(sample1 - 0.5) * scale * (log(2) + ifelse(sample1 < 0.5, log(sample1), log1p(-sample1)))
+  sample1
+}
+elogis<-function (n,location,scale) {
+  sample1<-(seq(from=1/(n+1), to=1-1/(n+1), by=1/(n+1)))
+  sample1<-location + scale * log((1-sample1)/sample1)
+  sample1
+}
 library(foreach)
 library(doParallel)
 numCores <- detectCores()
 registerDoParallel(numCores) 
 #parallel
+bootsize=216000
+simulatedbatchLaplace<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080)), .combine = 'rbind') %dopar% {
+  library(Lmoments)
+  x<-c(eLaplace(n=i, location = 0, scale = 1))
+  x<-sort(x,decreasing = FALSE,method ="radix")
+  dmmm<-c(0,1000000)
+  dscale1boot<-finddscale(x,expectbootl=3/4,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dtm1boot<-c(0,1000000,0,1000000)
+  dfm1boot<-finddfm(x,expectbootl=(3/4)*1/(3*sqrt(2)),expectboot=6*(sqrt(2)^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
+}
+
+simulatedbatchLaplace[is.infinite(simulatedbatchLaplace)] <-NA
+write.csv(simulatedbatchLaplace,paste("fdequinterval_Laplace.csv", sep = ","), row.names = TRUE)
+
+
+simulatedbatchnorm<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080)), .combine = 'rbind') %dopar% {
+  library(Lmoments)
+  x<-c(enorm(n=i,location=0,scale=1))
+  x<-sort(x,decreasing = FALSE,method ="radix")
+  dmmm<-c(0,1000000)
+  dscale1boot<-finddscale(x,expectbootl=1/sqrt(pi),expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dtm1boot<-c(0,1000000,0,1000000)
+  dfm1boot<-finddfm(x,expectbootl=(1/sqrt(pi))*(30*(1/(pi))*(atan(sqrt(2)))-9),expectboot=3,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
+}
+
+simulatedbatchnorm[is.infinite(simulatedbatchnorm)] <-NA
+write.csv(simulatedbatchnorm,paste("fdequinterval_norm.csv", sep = ","), row.names = TRUE)
+
+simulatedbatchlogis<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080)), .combine = 'rbind') %dopar% {
+  library(Lmoments)
+  x<-c(elogis(n=i, location = 0, scale = 1))
+  x<-sort(x,decreasing = FALSE,method ="radix")
+  dmmm<-c(0,1000000)
+  dscale1boot<-finddscale(x,expectbootl=1,expectboot=((pi^2)/3),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dtm1boot<-c(0,1000000,0,1000000)
+  dfm1boot<-finddfm(x,expectbootl=1/6,expectboot=((6/5)+3)*((sqrt((pi^2)/3))^4),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
+}
+
+simulatedbatchlogis[is.infinite(simulatedbatchlogis)] <-NA
+write.csv(simulatedbatchlogis,paste("fdequinterval_logis.csv", sep = ","), row.names = TRUE)
+
 simulatedbatch<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to=1305, by=108),seq(from=1413, to=5733, by=1080)), .combine = 'rbind') %dopar% {
   library(Lmoments)
   x<-c(eexp(n=i,scale=1))
   x<-sort(x,decreasing = FALSE,method ="radix")
-  dmmm<-finddmmm(expectboot=mean(x),expecttrue=mean(x),x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
-  dscale1boot<-finddscale(x,expectbootl=1/2,expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dtm1boot<-finddtm(x,expectbootl=1/6,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dfm1boot<-finddfm(x,expectbootl=1/12,expectboot=9,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dmmm<-finddmmm(expectboot=1,expecttrue=1,x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
+  dscale1boot<-finddscale(x,expectbootl=1/2,expectboot=1,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dtm1boot<-finddtm(x,expectbootl=1/6,expectboot=2,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dfm1boot<-finddfm(x,expectbootl=1/12,expectboot=9,interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
 
@@ -259,12 +314,13 @@ simulatedbatchRayleigh<-foreach(i = c(seq(from=9, to=108, by=1),seq(from=117, to
   library(Lmoments)
   x<-c(eRayleigh(n=i,scale=1))
   x<-sort(x,decreasing = FALSE,method ="radix")
-  dmmm<-finddmmm(expectboot=mean(x),expecttrue=mean(x),x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
-  dscale1boot<-finddscale(x,expectbootl=0.5*(sqrt(2)-1)*sqrt(pi),expectboot=(2-(pi/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dtm1boot<-finddtm(x,expectbootl=(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),expectboot=((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
-  dfm1boot<-finddfm(x,expectbootl=(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),expectboot=((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=54000,sorted=TRUE)
+  dmmm<-finddmmm(expectboot=sqrt(pi/2),expecttrue=sqrt(pi/2),x,interval=9,fast=TRUE,batch=1000,sorted=TRUE)
+  dscale1boot<-finddscale(x,expectbootl=0.5*(sqrt(2)-1)*sqrt(pi),expectboot=(2-(pi/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dtm1boot<-finddtm(x,expectbootl=(1/6)*(2*sqrt(6)+3*sqrt(2)-9)*sqrt(pi),expectboot=((sqrt(2-(pi/2)))^3)*2*sqrt((pi))*(pi-3)/((4-pi)^(3/2)),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
+  dfm1boot<-finddfm(x,expectbootl=(sqrt((77/6)-5*sqrt(6))-3/4)*sqrt(2*pi),expectboot=((sqrt(2-(pi/2)))^4)*(3-(6*(pi)^2-24*(pi)+16)/((4-pi)^(2))),interval=9,fast=TRUE,batch=1000,boot=TRUE,subsample=bootsize,sorted=TRUE)
   all<-c(dmmm,dscale1boot,dtm1boot,dfm1boot)
 }
 
 simulatedbatchRayleigh[is.infinite(simulatedbatchRayleigh)] <-NA
 write.csv(simulatedbatchRayleigh,paste("fdequinterval_Rayleigh.csv", sep = ","), row.names = TRUE)
+
